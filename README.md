@@ -12,6 +12,7 @@ modifying the GAP_SIZE macros near the top of src/render.c .
 
 
 And the result:
+(click the image below to see a video of it in action)
 
 [![i3](http://devthe.com/files/i3.png "i3")](http://devthe.com/files/i3demo.webm)
 
