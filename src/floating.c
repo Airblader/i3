@@ -289,8 +289,8 @@ void floating_enable(Con *con, bool automatic) {
     TAILQ_INSERT_TAIL(&(nc->focus_head), con, focused);
 
     /* render the cons to get initial window_rect correct */
-    render_con(nc, false);
-    render_con(con, false);
+    render_con(nc, false, true);
+    render_con(con, false, true);
 
     if (set_focus)
         con_focus(con);
@@ -417,7 +417,7 @@ DRAGGING_CB(drag_window_callback) {
     con->rect.x = old_rect->x + (new_x - event->root_x);
     con->rect.y = old_rect->y + (new_y - event->root_y);
 
-    render_con(con, false);
+    render_con(con, false, true);
     x_push_node(con);
     xcb_flush(conn);
 

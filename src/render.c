@@ -71,7 +71,7 @@ static void render_l_output(Con *con) {
     if (fullscreen) {
         fullscreen->rect = con->rect;
         x_raise_con(fullscreen);
-        render_con(fullscreen, true);
+        render_con(fullscreen, true, false);
         return;
     }
 
@@ -111,7 +111,7 @@ static void render_l_output(Con *con) {
         DLOG("child at (%d, %d) with (%d x %d)\n",
                 child->rect.x, child->rect.y, child->rect.width, child->rect.height);
         x_raise_con(child);
-        render_con(child, false);
+        render_con(child, false, child->type == CT_DOCKAREA);
     }
 }
 
@@ -123,7 +123,7 @@ static void render_l_output(Con *con) {
  * updated in X11.
  *
  */
-void render_con(Con *con, bool render_fullscreen) {
+void render_con(Con *con, bool render_fullscreen, bool already_inset) {
     int children = con_num_children(con);
     DLOG("Rendering %snode %p / %s / layout %d / children %d\n",
          (render_fullscreen ? "fullscreen " : ""), con, con->name, con->layout,
@@ -140,6 +140,25 @@ void render_con(Con *con, bool render_fullscreen) {
         rect.y += 2;
         rect.width -= 2 * 2;
         rect.height -= 2 * 2;
+    }
+
+    bool should_inset = ((con_is_leaf(con) ||
+                          (children > 0 &&
+                           (con->layout == L_STACKED ||
+                            con->layout == L_TABBED))) &&
+                         con->type != CT_FLOATING_CON &&
+                         con->type != CT_WORKSPACE);
+    if ((!already_inset && should_inset)) {
+        Rect inset = (Rect) {4, 4, 4 * -2, 4 * -2};
+        rect = rect_add(rect, inset);
+        if (!render_fullscreen) {
+            con->rect = rect_add(con->rect, inset);
+            if (con->window) {
+                con->window_rect = rect_add(con->window_rect, inset);
+            }
+        }
+        inset.height = 0;
+        con->deco_rect = rect_add(con->deco_rect, inset);
     }
 
     int x = rect.x;
@@ -209,7 +228,7 @@ void render_con(Con *con, bool render_fullscreen) {
     if (fullscreen) {
         fullscreen->rect = rect;
         x_raise_con(fullscreen);
-        render_con(fullscreen, true);
+        render_con(fullscreen, true, false);
         return;
     }
 
@@ -248,7 +267,7 @@ void render_con(Con *con, bool render_fullscreen) {
     } else if (con->type == CT_ROOT) {
         Con *output;
         TAILQ_FOREACH(output, &(con->nodes_head), nodes) {
-            render_con(output, false);
+            render_con(output, false, false);
         }
 
         /* We need to render floating windows after rendering all outputs’
@@ -300,7 +319,7 @@ void render_con(Con *con, bool render_fullscreen) {
                 DLOG("floating child at (%d,%d) with %d x %d\n",
                      child->rect.x, child->rect.y, child->rect.width, child->rect.height);
                 x_raise_con(child);
-                render_con(child, false);
+                render_con(child, false, true);
             }
         }
 
@@ -409,7 +428,7 @@ void render_con(Con *con, bool render_fullscreen) {
         DLOG("child at (%d, %d) with (%d x %d)\n",
                 child->rect.x, child->rect.y, child->rect.width, child->rect.height);
         x_raise_con(child);
-        render_con(child, false);
+        render_con(child, false, should_inset || already_inset);
         i++;
     }
 
@@ -422,7 +441,7 @@ void render_con(Con *con, bool render_fullscreen) {
              * that we have a non-leaf-container inside the stack. In that
              * case, the children of the non-leaf-container need to be raised
              * aswell. */
-            render_con(child, false);
+            render_con(child, false, true);
         }
 
         if (children != 1)

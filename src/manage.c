@@ -472,7 +472,7 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
          * workspace at all. However, just calling render_con() on the
          * workspace isn’t enough either — it needs the rect. */
         ws->rect = ws->parent->rect;
-        render_con(ws, true);
+        render_con(ws, true, false);
     }
     tree_render();
 

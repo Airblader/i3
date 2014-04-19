@@ -398,7 +398,7 @@ void init_ws_for_output(Output *output, Con *content) {
          * Then, we need to work with the "content" container, since we cannot
          * be sure that the workspace itself was rendered at all (in case it’s
          * invisible, it won’t be rendered). */
-        render_con(workspace_out, false);
+        render_con(workspace_out, false, true);
         Con *ws_out_content = output_get_content(workspace_out);
 
         Con *floating_con;
