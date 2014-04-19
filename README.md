@@ -13,6 +13,6 @@ modifying the GAP_SIZE macros near the top of src/render.c .
 
 And the result:
 
-![i3](https://devthe.com/files/i3.png "i3")
-![demo](https://devthe.com/files/i3demo.webm "demo")
+![i3](http://devthe.com/files/i3.png "i3")
+![demo](http://devthe.com/files/i3demo.gif "demo")
 
