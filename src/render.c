@@ -12,8 +12,6 @@
  */
 #include "all.h"
 
-#define GAP_SIZE 12
-
 /* change this to 'true' if you want to have additional borders around every
  * container (for debugging purposes) */
 static bool show_debug_borders = false;
@@ -151,7 +149,8 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
                          con->type != CT_FLOATING_CON &&
                          con->type != CT_WORKSPACE);
     if ((!already_inset && should_inset)) {
-        Rect inset = (Rect) {GAP_SIZE, GAP_SIZE, GAP_SIZE * -2, GAP_SIZE * -2};
+        Rect inset = (Rect) {config.gap_size, config.gap_size,
+            config.gap_size * -2, config.gap_size * -2};
         rect = rect_add(rect, inset);
         if (!render_fullscreen) {
             con->rect = rect_add(con->rect, inset);
@@ -159,7 +158,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
                 con->window_rect = rect_add(con->window_rect, inset);
             }
         }
-        inset.height = GAP_SIZE * -1;
+        inset.height = config.gap_size * -1;
         con->deco_rect = rect_add(con->deco_rect, inset);
     }
 

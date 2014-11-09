@@ -35,6 +35,7 @@ CFGFUN(criteria_pop_state);
 CFGFUN(font, const char *font);
 CFGFUN(exec, const char *exectype, const char *no_startup_id, const char *command);
 CFGFUN(for_window, const char *command);
+CFGFUN(gap_size, const long width);
 CFGFUN(floating_minimum_size, const long width, const long height);
 CFGFUN(floating_maximum_size, const long width, const long height);
 CFGFUN(default_orientation, const char *orientation);
