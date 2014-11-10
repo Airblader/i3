@@ -2054,3 +2054,14 @@ void cmd_debuglog(I3_CMD, char *argument) {
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
 }
+
+/**
+ * Implementation of 'gap_size <width>'
+ *
+ */
+
+void cmd_gap_size(I3_CMD, char *width) {
+    int px = atoi(width);
+
+    config.gap_size = px;
+}

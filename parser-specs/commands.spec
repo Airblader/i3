@@ -39,6 +39,7 @@ state INITIAL:
   'scratchpad' -> SCRATCHPAD
   'mode' -> MODE
   'bar' -> BAR
+  'gap_size' -> GAP_SIZE
 
 state CRITERIA:
   ctype = 'class' -> CRITERION
@@ -84,6 +85,11 @@ state BORDER:
     -> call cmd_border($border_style, "0")
   border_style = '1pixel'
     -> call cmd_border($border_style, "1")
+
+# gap_size <size>
+state GAP_SIZE:
+  width = word
+      -> call cmd_gap_size($width)
 
 state BORDER_WIDTH:
   end
