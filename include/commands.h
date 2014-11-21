@@ -7,13 +7,12 @@
  * commands.c: all command functions (see commands_parser.c)
  *
  */
-#ifndef I3_COMMANDS_H
-#define I3_COMMANDS_H
+#pragma once
 
 #include "commands_parser.h"
 
 /** The beginning of the prototype for every cmd_ function. */
-#define I3_CMD Match *current_match, struct CommandResult *cmd_output
+#define I3_CMD Match *current_match, struct CommandResultIR *cmd_output
 
 /**
  * Initializes the specified 'Match' data structure and the initial state of
@@ -295,5 +294,3 @@ void cmd_debuglog(I3_CMD, char *argument);
  */
 
 void cmd_gap_size(I3_CMD, char *width);
-
-#endif

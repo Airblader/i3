@@ -7,8 +7,7 @@
  * ipc.c: UNIX domain socket IPC (initialization, client handling, protocol).
  *
  */
-#ifndef I3_IPC_H
-#define I3_IPC_H
+#pragma once
 
 #include <ev.h>
 #include <stdbool.h>
@@ -17,6 +16,7 @@
 
 #include "data.h"
 #include "tree.h"
+#include "config.h"
 
 #include "i3/ipc.h"
 
@@ -49,6 +49,12 @@ typedef void(*handler_t)(int, uint8_t*, int, uint32_t, uint32_t);
         static void handle_ ## name (int fd, uint8_t *message, \
                                      int size, uint32_t message_size, \
                                      uint32_t message_type)
+
+/**
+ * Emulates mkdir -p (creates any missing folders)
+ *
+ */
+bool mkdirp(const char *path);
 
 /**
  * Handler for activity on the listening socket, meaning that a new client
@@ -89,4 +95,13 @@ void dump_node(yajl_gen gen, Con *con, bool inplace_restart);
  */
 void ipc_send_workspace_focus_event(Con *current, Con *old);
 
-#endif
+/**
+ * For the window events we send, along the usual "change" field,
+ * also the window container, in "container".
+ */
+void ipc_send_window_event(const char *property, Con *con);
+
+/**
+ * For the barconfig update events, we send the serialized barconfig.
+ */
+void ipc_send_barconfig_update_event(Barconfig *barconfig);
