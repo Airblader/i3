@@ -177,6 +177,29 @@ static int route_click(Con *con, xcb_button_press_event_t *event, const bool mod
     if (con->parent->type == CT_DOCKAREA)
         goto done;
 
+    /* if the user has bound an action to this click, it should override the
+     * default behavior. */
+    if (dest == CLICK_DECORATION || dest == CLICK_INSIDE) {
+        Binding *bind = get_binding_from_xcb_event((xcb_generic_event_t *)event);
+        /* clicks over a window decoration will always trigger the binding and
+         * clicks on the inside of the window will only trigger a binding if it
+         * has modifiers. */
+        if (bind && (dest == CLICK_DECORATION || (bind->mods && dest == CLICK_INSIDE))) {
+            CommandResult *result = run_binding(bind, con);
+
+            /* ASYNC_POINTER eats the event */
+            xcb_allow_events(conn, XCB_ALLOW_ASYNC_POINTER, event->time);
+            xcb_flush(conn);
+
+            if (result->needs_tree_render)
+                tree_render();
+
+            command_result_free(result);
+
+            return 0;
+        }
+    }
+
     /* Any click in a workspace should focus that workspace. If the
      * workspace is on another output we need to do a workspace_show in
      * order for i3bar (and others) to notice the change in workspace. */
@@ -191,7 +214,6 @@ static int route_click(Con *con, xcb_button_press_event_t *event, const bool mod
 
     if (ws != focused_workspace)
         workspace_show(ws);
-    focused_id = XCB_NONE;
 
     /* get the floating con */
     Con *floatingcon = con_inside_floating(con);
@@ -300,6 +322,7 @@ done:
     xcb_allow_events(conn, XCB_ALLOW_REPLAY_POINTER, event->time);
     xcb_flush(conn);
     tree_render();
+
     return 0;
 }
 
@@ -330,7 +353,7 @@ int handle_button_press(xcb_button_press_event_t *event) {
          * click coordinates and focus the output's active workspace. */
         if (event->event == root) {
             Con *output, *ws;
-            TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {
+            TAILQ_FOREACH(output, &(croot->nodes_head), nodes) {
                 if (con_is_internal(output) ||
                     !rect_contains(output->rect, event->event_x, event->event_y))
                     continue;
@@ -358,7 +381,7 @@ int handle_button_press(xcb_button_press_event_t *event) {
 
     /* Check if the click was on the decoration of a child */
     Con *child;
-    TAILQ_FOREACH (child, &(con->nodes_head), nodes) {
+    TAILQ_FOREACH(child, &(con->nodes_head), nodes) {
         if (!rect_contains(child->deco_rect, event->event_x, event->event_y))
             continue;
 

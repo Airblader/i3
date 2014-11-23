@@ -153,6 +153,7 @@ to upgrade to a newer version of i3) you can use +$mod+Shift+r+.
 === Exiting i3
 
 To cleanly exit i3 without killing your X server, you can use +$mod+Shift+e+.
+By default, a dialog will ask you to confirm if you really want to quit.
 
 === Floating
 
@@ -392,6 +393,40 @@ you to remap capslock (for example) to Mode_switch and use it for both: typing
 umlauts or special characters 'and' having some comfortably reachable key
 bindings. For example, when typing, capslock+1 or capslock+2 for switching
 workspaces is totally convenient. Try it :-).
+
+[[mousebindings]]
+
+=== Mouse bindings
+
+A mouse binding makes i3 execute a command upon pressing a specific mouse
+button in the scope of the clicked container (see <<command_criteria>>). You
+can configure mouse bindings in a similar way to key bindings.
+
+*Syntax*:
+----------------------------------
+bindsym [Modifiers+]button[n] command
+----------------------------------
+
+If the binding has no modifiers, it will only run when you click on the
+titlebar of the window. Otherwise, it will run when any part of the window is
+clicked.
+
+*Examples*:
+--------------------------------
+# The middle button over a titlebar kills the window
+bindsym button2 kill
+
+# The middle button and a modifer over any part of the window kills the window
+bindsym $mod+button2 kill
+
+# The right button toggles floating
+bindsym button3 floating toggle
+bindsym $mod+button3 floating toggle
+
+# The side buttons move the window around
+bindsym button9 move left
+bindsym button8 move right
+--------------------------------
 
 [[floating_modifier]]
 
@@ -1068,6 +1103,27 @@ bar {
 ----------------
 
 Available modifiers are Mod1-Mod5, Shift, Control (see +xmodmap(1)+).
+
+=== Mouse button commands
+
+Specifies a command to run when a button was pressed on i3bar to override the
+default behavior. Currently only the mouse wheel buttons are supported. This is
+useful for disabling the scroll wheel action or running scripts that implement
+custom behavior for these buttons.
+
+*Syntax*:
+---------------------
+wheel_up_cmd <command>
+wheel_down_cmd <command>
+---------------------
+
+*Example*:
+---------------------
+bar {
+    wheel_up_cmd nop
+    wheel_down_cmd exec ~/.i3/scripts/custom_wheel_down
+}
+---------------------
 
 === Bar ID
 

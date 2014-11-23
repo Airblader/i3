@@ -98,26 +98,21 @@ static int json_end_map(void *ctx) {
              * workspace called “1”. */
             Con *output;
             Con *workspace = NULL;
-            TAILQ_FOREACH (output, &(croot->nodes_head), nodes)
-                GREP_FIRST(workspace, output_get_content(output), !strcasecmp(child->name, json_node->name));
+            TAILQ_FOREACH(output, &(croot->nodes_head), nodes)
+            GREP_FIRST(workspace, output_get_content(output), !strcasecmp(child->name, json_node->name));
             char *base = sstrdup(json_node->name);
             int cnt = 1;
             while (workspace != NULL) {
                 FREE(json_node->name);
                 asprintf(&(json_node->name), "%s_%d", base, cnt++);
                 workspace = NULL;
-                TAILQ_FOREACH (output, &(croot->nodes_head), nodes)
-                    GREP_FIRST(workspace, output_get_content(output), !strcasecmp(child->name, json_node->name));
+                TAILQ_FOREACH(output, &(croot->nodes_head), nodes)
+                GREP_FIRST(workspace, output_get_content(output), !strcasecmp(child->name, json_node->name));
             }
             free(base);
 
             /* Set num accordingly so that i3bar will properly sort it. */
             json_node->num = ws_name_to_number(json_node->name);
-        } else {
-            // TODO: remove this in the “next” branch.
-            if (json_node->name == NULL || strcmp(json_node->name, "") == 0) {
-                json_node->name = sstrdup("#ff0000");
-            }
         }
 
         LOG("attaching\n");
@@ -146,10 +141,10 @@ static int json_end_array(void *ctx) {
     if (parsing_focus) {
         /* Clear the list of focus mappings */
         struct focus_mapping *mapping;
-        TAILQ_FOREACH_REVERSE (mapping, &focus_mappings, focus_mappings_head, focus_mappings) {
+        TAILQ_FOREACH_REVERSE(mapping, &focus_mappings, focus_mappings_head, focus_mappings) {
             LOG("focus (reverse) %d\n", mapping->old_id);
             Con *con;
-            TAILQ_FOREACH (con, &(json_node->focus_head), focused) {
+            TAILQ_FOREACH(con, &(json_node->focus_head), focused) {
                 if (con->old_id != mapping->old_id)
                     continue;
                 LOG("got it! %p\n", con);

@@ -24,7 +24,7 @@ uint32_t modifiers_from_str(const char *str);
  * using 'call cfg_foo()' in parser-specs/.*.spec. Useful so that we don’t need
  * to repeat the definition all the time. */
 #define CFGFUN(name, ...) \
-    void cfg_ ## name (I3_CFG, ## __VA_ARGS__ )
+    void cfg_##name(I3_CFG, ##__VA_ARGS__)
 
 /* The following functions are called by the config parser, see
  * parser-specs/config.spec. They get the parsed parameters and store them in
@@ -74,6 +74,8 @@ CFGFUN(bar_id, const char *bar_id);
 CFGFUN(bar_output, const char *output);
 CFGFUN(bar_verbose, const char *verbose);
 CFGFUN(bar_modifier, const char *modifier);
+CFGFUN(bar_wheel_up_cmd, const char *command);
+CFGFUN(bar_wheel_down_cmd, const char *command);
 CFGFUN(bar_position, const char *position);
 CFGFUN(bar_i3bar_command, const char *i3bar_command);
 CFGFUN(bar_color, const char *colorclass, const char *border, const char *background, const char *text);

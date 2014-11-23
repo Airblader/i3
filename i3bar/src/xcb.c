@@ -8,6 +8,7 @@
  *
  */
 #include <xcb/xcb.h>
+#include <xcb/xkb.h>
 #include <xcb/xproto.h>
 #include <xcb/xcb_aux.h>
 
@@ -63,8 +64,7 @@ static i3Font font;
 int bar_height;
 
 /* These are only relevant for XKB, which we only need for grabbing modifiers */
-Display *xkb_dpy;
-int xkb_event_base;
+int xkb_base;
 int mod_pressed = 0;
 
 /* Because the statusline is the same on all outputs, we have
@@ -128,7 +128,7 @@ void refresh_statusline(void) {
     statusline_width = 0;
 
     /* Predict the text width of all blocks (in pixels). */
-    TAILQ_FOREACH (block, &statusline_head, blocks) {
+    TAILQ_FOREACH(block, &statusline_head, blocks) {
         if (i3string_get_num_bytes(block->full_text) == 0)
             continue;
 
@@ -173,7 +173,7 @@ void refresh_statusline(void) {
 
     /* Draw the text of each block. */
     uint32_t x = 0;
-    TAILQ_FOREACH (block, &statusline_head, blocks) {
+    TAILQ_FOREACH(block, &statusline_head, blocks) {
         if (i3string_get_num_bytes(block->full_text) == 0)
             continue;
 
@@ -206,7 +206,7 @@ void hide_bars(void) {
     }
 
     i3_output *walk;
-    SLIST_FOREACH (walk, outputs, slist) {
+    SLIST_FOREACH(walk, outputs, slist) {
         if (!walk->active) {
             continue;
         }
@@ -231,7 +231,7 @@ void unhide_bars(void) {
 
     cont_child();
 
-    SLIST_FOREACH (walk, outputs, slist) {
+    SLIST_FOREACH(walk, outputs, slist) {
         if (walk->bar == XCB_NONE) {
             continue;
         }
@@ -303,7 +303,7 @@ void handle_button(xcb_button_press_event_t *event) {
     /* Determine, which bar was clicked */
     i3_output *walk;
     xcb_window_t bar = event->event;
-    SLIST_FOREACH (walk, outputs, slist) {
+    SLIST_FOREACH(walk, outputs, slist) {
         if (walk->bar == bar) {
             break;
         }
@@ -315,7 +315,7 @@ void handle_button(xcb_button_press_event_t *event) {
     }
 
     /* TODO: Move this to extern get_ws_for_output() */
-    TAILQ_FOREACH (cur_ws, walk->workspaces, tailq) {
+    TAILQ_FOREACH(cur_ws, walk->workspaces, tailq) {
         if (cur_ws->visible) {
             break;
         }
@@ -338,7 +338,7 @@ void handle_button(xcb_button_press_event_t *event) {
         /* First calculate width of tray area */
         trayclient *trayclient;
         int tray_width = 0;
-        TAILQ_FOREACH_REVERSE (trayclient, walk->trayclients, tc_head, tailq) {
+        TAILQ_FOREACH_REVERSE(trayclient, walk->trayclients, tc_head, tailq) {
             if (!trayclient->mapped)
                 continue;
             tray_width += (font.height + logical_px(2));
@@ -351,7 +351,7 @@ void handle_button(xcb_button_press_event_t *event) {
         if (x >= 0) {
             struct status_block *block;
 
-            TAILQ_FOREACH (block, &statusline_head, blocks) {
+            TAILQ_FOREACH(block, &statusline_head, blocks) {
                 last_block_x = block_x;
                 block_x += block->width + block->x_offset + block->x_append;
 
@@ -370,6 +370,14 @@ void handle_button(xcb_button_press_event_t *event) {
              * If there is no more workspace, don’t even send the workspace
              * command, otherwise (with workspace auto_back_and_forth) we’d end
              * up on the wrong workspace. */
+
+            /* If `wheel_up_cmd [COMMAND]` was specified, it should override
+             * the default behavior */
+            if (config.wheel_up_cmd) {
+                i3_send_msg(I3_IPC_MESSAGE_TYPE_COMMAND, config.wheel_up_cmd);
+                return;
+            }
+
             if (cur_ws == TAILQ_FIRST(walk->workspaces))
                 return;
 
@@ -380,6 +388,14 @@ void handle_button(xcb_button_press_event_t *event) {
              * If there is no more workspace, don’t even send the workspace
              * command, otherwise (with workspace auto_back_and_forth) we’d end
              * up on the wrong workspace. */
+
+            /* if `wheel_down_cmd [COMMAND]` was specified, it should override
+             * the default behavior */
+            if (config.wheel_down_cmd) {
+                i3_send_msg(I3_IPC_MESSAGE_TYPE_COMMAND, config.wheel_down_cmd);
+                return;
+            }
+
             if (cur_ws == TAILQ_LAST(walk->workspaces, ws_head))
                 return;
 
@@ -387,7 +403,7 @@ void handle_button(xcb_button_press_event_t *event) {
             break;
         case 1:
             /* Check if this event regards a workspace button */
-            TAILQ_FOREACH (cur_ws, walk->workspaces, tailq) {
+            TAILQ_FOREACH(cur_ws, walk->workspaces, tailq) {
                 DLOG("x = %d\n", x);
                 if (x >= 0 && x < cur_ws->name_width + logical_px(10)) {
                     break;
@@ -398,7 +414,7 @@ void handle_button(xcb_button_press_event_t *event) {
             /* Otherwise, focus our currently visible workspace if it is not
              * already focused */
             if (cur_ws == NULL) {
-                TAILQ_FOREACH (cur_ws, walk->workspaces, tailq) {
+                TAILQ_FOREACH(cur_ws, walk->workspaces, tailq) {
                     if (cur_ws->visible && !cur_ws->focused)
                         break;
                 }
@@ -455,12 +471,12 @@ void handle_button(xcb_button_press_event_t *event) {
 static void configure_trayclients(void) {
     trayclient *trayclient;
     i3_output *output;
-    SLIST_FOREACH (output, outputs, slist) {
+    SLIST_FOREACH(output, outputs, slist) {
         if (!output->active)
             continue;
 
         int clients = 0;
-        TAILQ_FOREACH_REVERSE (trayclient, output->trayclients, tc_head, tailq) {
+        TAILQ_FOREACH_REVERSE(trayclient, output->trayclients, tc_head, tailq) {
             if (!trayclient->mapped)
                 continue;
             clients++;
@@ -544,7 +560,7 @@ static void handle_client_message(xcb_client_message_event_t *event) {
 
             DLOG("X window %08x requested docking\n", client);
             i3_output *walk, *output = NULL;
-            SLIST_FOREACH (walk, outputs, slist) {
+            SLIST_FOREACH(walk, outputs, slist) {
                 if (!walk->active)
                     continue;
                 if (config.tray_output) {
@@ -562,7 +578,7 @@ static void handle_client_message(xcb_client_message_event_t *event) {
             if (output == NULL &&
                 config.tray_output &&
                 strcasecmp("primary", config.tray_output) == 0) {
-                SLIST_FOREACH (walk, outputs, slist) {
+                SLIST_FOREACH(walk, outputs, slist) {
                     if (!walk->active)
                         continue;
                     DLOG("Falling back to output %s because no primary output is configured\n", walk->name);
@@ -650,12 +666,12 @@ static void handle_destroy_notify(xcb_destroy_notify_event_t *event) {
     DLOG("DestroyNotify for window = %08x, event = %08x\n", event->window, event->event);
 
     i3_output *walk;
-    SLIST_FOREACH (walk, outputs, slist) {
+    SLIST_FOREACH(walk, outputs, slist) {
         if (!walk->active)
             continue;
         DLOG("checking output %s\n", walk->name);
         trayclient *trayclient;
-        TAILQ_FOREACH (trayclient, walk->trayclients, tailq) {
+        TAILQ_FOREACH(trayclient, walk->trayclients, tailq) {
             if (trayclient->win != event->window)
                 continue;
 
@@ -679,12 +695,12 @@ static void handle_map_notify(xcb_map_notify_event_t *event) {
     DLOG("MapNotify for window = %08x, event = %08x\n", event->window, event->event);
 
     i3_output *walk;
-    SLIST_FOREACH (walk, outputs, slist) {
+    SLIST_FOREACH(walk, outputs, slist) {
         if (!walk->active)
             continue;
         DLOG("checking output %s\n", walk->name);
         trayclient *trayclient;
-        TAILQ_FOREACH (trayclient, walk->trayclients, tailq) {
+        TAILQ_FOREACH(trayclient, walk->trayclients, tailq) {
             if (trayclient->win != event->window)
                 continue;
 
@@ -707,12 +723,12 @@ static void handle_unmap_notify(xcb_unmap_notify_event_t *event) {
     DLOG("UnmapNotify for window = %08x, event = %08x\n", event->window, event->event);
 
     i3_output *walk;
-    SLIST_FOREACH (walk, outputs, slist) {
+    SLIST_FOREACH(walk, outputs, slist) {
         if (!walk->active)
             continue;
         DLOG("checking output %s\n", walk->name);
         trayclient *trayclient;
-        TAILQ_FOREACH (trayclient, walk->trayclients, tailq) {
+        TAILQ_FOREACH(trayclient, walk->trayclients, tailq) {
             if (trayclient->win != event->window)
                 continue;
 
@@ -739,11 +755,11 @@ static void handle_property_notify(xcb_property_notify_event_t *event) {
         DLOG("xembed_info updated\n");
         trayclient *trayclient = NULL, *walk;
         i3_output *o_walk;
-        SLIST_FOREACH (o_walk, outputs, slist) {
+        SLIST_FOREACH(o_walk, outputs, slist) {
             if (!o_walk->active)
                 continue;
 
-            TAILQ_FOREACH (walk, o_walk->trayclients, tailq) {
+            TAILQ_FOREACH(walk, o_walk->trayclients, tailq) {
                 if (walk->win != event->window)
                     continue;
                 trayclient = walk;
@@ -802,12 +818,12 @@ static void handle_configure_request(xcb_configure_request_event_t *event) {
 
     trayclient *trayclient;
     i3_output *output;
-    SLIST_FOREACH (output, outputs, slist) {
+    SLIST_FOREACH(output, outputs, slist) {
         if (!output->active)
             continue;
 
         int clients = 0;
-        TAILQ_FOREACH_REVERSE (trayclient, output->trayclients, tc_head, tailq) {
+        TAILQ_FOREACH_REVERSE(trayclient, output->trayclients, tc_head, tailq) {
             if (!trayclient->mapped)
                 continue;
             clients++;
@@ -854,7 +870,62 @@ void xcb_chk_cb(struct ev_loop *loop, ev_check *watcher, int revents) {
     }
 
     while ((event = xcb_poll_for_event(xcb_connection)) != NULL) {
-        switch (event->response_type & ~0x80) {
+        int type = (event->response_type & ~0x80);
+
+        if (type == xkb_base && xkb_base > -1) {
+            DLOG("received an xkb event\n");
+
+            xcb_xkb_state_notify_event_t *state = (xcb_xkb_state_notify_event_t *)event;
+            if (state->xkbType == XCB_XKB_STATE_NOTIFY) {
+                int modstate = state->mods & config.modifier;
+
+#define DLOGMOD(modmask, status)                        \
+    do {                                                \
+        switch (modmask) {                              \
+            case ShiftMask:                             \
+                DLOG("ShiftMask got " #status "!\n");   \
+                break;                                  \
+            case ControlMask:                           \
+                DLOG("ControlMask got " #status "!\n"); \
+                break;                                  \
+            case Mod1Mask:                              \
+                DLOG("Mod1Mask got " #status "!\n");    \
+                break;                                  \
+            case Mod2Mask:                              \
+                DLOG("Mod2Mask got " #status "!\n");    \
+                break;                                  \
+            case Mod3Mask:                              \
+                DLOG("Mod3Mask got " #status "!\n");    \
+                break;                                  \
+            case Mod4Mask:                              \
+                DLOG("Mod4Mask got " #status "!\n");    \
+                break;                                  \
+            case Mod5Mask:                              \
+                DLOG("Mod5Mask got " #status "!\n");    \
+                break;                                  \
+        }                                               \
+    } while (0)
+
+                if (modstate != mod_pressed) {
+                    if (modstate == 0) {
+                        DLOGMOD(config.modifier, released);
+                        if (!activated_mode)
+                            hide_bars();
+                    } else {
+                        DLOGMOD(config.modifier, pressed);
+                        activated_mode = false;
+                        unhide_bars();
+                    }
+                    mod_pressed = modstate;
+                }
+#undef DLOGMOD
+            }
+
+            free(event);
+            continue;
+        }
+
+        switch (type) {
             case XCB_EXPOSE:
                 /* Expose-events happen, when the window needs to be redrawn */
                 redraw_bars();
@@ -898,76 +969,6 @@ void xcb_chk_cb(struct ev_loop *loop, ev_check *watcher, int revents) {
  *
  */
 void xcb_io_cb(struct ev_loop *loop, ev_io *watcher, int revents) {
-}
-
-/*
- * We need to bind to the modifier per XKB. Sadly, XCB does not implement this
- *
- */
-void xkb_io_cb(struct ev_loop *loop, ev_io *watcher, int revents) {
-    XkbEvent ev;
-    int modstate = 0;
-
-    DLOG("Got XKB-Event!\n");
-
-    while (XPending(xkb_dpy)) {
-        XNextEvent(xkb_dpy, (XEvent *)&ev);
-
-        if (ev.type != xkb_event_base) {
-            ELOG("No Xkb-Event!\n");
-            continue;
-        }
-
-        if (ev.any.xkb_type != XkbStateNotify) {
-            ELOG("No State Notify!\n");
-            continue;
-        }
-
-        unsigned int mods = ev.state.mods;
-        modstate = mods & config.modifier;
-    }
-
-#define DLOGMOD(modmask, status)                        \
-    do {                                                \
-        switch (modmask) {                              \
-            case ShiftMask:                             \
-                DLOG("ShiftMask got " #status "!\n");   \
-                break;                                  \
-            case ControlMask:                           \
-                DLOG("ControlMask got " #status "!\n"); \
-                break;                                  \
-            case Mod1Mask:                              \
-                DLOG("Mod1Mask got " #status "!\n");    \
-                break;                                  \
-            case Mod2Mask:                              \
-                DLOG("Mod2Mask got " #status "!\n");    \
-                break;                                  \
-            case Mod3Mask:                              \
-                DLOG("Mod3Mask got " #status "!\n");    \
-                break;                                  \
-            case Mod4Mask:                              \
-                DLOG("Mod4Mask got " #status "!\n");    \
-                break;                                  \
-            case Mod5Mask:                              \
-                DLOG("Mod5Mask got " #status "!\n");    \
-                break;                                  \
-        }                                               \
-    } while (0)
-
-    if (modstate != mod_pressed) {
-        if (modstate == 0) {
-            DLOGMOD(config.modifier, released);
-            if (!activated_mode)
-                hide_bars();
-        } else {
-            DLOGMOD(config.modifier, pressed);
-            activated_mode = false;
-            unhide_bars();
-        }
-        mod_pressed = modstate;
-    }
-
-#undef DLOGMOD
 }
 
 /*
@@ -1053,44 +1054,23 @@ char *init_xcb_early() {
  *
  */
 void register_xkb_keyevents() {
-    if (xkb_dpy == NULL) {
-        int xkb_major, xkb_minor, xkb_errbase, xkb_err;
-        xkb_major = XkbMajorVersion;
-        xkb_minor = XkbMinorVersion;
-
-        xkb_dpy = XkbOpenDisplay(NULL,
-                                 &xkb_event_base,
-                                 &xkb_errbase,
-                                 &xkb_major,
-                                 &xkb_minor,
-                                 &xkb_err);
-
-        if (xkb_dpy == NULL) {
-            ELOG("No XKB!\n");
-            exit(EXIT_FAILURE);
-        }
-
-        if (fcntl(ConnectionNumber(xkb_dpy), F_SETFD, FD_CLOEXEC) == -1) {
-            ELOG("Could not set FD_CLOEXEC on xkbdpy: %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-
-        int i1;
-        if (!XkbQueryExtension(xkb_dpy, &i1, &xkb_event_base, &xkb_errbase, &xkb_major, &xkb_minor)) {
-            ELOG("XKB not supported by X-server!\n");
-            exit(EXIT_FAILURE);
-        }
-
-        if (!XkbSelectEvents(xkb_dpy, XkbUseCoreKbd, XkbStateNotifyMask, XkbStateNotifyMask)) {
-            ELOG("Could not grab Key!\n");
-            exit(EXIT_FAILURE);
-        }
-
-        xkb_io = smalloc(sizeof(ev_io));
-        ev_io_init(xkb_io, &xkb_io_cb, ConnectionNumber(xkb_dpy), EV_READ);
-        ev_io_start(main_loop, xkb_io);
-        XFlush(xkb_dpy);
+    const xcb_query_extension_reply_t *extreply;
+    extreply = xcb_get_extension_data(conn, &xcb_xkb_id);
+    if (!extreply->present) {
+        ELOG("xkb is not present on this server\n");
+        exit(EXIT_FAILURE);
     }
+    DLOG("initializing xcb-xkb\n");
+    xcb_xkb_use_extension(conn, XCB_XKB_MAJOR_VERSION, XCB_XKB_MINOR_VERSION);
+    xcb_xkb_select_events(conn,
+                          XCB_XKB_ID_USE_CORE_KBD,
+                          XCB_XKB_EVENT_TYPE_STATE_NOTIFY,
+                          0,
+                          XCB_XKB_EVENT_TYPE_STATE_NOTIFY,
+                          0xff,
+                          0xff,
+                          NULL);
+    xkb_base = extreply->first_event;
 }
 
 /*
@@ -1098,13 +1078,14 @@ void register_xkb_keyevents() {
  *
  */
 void deregister_xkb_keyevents() {
-    if (xkb_dpy != NULL) {
-        ev_io_stop(main_loop, xkb_io);
-        XCloseDisplay(xkb_dpy);
-        close(xkb_io->fd);
-        FREE(xkb_io);
-        xkb_dpy = NULL;
-    }
+    xcb_xkb_select_events(conn,
+                          XCB_XKB_ID_USE_CORE_KBD,
+                          0,
+                          0,
+                          0,
+                          0xff,
+                          0xff,
+                          NULL);
 }
 
 /*
@@ -1280,7 +1261,7 @@ void init_tray_colors(void) {
 void clean_xcb(void) {
     i3_output *o_walk;
     free_workspaces();
-    SLIST_FOREACH (o_walk, outputs, slist) {
+    SLIST_FOREACH(o_walk, outputs, slist) {
         destroy_window(o_walk);
         FREE(o_walk->trayclients);
         FREE(o_walk->workspaces);
@@ -1435,7 +1416,7 @@ void reconfig_windows(bool redraw_bars) {
     static bool tray_configured = false;
 
     i3_output *walk;
-    SLIST_FOREACH (walk, outputs, slist) {
+    SLIST_FOREACH(walk, outputs, slist) {
         if (!walk->active) {
             /* If an output is not active, we destroy its bar */
             /* FIXME: Maybe we rather want to unmap? */
@@ -1597,7 +1578,7 @@ void reconfig_windows(bool redraw_bars) {
                  * VGA-1 but output == [HDMI-1]).
                  */
                 i3_output *output;
-                SLIST_FOREACH (output, outputs, slist) {
+                SLIST_FOREACH(output, outputs, slist) {
                     if (strcasecmp(output->name, tray_output) == 0 ||
                         (strcasecmp(tray_output, "primary") == 0 && output->primary)) {
                         init_tray();
@@ -1686,7 +1667,7 @@ void draw_bars(bool unhide) {
     refresh_statusline();
 
     i3_output *outputs_walk;
-    SLIST_FOREACH (outputs_walk, outputs, slist) {
+    SLIST_FOREACH(outputs_walk, outputs, slist) {
         if (!outputs_walk->active) {
             DLOG("Output %s inactive, skipping...\n", outputs_walk->name);
             continue;
@@ -1716,7 +1697,7 @@ void draw_bars(bool unhide) {
              * position */
             trayclient *trayclient;
             int traypx = 0;
-            TAILQ_FOREACH (trayclient, outputs_walk->trayclients, tailq) {
+            TAILQ_FOREACH(trayclient, outputs_walk->trayclients, tailq) {
                 if (!trayclient->mapped)
                     continue;
                 /* We assume the tray icons are quadratic (we use the font
@@ -1738,7 +1719,7 @@ void draw_bars(bool unhide) {
 
         if (!config.disable_ws) {
             i3_ws *ws_walk;
-            TAILQ_FOREACH (ws_walk, outputs_walk->workspaces, tailq) {
+            TAILQ_FOREACH(ws_walk, outputs_walk->workspaces, tailq) {
                 DLOG("Drawing Button for WS %s at x = %d, len = %d\n",
                      i3string_as_utf8(ws_walk->name), i, ws_walk->name_width);
                 uint32_t fg_color = colors.inactive_ws_fg;
@@ -1854,7 +1835,7 @@ void draw_bars(bool unhide) {
  */
 void redraw_bars(void) {
     i3_output *outputs_walk;
-    SLIST_FOREACH (outputs_walk, outputs, slist) {
+    SLIST_FOREACH(outputs_walk, outputs, slist) {
         if (!outputs_walk->active) {
             continue;
         }
