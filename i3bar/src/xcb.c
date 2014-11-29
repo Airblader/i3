@@ -117,6 +117,10 @@ int _xcb_request_failed(xcb_void_cookie_t cookie, char *err_msg, int line) {
     return 0;
 }
 
+uint32_t get_sep_offset(struct status_block *block) {
+    return block->sep_block_width / 2 + block->sep_block_width % 2;
+}
+
 /*
  * Redraws the statusline to the buffer
  *
@@ -168,30 +172,47 @@ void refresh_statusline(void) {
         realloc_sl_buffer();
 
     /* Clear the statusline pixmap. */
-    xcb_rectangle_t rect = {0, 0, root_screen->width_in_pixels, font.height + logical_px(5)};
+    xcb_rectangle_t rect = {0, 0, root_screen->width_in_pixels, bar_height};
     xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_clear, 1, &rect);
 
     /* Draw the text of each block. */
     uint32_t x = 0;
     TAILQ_FOREACH (block, &statusline_head, blocks) {
-        if (i3string_get_num_bytes(block->full_text) == 0)
+        if (i3string_get_num_bytes(block->full_text) == 0) {
             continue;
+        }
+
+        /* draw the background */
+        uint32_t vals_bg[] = {colors.urgent_ws_bg, colors.urgent_ws_bg};
+        xcb_change_gc(xcb_connection, statusline_ctx, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+            vals_bg);
+
+        struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
+        uint32_t prev_sep_offset = prev_block == NULL ? 0 : get_sep_offset(prev_block);
+        uint32_t sep_offset = 0;
+        if (!block->no_separator && block->sep_block_width > 0) {
+            sep_offset = get_sep_offset(block);
+        }
+
+        xcb_rectangle_t rect = {
+            x - prev_sep_offset, 0, block->width + prev_sep_offset - sep_offset, bar_height
+        };
+        xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
 
         uint32_t colorpixel = (block->color ? get_colorpixel(block->color) : colors.bar_fg);
         set_font_colors(statusline_ctx, colorpixel, colors.bar_bg);
-        draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset, 1, block->width);
+        draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset, 3, block->width);
         x += block->width + block->x_offset + block->x_append;
 
         if (TAILQ_NEXT(block, blocks) != NULL && !block->no_separator && block->sep_block_width > 0) {
             /* This is not the last block, draw a separator. */
-            uint32_t sep_offset = block->sep_block_width / 2 + block->sep_block_width % 2;
             uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_LINE_WIDTH;
             uint32_t values[] = {colors.sep_fg, colors.bar_bg, logical_px(1)};
             xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
             xcb_poly_line(xcb_connection, XCB_COORD_MODE_ORIGIN, statusline_pm,
                           statusline_ctx, 2,
-                          (xcb_point_t[]) {{x - sep_offset, 2},
-                                           {x - sep_offset, font.height - 2}});
+                          (xcb_point_t[]) {{x - sep_offset, 4},
+                                           {x - sep_offset, bar_height - 4}});
         }
     }
 }
@@ -1732,8 +1753,8 @@ void draw_bars(bool unhide) {
                           outputs_walk->buffer,
                           outputs_walk->bargc,
                           MAX(0, (int16_t)(statusline_width - outputs_walk->rect.w + 4)), 0,
-                          MAX(0, (int16_t)(outputs_walk->rect.w - statusline_width - traypx - 4)), 3,
-                          MIN(outputs_walk->rect.w - traypx - 4, (int)statusline_width), font.height + 2);
+                          MAX(0, (int16_t)(outputs_walk->rect.w - statusline_width - traypx - 4)), 0,
+                          MIN(outputs_walk->rect.w - traypx - 4, (int)statusline_width), bar_height);
         }
 
         if (!config.disable_ws) {
