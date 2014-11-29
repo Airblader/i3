@@ -187,6 +187,9 @@ static int stdin_string(void *context, const unsigned char *val, size_t len) {
     if (strcasecmp(ctx->last_map_key, "color") == 0) {
         sasprintf(&(ctx->block.color), "%.*s", len, val);
     }
+    if (strcasecmp(ctx->last_map_key, "background") == 0) {
+        sasprintf(&(ctx->block.background), "%.*s", len, val);
+    }
     if (strcasecmp(ctx->last_map_key, "align") == 0) {
         if (len == strlen("left") && !strncmp((const char *)val, "left", strlen("left"))) {
             ctx->block.align = ALIGN_LEFT;

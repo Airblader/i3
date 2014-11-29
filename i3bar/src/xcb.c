@@ -183,7 +183,8 @@ void refresh_statusline(void) {
         }
 
         /* draw the background */
-        uint32_t vals_bg[] = {colors.urgent_ws_bg, colors.urgent_ws_bg};
+        uint32_t background_color = block->background ? get_colorpixel(block->background) : colors.bar_bg;
+        uint32_t vals_bg[] = {background_color, background_color};
         xcb_change_gc(xcb_connection, statusline_ctx, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
             vals_bg);
 

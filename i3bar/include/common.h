@@ -38,6 +38,7 @@ struct status_block {
     i3String *full_text;
 
     char *color;
+    char *background;
     uint32_t min_width;
     blockalign_t align;
 
