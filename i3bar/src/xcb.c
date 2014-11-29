@@ -183,22 +183,25 @@ void refresh_statusline(void) {
         }
 
         /* draw the background */
-        uint32_t background_color = block->background ? get_colorpixel(block->background) : colors.bar_bg;
-        uint32_t vals_bg[] = {background_color, background_color};
-        xcb_change_gc(xcb_connection, statusline_ctx, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
-            vals_bg);
+        if (block->background) {
+            uint32_t background_color = get_colorpixel(block->background);
+            uint32_t vals_bg[] = {background_color, background_color};
+            xcb_change_gc(xcb_connection, statusline_ctx, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+                vals_bg);
 
-        struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
-        uint32_t prev_sep_offset = prev_block == NULL ? 0 : get_sep_offset(prev_block);
-        uint32_t sep_offset = 0;
-        if (!block->no_separator && block->sep_block_width > 0) {
-            sep_offset = get_sep_offset(block);
+            struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
+            uint32_t prev_sep_offset = prev_block == NULL ? 0 : get_sep_offset(prev_block);
+            uint32_t sep_offset = 0;
+            if (!block->no_separator && block->sep_block_width > 0) {
+                sep_offset = get_sep_offset(block);
+            }
+
+            xcb_rectangle_t rect = {
+                x - prev_sep_offset, 0, block->width + prev_sep_offset - sep_offset, bar_height
+            };
+
+            xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
         }
-
-        xcb_rectangle_t rect = {
-            x - prev_sep_offset, 0, block->width + prev_sep_offset - sep_offset, bar_height
-        };
-        xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
 
         uint32_t colorpixel = (block->color ? get_colorpixel(block->color) : colors.bar_fg);
         set_font_colors(statusline_ctx, colorpixel, colors.bar_bg);
@@ -207,6 +210,7 @@ void refresh_statusline(void) {
 
         if (TAILQ_NEXT(block, blocks) != NULL && !block->no_separator && block->sep_block_width > 0) {
             /* This is not the last block, draw a separator. */
+            uint32_t sep_offset = get_sep_offset(block);
             uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_LINE_WIDTH;
             uint32_t values[] = {colors.sep_fg, colors.bar_bg, logical_px(1)};
             xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
