@@ -118,7 +118,9 @@ int _xcb_request_failed(xcb_void_cookie_t cookie, char *err_msg, int line) {
 }
 
 uint32_t get_sep_offset(struct status_block *block) {
-    return block->sep_block_width / 2 + block->sep_block_width % 2;
+    if (!block->no_separator || block->sep_block_width > 0)
+        return block->sep_block_width / 2 + block->sep_block_width % 2;
+    return 0;
 }
 
 /*
@@ -182,6 +184,8 @@ void refresh_statusline(void) {
             continue;
         }
 
+        uint32_t sep_offset = get_sep_offset(block);
+
         /* Draw the background for this block. */
         if (block->background) {
             uint32_t bg_color = get_colorpixel(block->background);
@@ -191,8 +195,6 @@ void refresh_statusline(void) {
 
             struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
             uint32_t prev_sep_offset = prev_block == NULL ? 0 : get_sep_offset(prev_block);
-            uint32_t sep_offset = !block->no_separator && block->sep_block_width > 0
-                                  ? get_sep_offset(block) : 0;
 
             xcb_rectangle_t rect = { x - prev_sep_offset + logical_px(1),
                                      0,
@@ -207,9 +209,8 @@ void refresh_statusline(void) {
         draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset, 3, block->width);
         x += block->width + block->x_offset + block->x_append;
 
-        if (TAILQ_NEXT(block, blocks) != NULL && !block->no_separator && block->sep_block_width > 0) {
+        if (TAILQ_NEXT(block, blocks) != NULL && sep_offset > 0) {
             /* This is not the last block, draw a separator. */
-            uint32_t sep_offset = get_sep_offset(block);
             uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND | XCB_GC_LINE_WIDTH;
             uint32_t values[] = {colors.sep_fg, colors.bar_bg, logical_px(1)};
             xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
