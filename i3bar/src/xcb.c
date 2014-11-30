@@ -198,15 +198,20 @@ void refresh_statusline(void) {
 
         /* Draw the background for this block. */
         if (block->background) {
-            uint32_t border_offset = block->border ? 1 : 0;
+            bool is_border = !!block->border;
+
             uint32_t bg_color = get_colorpixel(block->background);
             uint32_t values[] = { bg_color, bg_color };
             uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
             xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
 
-            xcb_rectangle_t rect = { x + border_offset, border_offset, 
-                                     block->width + block->x_offset + block->x_append - 2 * border_offset,
-                                     bar_height - 2 * border_offset };
+            xcb_rectangle_t rect = {
+                x + is_border * block->border_left,
+                is_border * block->border_top,
+                block->width + block->x_offset + block->x_append 
+                    - is_border * (block->border_right + block->border_left),
+                bar_height - is_border * (block->border_bottom + block->border_top)
+            };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
         }
 

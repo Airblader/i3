@@ -158,6 +158,12 @@ static int stdin_start_map(void *context) {
     /* Default width of the separator block. */
     ctx->block.sep_block_width = logical_px(9);
 
+    /* If a border is set, by default we draw all four borders. */
+    ctx->block.border_top = true;
+    ctx->block.border_right = true;
+    ctx->block.border_bottom = true;
+    ctx->block.border_left = true;
+
     return 1;
 }
 
@@ -175,6 +181,18 @@ static int stdin_boolean(void *context, int val) {
     }
     if (strcasecmp(ctx->last_map_key, "separator") == 0) {
         ctx->block.no_separator = !val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_top") == 0) {
+        ctx->block.border_top = val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_right") == 0) {
+        ctx->block.border_right = val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_bottom") == 0) {
+        ctx->block.border_bottom = val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_left") == 0) {
+        ctx->block.border_left = val;
     }
     return 1;
 }
