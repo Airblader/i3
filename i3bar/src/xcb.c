@@ -182,7 +182,7 @@ void refresh_statusline(void) {
             continue;
         }
 
-        /* draw the background */
+        /* Draw the background for this block. */
         if (block->background) {
             uint32_t background_color = get_colorpixel(block->background);
             uint32_t vals_bg[] = {background_color, background_color};
@@ -191,15 +191,12 @@ void refresh_statusline(void) {
 
             struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
             uint32_t prev_sep_offset = prev_block == NULL ? 0 : get_sep_offset(prev_block);
-            uint32_t sep_offset = 0;
-            if (!block->no_separator && block->sep_block_width > 0) {
-                sep_offset = get_sep_offset(block);
-            }
 
-            xcb_rectangle_t rect = {
-                x - prev_sep_offset, 0, block->width + prev_sep_offset - sep_offset, bar_height
-            };
+            uint32_t sep_offset = !block->no_separator && block->sep_block_width > 0
+                ? get_sep_offset(block) : 0;
 
+            xcb_rectangle_t rect = { x - prev_sep_offset, 0,
+                block->width + prev_sep_offset - sep_offset, bar_height };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
         }
 
