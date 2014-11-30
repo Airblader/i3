@@ -184,14 +184,13 @@ void refresh_statusline(void) {
 
         /* Draw the background for this block. */
         if (block->background) {
-            uint32_t background_color = get_colorpixel(block->background);
-            uint32_t vals_bg[] = {background_color, background_color};
-            xcb_change_gc(xcb_connection, statusline_ctx, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
-                vals_bg);
+            uint32_t bg_color = get_colorpixel(block->background);
+            uint32_t values[] = { bg_color, bg_color };
+            uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
+            xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
 
             struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
             uint32_t prev_sep_offset = prev_block == NULL ? 0 : get_sep_offset(prev_block);
-
             uint32_t sep_offset = !block->no_separator && block->sep_block_width > 0
                 ? get_sep_offset(block) : 0;
 
