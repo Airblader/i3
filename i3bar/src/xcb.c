@@ -191,7 +191,6 @@ void refresh_statusline(void) {
             uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
             xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
 
-            struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
             xcb_rectangle_t rect = { x, 0, block->width + block->x_offset + block->x_append,
                                      bar_height };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
