@@ -11,6 +11,18 @@ to allow for configurable gaps between containers in i3. On top of that, the fol
 * Merged i3 4.8 to get to the latest release
 * Introduced a patch to allow background and border settings in i3bar blocks via JSON
 
+Installation
+------------
+
+Simply clone the repository, switch into the the directory and execute `make && sudo make install`. The next time you log in, you can switch i3 in your login manager environment.
+
+i3 has a few dependencies. Here is a list of packages that I needed to install on a clean Ubuntu 14.10 installation to build the project:
+
+````
+apt-get install libxcb1-dev libxcb-keysyms1-dev libpango1.0-dev libxcb-util0-dev libxcb-icccm4-dev \
+  libyajl-dev libstartup-notification0-dev libxcb-randr0-dev libev-dev libxcb-cursor-dev libxcb-xinerama0-dev
+```
+
 Status Block Background & Color
 -------------------------------
 
