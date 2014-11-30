@@ -30,4 +30,9 @@ Example:
   "border": "\#9FBC00", \
   "border_bottom": false \
 }
-````
+```
+
+Screenshot
+----------
+
+![i3](http://i.imgur.com/W2iMHHW.png)
