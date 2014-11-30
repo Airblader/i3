@@ -184,15 +184,29 @@ void refresh_statusline(void) {
             continue;
         }
 
-        /* Draw the background for this block. */
-        if (block->background) {
-            uint32_t bg_color = get_colorpixel(block->background);
-            uint32_t values[] = { bg_color, bg_color };
+        /* Draw the border for this block. */
+        if (block->border) {
+            uint32_t border_color = get_colorpixel(block->border);
+            uint32_t values[] = { border_color, border_color };
             uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
             xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
 
             xcb_rectangle_t rect = { x, 0, block->width + block->x_offset + block->x_append,
                                      bar_height };
+            xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
+        }
+
+        /* Draw the background for this block. */
+        if (block->background) {
+            uint32_t border_offset = block->border ? 1 : 0;
+            uint32_t bg_color = get_colorpixel(block->background);
+            uint32_t values[] = { bg_color, bg_color };
+            uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
+            xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
+
+            xcb_rectangle_t rect = { x + border_offset, border_offset, 
+                                     block->width + block->x_offset + block->x_append - 2 * border_offset,
+                                     bar_height - 2 * border_offset };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
         }
 
