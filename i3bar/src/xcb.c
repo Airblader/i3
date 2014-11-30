@@ -197,23 +197,20 @@ void refresh_statusline(void) {
         }
 
         /* Draw the background for this block. */
-        if (block->background) {
-            bool is_border = !!block->border;
+        bool is_border = !!block->border;
+        uint32_t bg_color = block->background ? get_colorpixel(block->background) : colors.bar_bg;
+        uint32_t values[] = { bg_color, bg_color };
+        uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
+        xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
 
-            uint32_t bg_color = get_colorpixel(block->background);
-            uint32_t values[] = { bg_color, bg_color };
-            uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
-            xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
-
-            xcb_rectangle_t rect = {
-                x + is_border * block->border_left,
-                is_border * block->border_top,
-                block->width + block->x_offset + block->x_append 
-                    - is_border * (block->border_right + block->border_left),
-                bar_height - is_border * (block->border_bottom + block->border_top)
-            };
-            xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
-        }
+        xcb_rectangle_t rect = {
+            x + is_border * block->border_left,
+            is_border * block->border_top,
+            block->width + block->x_offset + block->x_append 
+                - is_border * (block->border_right + block->border_left),
+            bar_height - is_border * (block->border_bottom + block->border_top)
+        };
+        xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
 
         uint32_t colorpixel = (block->color ? get_colorpixel(block->color) : colors.bar_fg);
         set_font_colors(statusline_ctx, colorpixel, colors.bar_bg);
