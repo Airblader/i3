@@ -162,7 +162,7 @@ void refresh_statusline(void) {
 
         /* If this is not the last block, add some pixels for a separator. */
         if (TAILQ_NEXT(block, blocks) != NULL)
-            block->width += block->sep_block_width;
+            statusline_width += block->sep_block_width;
 
         statusline_width += block->width + block->x_offset + block->x_append;
     }
@@ -198,10 +198,10 @@ void refresh_statusline(void) {
             if (prev_block != NULL && prev_sep_offset == 0)
                 prev_sep_offset++;
 
-            xcb_rectangle_t rect = { x - prev_sep_offset + logical_px(1),
+            xcb_rectangle_t rect = { x,
                                      0,
-                                     block->width + prev_sep_offset - sep_offset
-                                         + block->x_offset + block->x_append - logical_px(1),
+                                     block->width
+                                         + block->x_offset + block->x_append,
                                      bar_height };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
         }
@@ -209,7 +209,7 @@ void refresh_statusline(void) {
         uint32_t colorpixel = (block->color ? get_colorpixel(block->color) : colors.bar_fg);
         set_font_colors(statusline_ctx, colorpixel, colors.bar_bg);
         draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset, 3, block->width);
-        x += block->width + block->x_offset + block->x_append;
+        x += block->width + block->sep_block_width + block->x_offset + block->x_append;
 
         if (TAILQ_NEXT(block, blocks) != NULL && sep_offset > 0) {
             /* This is not the last block, draw a separator. */
