@@ -198,10 +198,7 @@ void refresh_statusline(void) {
             if (prev_block != NULL && prev_sep_offset == 0)
                 prev_sep_offset++;
 
-            xcb_rectangle_t rect = { x,
-                                     0,
-                                     block->width
-                                         + block->x_offset + block->x_append,
+            xcb_rectangle_t rect = { x, 0, block->width + block->x_offset + block->x_append,
                                      bar_height };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
         }
