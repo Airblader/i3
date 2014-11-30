@@ -118,7 +118,7 @@ int _xcb_request_failed(xcb_void_cookie_t cookie, char *err_msg, int line) {
 }
 
 uint32_t get_sep_offset(struct status_block *block) {
-    if (!block->no_separator || block->sep_block_width > 0)
+    if (!block->no_separator && block->sep_block_width > 0)
         return block->sep_block_width / 2 + block->sep_block_width % 2;
     return 0;
 }
@@ -195,6 +195,8 @@ void refresh_statusline(void) {
 
             struct status_block *prev_block = TAILQ_PREV(block, statusline_head, blocks);
             uint32_t prev_sep_offset = prev_block == NULL ? 0 : get_sep_offset(prev_block);
+            if (prev_block != NULL && prev_sep_offset == 0)
+                prev_sep_offset++;
 
             xcb_rectangle_t rect = { x - prev_sep_offset + logical_px(1),
                                      0,
