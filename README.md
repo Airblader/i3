@@ -1,18 +1,33 @@
-i3 - Unofficial Gaps Branch
-===========================
+i3 - Unofficial Fork
+=====================
 
-This branch uses the gaps patch from:
-http://infra.in.zekjur.net/pipermail/i3-discuss/2012-November/001042.html
+This fork uses the patches provided in
 
-I have also included some minor fixes that, for me at least, makes it work perfectly.
+* https://github.com/jeanbroid/i3
+* https://github.com/o4dev/i3
 
-As well as this there is now a little bit more convenient way to change the gap size by
-modifying the GAP_SIZE macros near the top of src/render.c .
+to allow for configurable gaps between containers in i3. On top of that, the following changes were made:
 
+* Merged i3 4.8 to get to the latest release
+* Introduced a patch to allow background and border settings in i3bar blocks via JSON
 
+Status Block Background & Color
+-------------------------------
 
-And the result:
-(click the image below to see a video of it in action)
+This fork supports setting a background and border color for i3bar blocks as well as specifying on which sides these borders should be drawn. The following keys can be passed in via JSON:
 
-[![i3](http://devthe.com/files/i3.png "i3")](http://devthe.com/files/i3demo.webm)
+* `background` [color] sets the background color
+* `border` [color] sets the border color
+* `border_top`, `border_bottom`, `border_left`, `border_right` [boolean] whether to draw a border on the specified side (defaults to `true`)
 
+Example:
+
+````
+{ \
+  "full_text": "example", \
+  "color": "\#FFFFFF", \
+  "background": "\#222222", \
+  "border": "\#9FBC00", \
+  "border_bottom": false \
+}
+````
