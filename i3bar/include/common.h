@@ -38,11 +38,17 @@ struct status_block {
     i3String *full_text;
 
     char *color;
+    char *background;
+    char *border;
     uint32_t min_width;
     blockalign_t align;
 
     bool urgent;
     bool no_separator;
+    bool border_top;
+    bool border_right;
+    bool border_bottom;
+    bool border_left;
 
     /* The amount of pixels necessary to render a separater after the block. */
     uint32_t sep_block_width;
