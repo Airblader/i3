@@ -47,4 +47,4 @@ Example:
 Screenshot
 ----------
 
-![i3](http://i.imgur.com/W2iMHHW.png)
+![i3](http://i.imgur.com/ec7GqYB.png)
