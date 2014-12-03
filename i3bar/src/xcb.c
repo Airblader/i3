@@ -180,42 +180,56 @@ void refresh_statusline(void) {
     /* Draw the text of each block. */
     uint32_t x = 0;
     TAILQ_FOREACH (block, &statusline_head, blocks) {
-        if (i3string_get_num_bytes(block->full_text) == 0) {
+        if (i3string_get_num_bytes(block->full_text) == 0)
             continue;
-        }
 
-        /* Draw the border for this block. */
-        if (block->border) {
-            uint32_t border_color = get_colorpixel(block->border);
-            uint32_t values[] = { border_color, border_color };
+        uint32_t fg_color = (block->color ? get_colorpixel(block->color) : colors.bar_fg);
+        if (block->border || block->background || block->urgent) {
+            if (block->urgent)
+                fg_color = colors.urgent_ws_fg;
+
             uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
-            xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
 
-            xcb_rectangle_t rect = { x, 0, block->width + block->x_offset + block->x_append,
-                                     bar_height };
-            xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
-        }
+            /* Let's determine the colors first. */
+            uint32_t border_color = colors.bar_bg;
+            uint32_t bg_color = colors.bar_bg;
+            if (block->urgent) {
+                border_color = colors.urgent_ws_border;
+                bg_color = colors.urgent_ws_bg;
+            } else {
+                if (block->border)
+                    border_color = get_colorpixel(block->border);
 
-        /* Draw the background for this block. */
-        if (block->background || block->border) {
+                if (block->background)
+                    bg_color = get_colorpixel(block->background);
+            }
+
+            /* Draw a border if necessary. */
+            if (border_color != bg_color) {
+                uint32_t border_values[] = { border_color, border_color };
+                xcb_change_gc(xcb_connection, statusline_ctx, mask, border_values);
+
+                xcb_rectangle_t border_rect = { x, 0,
+                                                block->width + block->x_offset + block->x_append, bar_height };
+                xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &border_rect);
+            }
+
+            /* Draw the background. */
             bool is_border = !!block->border;
-            uint32_t bg_color = block->background ? get_colorpixel(block->background) : colors.bar_bg;
-            uint32_t values[] = { bg_color, bg_color };
-            uint32_t mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
-            xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
+            uint32_t bg_values[] = { bg_color, bg_color };
+            xcb_change_gc(xcb_connection, statusline_ctx, mask, bg_values);
 
-            xcb_rectangle_t rect = {
+            xcb_rectangle_t bg_rect = {
                 x + is_border * block->border_left,
                 is_border * block->border_top,
                 block->width + block->x_offset + block->x_append 
                     - is_border * (block->border_right + block->border_left),
                 bar_height - is_border * (block->border_bottom + block->border_top)
             };
-            xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &rect);
+            xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &bg_rect);
         }
 
-        uint32_t colorpixel = (block->color ? get_colorpixel(block->color) : colors.bar_fg);
-        set_font_colors(statusline_ctx, colorpixel, colors.bar_bg);
+        set_font_colors(statusline_ctx, fg_color, colors.bar_bg);
         draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset, 3, block->width);
         x += block->width + block->sep_block_width + block->x_offset + block->x_append;
 
