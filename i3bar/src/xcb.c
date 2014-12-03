@@ -204,15 +204,13 @@ void refresh_statusline(void) {
                     bg_color = get_colorpixel(block->background);
             }
 
-            /* Draw a border if necessary. */
-            if (border_color != bg_color) {
-                uint32_t border_values[] = { border_color, border_color };
-                xcb_change_gc(xcb_connection, statusline_ctx, mask, border_values);
+            /* Draw the border. */
+            uint32_t border_values[] = { border_color, border_color };
+            xcb_change_gc(xcb_connection, statusline_ctx, mask, border_values);
 
-                xcb_rectangle_t border_rect = { x, 0,
+            xcb_rectangle_t border_rect = { x, 0,
                                                 block->width + block->x_offset + block->x_append, bar_height };
-                xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &border_rect);
-            }
+            xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &border_rect);
 
             /* Draw the background. */
             bool is_border = !!block->border;
