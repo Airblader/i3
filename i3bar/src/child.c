@@ -257,7 +257,7 @@ static int stdin_end_map(void *context) {
     /* Ensure we have a full_text set, so that when it is missing (or null),
      * i3bar doesn’t crash and the user gets an annoying message. */
     if (!new_block->full_text)
-        new_block->full_text = i3string_from_utf8("SPEC VIOLATION (null)");
+        new_block->full_text = i3string_from_utf8("ERROR No full_text specified!");
     if (new_block->urgent)
         ctx->has_urgent = true;
     TAILQ_INSERT_TAIL(&statusline_head, new_block, blocks);
