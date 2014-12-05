@@ -2124,12 +2124,16 @@ void cmd_debuglog(I3_CMD, char *argument) {
 }
 
 /**
- * Implementation of 'gap_size <width>'
- *
+ * Implementation of 'gap_size [plus|minus] <width>'
  */
-
-void cmd_gap_size(I3_CMD, char *width) {
-    config.gap_size = atoi(width);
+void cmd_gap_size(I3_CMD, char *way, char *width) {
+    int pixels = atoi(width);
+    if (!strcmp(way, "plus"))
+        config.gap_size += pixels;
+    else if (!strcmp(way, "minus"))
+        config.gap_size -= pixels;
+    else
+        config.gap_size = pixels;
 
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply

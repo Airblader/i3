@@ -87,9 +87,16 @@ state BORDER:
     -> call cmd_border($border_style, "1")
 
 # gap_size <size>
+# gap_size plus|minus <size>
 state GAP_SIZE:
+  way = 'plus', 'minus'
+      -> GAP_SIZE_DELTA
   width = word
-      -> call cmd_gap_size($width)
+      -> call cmd_gap_size("set", $width)
+
+state GAP_SIZE_DELTA:
+  delta = string
+      -> call cmd_gap_size($way, $delta)
 
 state BORDER_WIDTH:
   end
