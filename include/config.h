@@ -216,6 +216,9 @@ struct Config {
 
     /* useless gap size */
     int gap_size;
+
+    /* Should single containers on a workspace receive a border? */
+    bool smart_borders;
 };
 
 /**

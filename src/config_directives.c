@@ -223,6 +223,10 @@ CFGFUN(gap_size, const long width) {
     config.gap_size = width;
 }
 
+CFGFUN(smart_borders, const char *enable) {
+    config.smart_borders = eval_boolstr(enable);
+}
+
 CFGFUN(floating_minimum_size, const long width, const long height) {
     config.floating_minimum_width = width;
     config.floating_minimum_height = height;
