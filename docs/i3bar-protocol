@@ -137,6 +137,24 @@ color::
 	when it is associated.
 	Colors are specified in hex (like in HTML), starting with a leading
 	hash sign. For example, +#ff0000+ means red.
+background::
+        Sets the background color of the block. If not given, this defaults to
+        the i3bar background.
+border::
+        Sets the border color of the block. If not given, this defaults to the
+        i3bar background.
+border_top::
+        A boolean specifying whether or not the top border should be drawn.
+        The default is true.
+border_bottom::
+        A boolean specifying whether or not the bottom border should be drawn.
+        The default is true.
+border_left::
+        A boolean specifying whether or not the left border should be drawn.
+        The default is true.
+border_right::
+        A boolean specifying whether or not the right border should be drawn.
+        The default is true.
 min_width::
 	The minimum width (in pixels) of the block. If the content of the
 	+full_text+ key take less space than the specified min_width, the block
@@ -204,6 +222,12 @@ An example of a block which uses all possible entries follows:
  "full_text": "E: 10.0.0.1 (1000 Mbit/s)",
  "short_text": "10.0.0.1",
  "color": "#00ff00",
+ "background": "#000000",
+ "border": "#ffffff",
+ "border_top": true,
+ "border_bottom": true,
+ "border_left": false,
+ "border_right": false,
  "min_width": 300,
  "align": "right",
  "urgent": false,
