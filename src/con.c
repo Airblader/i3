@@ -1070,6 +1070,22 @@ Con *con_descend_direction(Con *con, direction_t direction) {
  *
  */
 Rect con_border_style_rect(Con *con) {
+    /* Smart border patch: don't put borders on if it's the only container
+     * on this workspace. */
+    if (config.smart_borders) {
+        Con *current = con;
+        while (current != NULL && !con_is_floating(current)) {
+            Con *parent = current->parent;
+            if (con_num_children(parent) != 1)
+                break;
+
+            if (parent->type == CT_WORKSPACE)
+                return (Rect) { 0, 0, 0, 0 };
+            else
+                current = parent;
+        }
+    }
+
     adjacent_t borders_to_hide = ADJ_NONE;
     int border_width = con->current_border_width;
     DLOG("The border width for con is set to: %d\n", con->current_border_width);

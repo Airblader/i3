@@ -77,3 +77,13 @@ Example:
   "border_bottom": false \
 }
 ```
+
+
+Smart Borders
+-------------
+
+With the original patch from [i3-extras](https://github.com/ashinkarov/i3-extras), I've made the smart border feature configurable. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with
+
+````
+smart_borders on
+```

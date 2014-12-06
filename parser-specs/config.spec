@@ -23,6 +23,7 @@ state INITIAL:
   'font'                                   -> FONT
   'mode'                                   -> MODENAME
   'gap_size'                               -> GAP_SIZE
+  'smart_borders'                          -> SMART_BORDERS
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
   'floating_modifier'                      -> FLOATING_MODIFIER
@@ -58,6 +59,11 @@ state IGNORE_LINE:
 state GAP_SIZE:
   width = number
       -> call cfg_gap_size(&width)
+
+# smart_borders true|false
+state SMART_BORDERS:
+  enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
+      -> call cfg_smart_borders($enabled)
 
 # floating_minimum_size <width> x <height>
 state FLOATING_MINIMUM_SIZE_WIDTH:
