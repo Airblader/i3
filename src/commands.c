@@ -2189,6 +2189,9 @@ void cmd_gap_size(I3_CMD, char *way, char *width) {
     else
         config.gap_size = pixels;
 
+    if (config.gap_size < 0)
+        config.gap_size = 0;
+
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
