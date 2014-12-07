@@ -159,7 +159,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
 
     bool should_inset = should_inset_con(con, children);
     if (!already_inset && should_inset) {
-        int gap_size = config.gap_size;
+        int gap_size = config.gap_size + con_get_workspace(con)->gap_size_delta;
         Rect inset = (Rect) { gap_size, gap_size, -2 * gap_size, -2 * gap_size };
         rect = rect_add(rect, inset);
         if (!render_fullscreen) {
