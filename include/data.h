@@ -524,6 +524,10 @@ struct Con {
      * workspace is not a named workspace (for named workspaces, num == -1) */
     int num;
 
+    /** Only applicable for containers of type CT_WORKSPACE, this value is
+      * an additional gap_size relative to the global config's setting. */
+    int gap_size_delta;
+
     struct Con *parent;
 
     struct Rect rect;

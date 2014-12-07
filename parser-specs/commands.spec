@@ -86,17 +86,28 @@ state BORDER:
   border_style = '1pixel'
     -> call cmd_border($border_style, "1")
 
-# gap_size <size>
-# gap_size plus|minus <size>
+# gap_size [current] [plus|minus] <size>
 state GAP_SIZE:
+  current = 'current'
+      -> GAP_SIZE_CURRENT
   way = 'plus', 'minus'
       -> GAP_SIZE_DELTA
   width = word
-      -> call cmd_gap_size("set", $width)
+      -> call cmd_gap_size("set", NULL, $width)
+
+state GAP_SIZE_CURRENT:
+  way = 'plus', 'minus'
+      -> GAP_SIZE_CURRENT_DELTA
+  width = word
+      -> call cmd_gap_size("set", "current", $width)
+
+state GAP_SIZE_CURRENT_DELTA:
+  delta = string
+      -> call cmd_gap_size($way, $current, $delta)
 
 state GAP_SIZE_DELTA:
   delta = string
-      -> call cmd_gap_size($way, $delta)
+      -> call cmd_gap_size($way, NULL, $delta)
 
 state BORDER_WIDTH:
   end

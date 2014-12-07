@@ -116,6 +116,21 @@ static void render_l_output(Con *con) {
 }
 
 /*
+ * Decides whether the container should be inset.
+ */
+bool should_inset_con(Con *con, int children) {
+    /* Don't inset floating containers and workspaces. */
+    if (con->type == CT_FLOATING_CON || con->type == CT_WORKSPACE)
+        return false;
+
+    if (con_is_leaf(con))
+        return true;
+
+    return (con->layout == L_STACKED || con->layout == L_TABBED)
+        && children > 0;
+}
+
+/*
  * "Renders" the given container (and its children), meaning that all rects are
  * updated correctly. Note that this function does not call any xcb_*
  * functions, so the changes are completely done in memory only (and
@@ -142,15 +157,10 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
         rect.height -= 2 * 2;
     }
 
-    bool should_inset = ((con_is_leaf(con) ||
-                          (children > 0 &&
-                           (con->layout == L_STACKED ||
-                            con->layout == L_TABBED))) &&
-                         con->type != CT_FLOATING_CON &&
-                         con->type != CT_WORKSPACE);
-    if ((!already_inset && should_inset)) {
-        Rect inset = (Rect) {config.gap_size, config.gap_size,
-            config.gap_size * -2, config.gap_size * -2};
+    bool should_inset = should_inset_con(con, children);
+    if (!already_inset && should_inset) {
+        int gap_size = config.gap_size + con_get_workspace(con)->gap_size_delta;
+        Rect inset = (Rect) { gap_size, gap_size, -2 * gap_size, -2 * gap_size };
         rect = rect_add(rect, inset);
         if (!render_fullscreen) {
             con->rect = rect_add(con->rect, inset);
@@ -158,7 +168,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
                 con->window_rect = rect_add(con->window_rect, inset);
             }
         }
-        inset.height = config.gap_size * -1;
+        inset.height = -gap_size;
         con->deco_rect = rect_add(con->deco_rect, inset);
     }
 

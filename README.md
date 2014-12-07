@@ -46,15 +46,41 @@ New Features
 gaps
 ----
 
-Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. The syntax for the i3 config is
+Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys.
+
+In your i3 config, you can set a global gap size as shown below. This is the default value that will be used for all workspaces:
 
 ````
-gaps_size [plus|minus] <px>
+gap_size <px>
 ```
 
-So, for example, `gap_size 10` would simply set the size of the gaps to 10 pixels. On the other hand, `gap_size plus 5` would increase the current gap size without having to know how much it actually is.
+Additionally, you can issue commands with the following syntax. This is useful, for example, to bind keys to changing the gap size:
 
-Note that `gap_size 0` is basically equivalent to not using the gaps patch at all. This is the default value.
+````
+gap_size [current] [plus|minus] <px>
+```
+
+So, for example, `gap_size 10` would simply set the size of the gaps to 10 pixels. On the other hand, `gap_size plus 5` would increase the current gap size without having to know how much it actually is. Note that `gap_size 0` is basically equivalent to not using the gaps patch at all. This is the default value.
+
+Here is an exceprt from my i3 config that shows how this can be utilized. Press `$mod+Shift+g` to enter a special mode to modify the gap size. From there, you can press either `+`, `-` or `0` to increase / decrease the gap size or turn gaps off for the current workspace. If you hold `Shift` while doing this, it will modify the setting globally for all workspaces.
+
+````
+set $mode_gap_size Gaps: [+|-|0] for current workspace, Shift + [+|-|0] for all workspaces
+mode "$mode_gap_size" {
+        bindsym plus gap_size current plus 5
+        bindsym minus gap_size current minus 5
+        bindsym 0 gap_size current 0
+
+        bindsym Shift+plus gap_size plus 5
+        bindsym Shift+minus gap_size minus 5
+        bindsym Shift+0 gap_size 0
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+Shift+g mode "$mode_gap_size"
+```
 
 
 i3bar Background & Color

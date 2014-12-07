@@ -292,4 +292,4 @@ void cmd_debuglog(I3_CMD, char *argument);
  * Implementation of 'gap_size [plus|minus] <width>'
  *
  */
-void cmd_gap_size(I3_CMD, char *way, char *width);
+void cmd_gap_size(I3_CMD, char *way, char *workspace, char *width);
