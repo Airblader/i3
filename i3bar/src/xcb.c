@@ -239,8 +239,8 @@ void refresh_statusline(void) {
             xcb_change_gc(xcb_connection, statusline_ctx, mask, values);
             xcb_poly_line(xcb_connection, XCB_COORD_MODE_ORIGIN, statusline_pm,
                           statusline_ctx, 2,
-                          (xcb_point_t[]) {{x - sep_offset, 4},
-                                           {x - sep_offset, bar_height - 4}});
+                          (xcb_point_t[]) { { x - sep_offset, logical_px(4) },
+                                            { x - sep_offset, bar_height - logical_px(4) } });
         }
     }
 }
@@ -1771,18 +1771,18 @@ void draw_bars(bool unhide) {
                 /* We assume the tray icons are quadratic (we use the font
                  * *height* as *width* of the icons) because we configured them
                  * like this. */
-                traypx += font.height + 2;
+                traypx += font.height + logical_px(2);
             }
             /* Add 2px of padding if there are any tray icons */
             if (traypx > 0)
-                traypx += 2;
+                traypx += logical_px(2);
             xcb_copy_area(xcb_connection,
                           statusline_pm,
                           outputs_walk->buffer,
                           outputs_walk->bargc,
-                          MAX(0, (int16_t)(statusline_width - outputs_walk->rect.w + 4)), 0,
-                          MAX(0, (int16_t)(outputs_walk->rect.w - statusline_width - traypx - 4)), 0,
-                          MIN(outputs_walk->rect.w - traypx - 4, (int)statusline_width), bar_height);
+                          MAX(0, (int16_t)(statusline_width - outputs_walk->rect.w + logical_px(4))), 0,
+                          MAX(0, (int16_t)(outputs_walk->rect.w - statusline_width - traypx - logical_px(4))), 0,
+                          MIN(outputs_walk->rect.w - traypx - logical_px(4), (int)statusline_width), bar_height);
         }
 
         if (!config.disable_ws) {
