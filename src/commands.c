@@ -958,6 +958,12 @@ void cmd_workspace(I3_CMD, char *which) {
 
     DLOG("which=%s\n", which);
 
+    if (con_get_fullscreen_con(croot, CF_GLOBAL)) {
+        LOG("Cannot switch workspace while in global fullscreen\n");
+        ysuccess(false);
+        return;
+    }
+
     if (strcmp(which, "next") == 0)
         ws = workspace_next();
     else if (strcmp(which, "prev") == 0)
@@ -985,6 +991,12 @@ void cmd_workspace(I3_CMD, char *which) {
  */
 void cmd_workspace_number(I3_CMD, char *which) {
     Con *output, *workspace = NULL;
+
+    if (con_get_fullscreen_con(croot, CF_GLOBAL)) {
+        LOG("Cannot switch workspace while in global fullscreen\n");
+        ysuccess(false);
+        return;
+    }
 
     long parsed_num = ws_name_to_number(which);
 
@@ -1020,6 +1032,12 @@ void cmd_workspace_number(I3_CMD, char *which) {
  *
  */
 void cmd_workspace_back_and_forth(I3_CMD) {
+    if (con_get_fullscreen_con(croot, CF_GLOBAL)) {
+        LOG("Cannot switch workspace while in global fullscreen\n");
+        ysuccess(false);
+        return;
+    }
+
     workspace_back_and_forth();
 
     cmd_output->needs_tree_render = true;
@@ -1034,6 +1052,12 @@ void cmd_workspace_back_and_forth(I3_CMD) {
 void cmd_workspace_name(I3_CMD, char *name) {
     if (strncasecmp(name, "__", strlen("__")) == 0) {
         LOG("You cannot switch to the i3-internal workspaces (\"%s\").\n", name);
+        ysuccess(false);
+        return;
+    }
+
+    if (con_get_fullscreen_con(croot, CF_GLOBAL)) {
+        LOG("Cannot switch workspace while in global fullscreen\n");
         ysuccess(false);
         return;
     }
@@ -1574,20 +1598,26 @@ void cmd_focus(I3_CMD) {
 }
 
 /*
- * Implementation of 'fullscreen [global]'.
+ * Implementation of 'fullscreen enable|toggle [global]' and
+ *                   'fullscreen disable'
  *
  */
-void cmd_fullscreen(I3_CMD, char *fullscreen_mode) {
-    if (fullscreen_mode == NULL)
-        fullscreen_mode = "output";
-    DLOG("toggling fullscreen, mode = %s\n", fullscreen_mode);
+void cmd_fullscreen(I3_CMD, char *action, char *fullscreen_mode) {
+    fullscreen_mode_t mode = strcmp(fullscreen_mode, "global") == 0 ? CF_GLOBAL : CF_OUTPUT;
+    DLOG("%s fullscreen, mode = %s\n", action, fullscreen_mode);
     owindow *current;
 
     HANDLE_EMPTY_MATCH;
 
     TAILQ_FOREACH(current, &owindows, owindows) {
         DLOG("matching: %p / %s\n", current->con, current->con->name);
-        con_toggle_fullscreen(current->con, (strcmp(fullscreen_mode, "global") == 0 ? CF_GLOBAL : CF_OUTPUT));
+        if (strcmp(action, "toggle") == 0) {
+            con_toggle_fullscreen(current->con, mode);
+        } else if (strcmp(action, "enable") == 0) {
+            con_enable_fullscreen(current->con, mode);
+        } else if (strcmp(action, "disable") == 0) {
+            con_disable_fullscreen(current->con);
+        }
     }
 
     cmd_output->needs_tree_render = true;
