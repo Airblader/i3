@@ -160,7 +160,25 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
     bool should_inset = should_inset_con(con, children);
     if (!already_inset && should_inset) {
         int gap_size = config.gap_size + con_get_workspace(con)->gap_size_delta;
-        Rect inset = (Rect) { gap_size, gap_size, -2 * gap_size, -2 * gap_size };
+
+        Con *cur = con;
+        Con *tmp = NULL;
+        bool has_left_neighbor = resize_find_tiling_participants(&cur, &tmp, D_LEFT);
+        Con *cur2 = con;
+        bool has_right_neighbor = resize_find_tiling_participants(&cur2, &tmp, D_RIGHT);
+        Con *cur3 = con;
+        bool has_top_neighbor = resize_find_tiling_participants(&cur3, &tmp, D_UP);
+        Con *cur4 = con;
+        bool has_bottom_neighbor = resize_find_tiling_participants(&cur4, &tmp, D_DOWN);
+        Rect inset = (Rect) {
+            gap_size / (1 + has_left_neighbor),
+            gap_size / (1 + has_top_neighbor),
+            -1 * gap_size / (1 + has_right_neighbor),
+            -1 * gap_size / (1 + has_bottom_neighbor)
+        };
+        inset.width -= inset.x;
+        inset.height -= inset.y;
+
         rect = rect_add(rect, inset);
         if (!render_fullscreen) {
             con->rect = rect_add(con->rect, inset);
@@ -168,7 +186,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
                 con->window_rect = rect_add(con->window_rect, inset);
             }
         }
-        inset.height = -gap_size;
+        inset.height = -inset.y;
         con->deco_rect = rect_add(con->deco_rect, inset);
     }
 
