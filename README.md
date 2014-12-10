@@ -37,7 +37,7 @@ This may vary for other distributions. If you have trouble compiling it, just op
 Screenshot
 ==========
 
-![i3](http://i.imgur.com/ec7GqYB.png)
+![i3](http://i.imgur.com/kUmkrut.png)
 
 
 New Features
