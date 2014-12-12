@@ -131,6 +131,17 @@ bool should_inset_con(Con *con, int children) {
 }
 
 /*
+ * Returns whether the given container has an adjacent container in the
+ * specified direction. In other words, this returns true if and only if
+ * the container is not touching the edge of the screen in that direction.
+ */
+bool has_adjacent_container(Con *con, direction_t direction) {
+    Con *first = con;
+    Con *tmp = NULL;
+    return resize_find_tiling_participants(&first, &tmp, direction);
+}
+
+/*
  * "Renders" the given container (and its children), meaning that all rects are
  * updated correctly. Note that this function does not call any xcb_*
  * functions, so the changes are completely done in memory only (and
@@ -160,7 +171,16 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
     bool should_inset = should_inset_con(con, children);
     if (!already_inset && should_inset) {
         int gap_size = config.gap_size + con_get_workspace(con)->gap_size_delta;
-        Rect inset = (Rect) { gap_size, gap_size, -2 * gap_size, -2 * gap_size };
+
+        Rect inset = (Rect) {
+            gap_size / (1 + has_adjacent_container(con, D_LEFT)),
+            gap_size / (1 + has_adjacent_container(con, D_UP)),
+            -1 * gap_size / (1 + has_adjacent_container(con, D_RIGHT)),
+            -1 * gap_size / (1 + has_adjacent_container(con, D_DOWN))
+        };
+        inset.width -= inset.x;
+        inset.height -= inset.y;
+
         rect = rect_add(rect, inset);
         if (!render_fullscreen) {
             con->rect = rect_add(con->rect, inset);
@@ -168,7 +188,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
                 con->window_rect = rect_add(con->window_rect, inset);
             }
         }
-        inset.height = -gap_size;
+        inset.height = -inset.y;
         con->deco_rect = rect_add(con->deco_rect, inset);
     }
 
