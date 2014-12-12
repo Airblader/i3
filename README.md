@@ -37,7 +37,7 @@ This may vary for other distributions. If you have trouble compiling it, just op
 Screenshot
 ==========
 
-![i3](http://i.imgur.com/ec7GqYB.png)
+![i3](http://i.imgur.com/kUmkrut.png)
 
 
 New Features
@@ -46,7 +46,7 @@ New Features
 gaps
 ----
 
-Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys.
+Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that the gaps between containers and the gaps between containers and the edge of the screen are the same.
 
 In your i3 config, you can set a global gap size as shown below. This is the default value that will be used for all workspaces:
 
