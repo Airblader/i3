@@ -9,7 +9,7 @@ This is a fork of [i3wm](http://www.i3wm.org), a tiling window manager for Linux
 to allow for configurable gaps between containers in i3. However, I've also included patches on my own which are listed below. If you want
 to check out how you could use them, you could check out my [dotfiles repository](https://www.github.com/Airblader/dotfiles).
 
-As a general note, the `gaps` branch currently has i3 4.8 merged into it, while `gaps-next` ie the equivalent of `i3/next` with my patches.
+As a general note, the `gaps` branch currently has i3 4.8 merged into it, while `gaps-next` is the equivalent of `i3/next` with my patches.
 
 
 Installation
