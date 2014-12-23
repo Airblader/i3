@@ -139,6 +139,8 @@ void refresh_statusline(void) {
             continue;
 
         block->width = predict_text_width(block->full_text);
+        /* Add some padding. */
+        block->width += logical_px(4);
 
         /* Compute offset and append for text aligment in min_width. */
         if (block->min_width <= block->width) {
@@ -209,7 +211,7 @@ void refresh_statusline(void) {
             xcb_change_gc(xcb_connection, statusline_ctx, mask, border_values);
 
             xcb_rectangle_t border_rect = { x, 0,
-                                                block->width + block->x_offset + block->x_append, bar_height };
+                                            block->width + block->x_offset + block->x_append, bar_height };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &border_rect);
 
             /* Draw the background. */
@@ -228,7 +230,7 @@ void refresh_statusline(void) {
         }
 
         set_font_colors(statusline_ctx, fg_color, colors.bar_bg);
-        draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset, 3, block->width);
+        draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset + logical_px(2), 3, block->width - logical_px(4));
         x += block->width + block->sep_block_width + block->x_offset + block->x_append;
 
         uint32_t sep_offset = get_sep_offset(block);
