@@ -1,15 +1,11 @@
 i3 - Unofficial Fork
 =====================
 
-This is a fork of [i3wm](http://www.i3wm.org), a tiling window manager for Linux. It is based on two patches provided by
+This is a fork of [i3wm](http://www.i3wm.org), a tiling window manager for Linux. It includes a few additional features which you can read up on below.
 
-* https://github.com/jeanbroid/i3
-* https://github.com/o4dev/i3
+If you want to check out how you could use them, you could check out my [dotfiles repository](https://www.github.com/Airblader/dotfiles).
 
-to allow for configurable gaps between containers in i3. However, I've also included patches on my own which are listed below. If you want
-to check out how you could use them, you could check out my [dotfiles repository](https://www.github.com/Airblader/dotfiles).
-
-As a general note, the `gaps` branch currently has i3 4.8 merged into it, while `gaps-next` is the equivalent of `i3/next` with my patches.
+This fork, much like i3 itself, maintains two branches: The `gaps` branch is the equivalent of i3's stable `master` branch while `gaps-next` contains `gaps` and i3's `next`.
 
 
 Installation
@@ -17,7 +13,7 @@ Installation
 
 First, clone the repository and switch into that folder. From there, installing (and updating) i3 is as easy as `make && sudo make install`. The next time you log in, simply select i3 as the desktop environment in your login manager. If you don't use one, start i3 from your `.xinitrc` or similar (in this case, I'm sure you know what to do – if not, google it).
 
-When first compiling i3, you need to install a few dependencies. The following is a list of packages needed when compiling the `gaps` branch on a fresh installation of Ubuntu 14.04:
+When first compiling i3, you need to install a few dependencies. The following is a list of packages needed when compiling the `gaps` branch on a fresh installation of Ubuntu 14.04. The package names for other distros will be different, but if you use, e.g., Arch, you probably know how to figure them out anyway.
 
 
 ````
