@@ -1820,9 +1820,9 @@ void draw_bars(bool unhide) {
                               mask,
                               vals_border);
                 xcb_rectangle_t rect_border = {i,
-                                               0,
+                                               logical_px(1),
                                                ws_walk->name_width + logical_px(10),
-                                               bar_height};
+                                               bar_height - logical_px(2)};
                 xcb_poly_fill_rectangle(xcb_connection,
                                         outputs_walk->buffer,
                                         outputs_walk->bargc,
@@ -1834,9 +1834,9 @@ void draw_bars(bool unhide) {
                               mask,
                               vals);
                 xcb_rectangle_t rect = {i + logical_px(1),
-                                        logical_px(1),
+                                        logical_px(2),
                                         ws_walk->name_width + logical_px(8),
-                                        bar_height - logical_px(2)};
+                                        bar_height - logical_px(4)};
                 xcb_poly_fill_rectangle(xcb_connection,
                                         outputs_walk->buffer,
                                         outputs_walk->bargc,
