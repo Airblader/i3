@@ -89,11 +89,11 @@ smart_borders on
 
 ### Background & Color
 
-i3bar now supports setting a background and border color for the individual blocks. Additionally, it can be specified which of the four sides should have a border. Simply pass the following values via JSON to i3bar:
+i3bar now supports setting a background and border color for the individual blocks. Additionally, the border width for each of the four sides can be specified (where a width of `0` hides that border). Simply pass the following values via JSON to i3bar:
 
 * `background` [color] sets the background color
 * `border` [color] sets the border color
-* `border_top`, `border_bottom`, `border_left`, `border_right` [boolean] whether to draw a border on the specified side (defaults to `true`)
+* `border_top`, `border_bottom`, `border_left`, `border_right` [int] width of the corresponding border (defaults to `1`)
 
 Example:
 
@@ -103,6 +103,6 @@ Example:
   "color": "\#FFFFFF", \
   "background": "\#222222", \
   "border": "\#9FBC00", \
-  "border_bottom": false \
+  "border_bottom": 0 \
 }
 ```

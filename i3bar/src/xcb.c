@@ -140,7 +140,7 @@ void refresh_statusline(void) {
 
         block->width = predict_text_width(block->full_text);
         /* Add some padding. */
-        block->width += logical_px(4);
+        block->width += logical_px(2) + block->border_left + block->border_right;
 
         /* Compute offset and append for text aligment in min_width. */
         if (block->min_width <= block->width) {
@@ -231,7 +231,9 @@ void refresh_statusline(void) {
 
         set_font_colors(statusline_ctx, fg_color, colors.bar_bg);
         draw_text(block->full_text, statusline_pm, statusline_ctx,
-                  x + block->x_offset + logical_px(2), bar_height / 2 - font.height / 2, block->width - logical_px(4));
+                  x + block->x_offset + logical_px(1) + block->border_left,
+                  bar_height / 2 - font.height / 2,
+                  block->width - logical_px(1) - block->border_left - block->border_right);
         x += block->width + block->sep_block_width + block->x_offset + block->x_append;
 
         uint32_t sep_offset = get_sep_offset(block);

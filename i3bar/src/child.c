@@ -159,10 +159,10 @@ static int stdin_start_map(void *context) {
     ctx->block.sep_block_width = logical_px(9);
 
     /* If a border is set, by default we draw all four borders. */
-    ctx->block.border_top = true;
-    ctx->block.border_right = true;
-    ctx->block.border_bottom = true;
-    ctx->block.border_left = true;
+    ctx->block.border_top = 1;
+    ctx->block.border_right = 1;
+    ctx->block.border_bottom = 1;
+    ctx->block.border_left = 1;
 
     return 1;
 }
@@ -181,18 +181,6 @@ static int stdin_boolean(void *context, int val) {
     }
     if (strcasecmp(ctx->last_map_key, "separator") == 0) {
         ctx->block.no_separator = !val;
-    }
-    if (strcasecmp(ctx->last_map_key, "border_top") == 0) {
-        ctx->block.border_top = val;
-    }
-    if (strcasecmp(ctx->last_map_key, "border_right") == 0) {
-        ctx->block.border_right = val;
-    }
-    if (strcasecmp(ctx->last_map_key, "border_bottom") == 0) {
-        ctx->block.border_bottom = val;
-    }
-    if (strcasecmp(ctx->last_map_key, "border_left") == 0) {
-        ctx->block.border_left = val;
     }
     return 1;
 }
@@ -246,6 +234,18 @@ static int stdin_integer(void *context, long long val) {
     }
     if (strcasecmp(ctx->last_map_key, "separator_block_width") == 0) {
         ctx->block.sep_block_width = (uint32_t)val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_top") == 0) {
+        ctx->block.border_top = (uint32_t)val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_right") == 0) {
+        ctx->block.border_right = (uint32_t)val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_bottom") == 0) {
+        ctx->block.border_bottom = (uint32_t)val;
+    }
+    if (strcasecmp(ctx->last_map_key, "border_left") == 0) {
+        ctx->block.border_left = (uint32_t)val;
     }
     return 1;
 }
