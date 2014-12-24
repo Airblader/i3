@@ -457,10 +457,10 @@ void handle_button(xcb_button_press_event_t *event) {
             /* Check if this event regards a workspace button */
             TAILQ_FOREACH(cur_ws, walk->workspaces, tailq) {
                 DLOG("x = %d\n", x);
-                if (x >= 0 && x <= cur_ws->name_width + logical_px(10)) {
+                if (x >= 0 && x <= cur_ws->name_width + logical_px(11)) {
                     break;
                 }
-                x -= cur_ws->name_width + logical_px(10);
+                x -= cur_ws->name_width + logical_px(11);
             }
 
             /* Otherwise, focus our currently visible workspace if it is not
@@ -1826,7 +1826,7 @@ void draw_bars(bool unhide) {
                 set_font_colors(outputs_walk->bargc, fg_color, bg_color);
                 draw_text(ws_walk->name, outputs_walk->buffer, outputs_walk->bargc,
                           i + logical_px(5), bar_height / 2 - font.height / 2, ws_walk->name_width);
-                i += logical_px(10) + ws_walk->name_width;
+                i += logical_px(10) + ws_walk->name_width + logical_px(1);
             }
         }
 
