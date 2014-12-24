@@ -1,5 +1,4 @@
-i3 - Unofficial Fork
-=====================
+# i3 - Unofficial Fork
 
 This is a fork of [i3wm](http://www.i3wm.org), a tiling window manager for Linux. It includes a few additional features which you can read up on below.
 
@@ -8,8 +7,7 @@ If you want to check out how you could use them, you could check out my [dotfile
 This fork, much like i3 itself, maintains two branches: The `gaps` branch is the equivalent of i3's stable `master` branch while `gaps-next` contains `gaps` and i3's `next`.
 
 
-Installation
-============
+# Installation
 
 First, clone the repository and switch into that folder. From there, installing (and updating) i3 is as easy as `make && sudo make install`. The next time you log in, simply select i3 as the desktop environment in your login manager. If you don't use one, start i3 from your `.xinitrc` or similar (in this case, I'm sure you know what to do – if not, google it).
 
@@ -30,17 +28,14 @@ apt-get install libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
 This may vary for other distributions. If you have trouble compiling it, just open an issue to let me know.
 
 
-Screenshot
-==========
+# Screenshot
 
 ![i3](http://i.imgur.com/kUmkrut.png)
 
 
-New Features
-============
+# New Features
 
-gaps
-----
+## gaps
 
 Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that the gaps between containers and the gaps between containers and the edge of the screen are the same.
 
@@ -79,8 +74,9 @@ bindsym $mod+Shift+g mode "$mode_gap_size"
 ```
 
 
-i3bar Background & Color
-------------------------
+## i3bar
+
+### Background & Color
 
 i3bar now supports setting a background and border color for the individual blocks. Additionally, it can be specified which of the four sides should have a border. Simply pass the following values via JSON to i3bar:
 
@@ -100,9 +96,11 @@ Example:
 }
 ```
 
+## Workspace Buttons
 
-Smart Borders
--------------
+The workspace buttons are no longer inset by one pixel as is the case in the original i3. This means that above, below and in between workspace buttons, the i3bar background will not shine through at all.
+
+## Smart Borders
 
 With the original patch from [i3-extras](https://github.com/ashinkarov/i3-extras), I've made the smart border feature configurable. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with
 
