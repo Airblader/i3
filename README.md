@@ -98,7 +98,7 @@ Example:
 
 ## Workspace Buttons
 
-The workspace buttons are no longer inset by one pixel as is the case in the original i3. This means that above, below and in between workspace buttons, the i3bar background will not shine through at all.
+The workspace buttons are no longer inset by one pixel as is the case in the original i3. This means that above and below workspace buttons, the i3bar background will not shine through. However, there is still a one pixel separation in between adjacent workspace buttons.
 
 ## Smart Borders
 
