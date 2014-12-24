@@ -230,7 +230,8 @@ void refresh_statusline(void) {
         }
 
         set_font_colors(statusline_ctx, fg_color, colors.bar_bg);
-        draw_text(block->full_text, statusline_pm, statusline_ctx, x + block->x_offset + logical_px(2), 3, block->width - logical_px(4));
+        draw_text(block->full_text, statusline_pm, statusline_ctx,
+                  x + block->x_offset + logical_px(2), bar_height / 2 - font.height / 2, block->width - logical_px(4));
         x += block->width + block->sep_block_width + block->x_offset + block->x_append;
 
         uint32_t sep_offset = get_sep_offset(block);
@@ -456,10 +457,10 @@ void handle_button(xcb_button_press_event_t *event) {
             /* Check if this event regards a workspace button */
             TAILQ_FOREACH(cur_ws, walk->workspaces, tailq) {
                 DLOG("x = %d\n", x);
-                if (x >= 0 && x < cur_ws->name_width + logical_px(10)) {
+                if (x >= 0 && x <= cur_ws->name_width + logical_px(10)) {
                     break;
                 }
-                x -= cur_ws->name_width + logical_px(11);
+                x -= cur_ws->name_width + logical_px(10);
             }
 
             /* Otherwise, focus our currently visible workspace if it is not
@@ -532,9 +533,8 @@ static void configure_trayclients(void) {
                 continue;
             clients++;
 
-            DLOG("Configuring tray window %08x to x=%d\n",
-                 trayclient->win, output->rect.w - (clients * (font.height + logical_px(2))));
             uint32_t x = output->rect.w - (clients * (font.height + logical_px(2)));
+            DLOG("Configuring tray window %08x to x=%d\n", trayclient->win, x);
             xcb_configure_window(xcb_connection,
                                  trayclient->win,
                                  XCB_CONFIG_WINDOW_X,
@@ -645,7 +645,7 @@ static void handle_client_message(xcb_client_message_event_t *event) {
                                 client,
                                 output->bar,
                                 output->rect.w - font.height - 2,
-                                2);
+                                bar_height / 2 - font.height / 2);
             /* We reconfigure the window to use a reasonable size. The systray
              * specification explicitly says:
              *   Tray icons may be assigned any size by the system tray, and
@@ -1801,9 +1801,9 @@ void draw_bars(bool unhide) {
                               mask,
                               vals_border);
                 xcb_rectangle_t rect_border = {i,
-                                               logical_px(1),
+                                               0,
                                                ws_walk->name_width + logical_px(10),
-                                               font.height + logical_px(4)};
+                                               bar_height};
                 xcb_poly_fill_rectangle(xcb_connection,
                                         outputs_walk->buffer,
                                         outputs_walk->bargc,
@@ -1815,9 +1815,9 @@ void draw_bars(bool unhide) {
                               mask,
                               vals);
                 xcb_rectangle_t rect = {i + logical_px(1),
-                                        2 * logical_px(1),
+                                        logical_px(1),
                                         ws_walk->name_width + logical_px(8),
-                                        font.height + logical_px(2)};
+                                        bar_height - logical_px(2)};
                 xcb_poly_fill_rectangle(xcb_connection,
                                         outputs_walk->buffer,
                                         outputs_walk->bargc,
@@ -1825,8 +1825,8 @@ void draw_bars(bool unhide) {
                                         &rect);
                 set_font_colors(outputs_walk->bargc, fg_color, bg_color);
                 draw_text(ws_walk->name, outputs_walk->buffer, outputs_walk->bargc,
-                          i + logical_px(5), 3 * logical_px(1), ws_walk->name_width);
-                i += logical_px(10) + ws_walk->name_width + logical_px(1);
+                          i + logical_px(5), bar_height / 2 - font.height / 2, ws_walk->name_width);
+                i += logical_px(10) + ws_walk->name_width;
             }
         }
 
