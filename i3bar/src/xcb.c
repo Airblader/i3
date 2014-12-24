@@ -210,8 +210,8 @@ void refresh_statusline(void) {
             uint32_t border_values[] = { border_color, border_color };
             xcb_change_gc(xcb_connection, statusline_ctx, mask, border_values);
 
-            xcb_rectangle_t border_rect = { x, 0,
-                                            block->width + block->x_offset + block->x_append, bar_height };
+            xcb_rectangle_t border_rect = { x, logical_px(1),
+                                            block->width + block->x_offset + block->x_append, bar_height - logical_px(2) };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &border_rect);
 
             /* Draw the background. */
@@ -221,10 +221,10 @@ void refresh_statusline(void) {
 
             xcb_rectangle_t bg_rect = {
                 x + is_border * block->border_left,
-                is_border * block->border_top,
+                logical_px(1) + is_border * block->border_top,
                 block->width + block->x_offset + block->x_append 
                     - is_border * (block->border_right + block->border_left),
-                bar_height - is_border * (block->border_bottom + block->border_top)
+                bar_height - is_border * (block->border_bottom + block->border_top) - logical_px(2)
             };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &bg_rect);
         }
