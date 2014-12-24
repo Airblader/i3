@@ -144,17 +144,13 @@ border::
         Sets the border color of the block. If not given, this defaults to the
         i3bar background.
 border_top::
-        A boolean specifying whether or not the top border should be drawn.
-        The default is true.
+        Width of the top border. The default is 1.
 border_bottom::
-        A boolean specifying whether or not the bottom border should be drawn.
-        The default is true.
+        Width of the bottom border. The default is 1.
 border_left::
-        A boolean specifying whether or not the left border should be drawn.
-        The default is true.
+        Width of the left border. The default is 1.
 border_right::
-        A boolean specifying whether or not the right border should be drawn.
-        The default is true.
+        Width of the right border. The default is 1.
 min_width::
 	The minimum width (in pixels) of the block. If the content of the
 	+full_text+ key take less space than the specified min_width, the block
@@ -224,10 +220,10 @@ An example of a block which uses all possible entries follows:
  "color": "#00ff00",
  "background": "#000000",
  "border": "#ffffff",
- "border_top": true,
- "border_bottom": true,
- "border_left": false,
- "border_right": false,
+ "border_top": 1,
+ "border_bottom": 0,
+ "border_left": 2,
+ "border_right": 2,
  "min_width": 300,
  "align": "right",
  "urgent": false,
