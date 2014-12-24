@@ -35,7 +35,9 @@ This may vary for other distributions. If you have trouble compiling it, just op
 
 # New Features
 
-## gaps
+## i3
+
+### gaps
 
 Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that the gaps between containers and the gaps between containers and the edge of the screen are the same.
 
@@ -74,7 +76,7 @@ bindsym $mod+Shift+g mode "$mode_gap_size"
 ```
 
 
-## Smart Borders
+### Smart Borders
 
 With the original patch from [i3-extras](https://github.com/ashinkarov/i3-extras), I've made the smart border feature configurable. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with
 
