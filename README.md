@@ -74,6 +74,15 @@ bindsym $mod+Shift+g mode "$mode_gap_size"
 ```
 
 
+## Smart Borders
+
+With the original patch from [i3-extras](https://github.com/ashinkarov/i3-extras), I've made the smart border feature configurable. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with
+
+````
+smart_borders on
+```
+
+
 ## i3bar
 
 ### Background & Color
@@ -94,16 +103,4 @@ Example:
   "border": "\#9FBC00", \
   "border_bottom": false \
 }
-```
-
-## Workspace Buttons
-
-The workspace buttons are no longer inset by one pixel as is the case in the original i3. This means that above and below workspace buttons, the i3bar background will not shine through. However, there is still a one pixel separation in between adjacent workspace buttons.
-
-## Smart Borders
-
-With the original patch from [i3-extras](https://github.com/ashinkarov/i3-extras), I've made the smart border feature configurable. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with
-
-````
-smart_borders on
 ```
