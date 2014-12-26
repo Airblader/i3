@@ -59,9 +59,6 @@ xcb_connection_t *conn;
 /* The font we'll use */
 static i3Font font;
 
-/* Overall height of the bar (based on font size) */
-int bar_height;
-
 /* These are only relevant for XKB, which we only need for grabbing modifiers */
 Display *xkb_dpy;
 int xkb_event_base;
@@ -176,7 +173,7 @@ void refresh_statusline(void) {
         realloc_sl_buffer();
 
     /* Clear the statusline pixmap. */
-    xcb_rectangle_t rect = {0, 0, root_screen->width_in_pixels, bar_height};
+    xcb_rectangle_t rect = {0, 0, root_screen->width_in_pixels, config.bar_height};
     xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_clear, 1, &rect);
 
     /* Draw the text of each block. */
@@ -211,7 +208,7 @@ void refresh_statusline(void) {
             xcb_change_gc(xcb_connection, statusline_ctx, mask, border_values);
 
             xcb_rectangle_t border_rect = { x, logical_px(1),
-                                            block->width + block->x_offset + block->x_append, bar_height - logical_px(2) };
+                                            block->width + block->x_offset + block->x_append, config.bar_height - logical_px(2) };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &border_rect);
 
             /* Draw the background. */
@@ -224,7 +221,7 @@ void refresh_statusline(void) {
                 logical_px(1) + is_border * block->border_top,
                 block->width + block->x_offset + block->x_append 
                     - is_border * (block->border_right + block->border_left),
-                bar_height - is_border * (block->border_bottom + block->border_top) - logical_px(2)
+                config.bar_height - is_border * (block->border_bottom + block->border_top) - logical_px(2)
             };
             xcb_poly_fill_rectangle(xcb_connection, statusline_pm, statusline_ctx, 1, &bg_rect);
         }
@@ -232,7 +229,7 @@ void refresh_statusline(void) {
         set_font_colors(statusline_ctx, fg_color, colors.bar_bg);
         draw_text(block->full_text, statusline_pm, statusline_ctx,
                   x + block->x_offset + logical_px(1) + block->border_left,
-                  bar_height / 2 - font.height / 2,
+                  config.bar_height / 2 - font.height / 2,
                   block->width - logical_px(1) - block->border_left - block->border_right);
         x += block->width + block->sep_block_width + block->x_offset + block->x_append;
 
@@ -245,7 +242,7 @@ void refresh_statusline(void) {
             xcb_poly_line(xcb_connection, XCB_COORD_MODE_ORIGIN, statusline_pm,
                           statusline_ctx, 2,
                           (xcb_point_t[]) { { x - sep_offset, logical_px(4) },
-                                            { x - sep_offset, bar_height - logical_px(4) } });
+                                            { x - sep_offset, config.bar_height - logical_px(4) } });
         }
     }
 }
@@ -298,9 +295,9 @@ void unhide_bars(void) {
         if (config.position == POS_TOP)
             values[1] = walk->rect.y;
         else
-            values[1] = walk->rect.y + walk->rect.h - bar_height;
+            values[1] = walk->rect.y + walk->rect.h - config.bar_height;
         values[2] = walk->rect.w;
-        values[3] = bar_height;
+        values[3] = config.bar_height;
         values[4] = XCB_STACK_MODE_ABOVE;
         DLOG("Reconfiguring Window for output %s to %d,%d\n", walk->name, values[0], values[1]);
         cookie = xcb_configure_window_checked(xcb_connection,
@@ -631,7 +628,7 @@ static void handle_client_message(xcb_client_message_event_t *event) {
                                 client,
                                 output->bar,
                                 output->rect.w - font.height - 2,
-                                bar_height / 2 - font.height / 2);
+                                config.bar_height / 2 - font.height / 2);
             /* We reconfigure the window to use a reasonable size. The systray
              * specification explicitly says:
              *   Tray icons may be assigned any size by the system tray, and
@@ -1173,7 +1170,8 @@ void init_xcb_late(char *fontname) {
     font = load_font(fontname, true);
     set_font(&font);
     DLOG("Calculated Font-height: %d\n", font.height);
-    bar_height = font.height + logical_px(6);
+    if (config.bar_height <= 0)
+        config.bar_height = font.height + logical_px(6);
 
     xcb_flush(xcb_connection);
 
@@ -1449,7 +1447,7 @@ void realloc_sl_buffer(void) {
                                                                statusline_pm,
                                                                xcb_root,
                                                                MAX(root_screen->width_in_pixels, statusline_width),
-                                                               bar_height);
+                                                               config.bar_height);
 
     uint32_t mask = XCB_GC_FOREGROUND;
     uint32_t vals[2] = {colors.bar_bg, colors.bar_bg};
@@ -1521,8 +1519,8 @@ void reconfig_windows(bool redraw_bars) {
                                                                      root_screen->root_depth,
                                                                      walk->bar,
                                                                      xcb_root,
-                                                                     walk->rect.x, walk->rect.y + walk->rect.h - bar_height,
-                                                                     walk->rect.w, bar_height,
+                                                                     walk->rect.x, walk->rect.y + walk->rect.h - config.bar_height,
+                                                                     walk->rect.w, config.bar_height,
                                                                      0,
                                                                      XCB_WINDOW_CLASS_INPUT_OUTPUT,
                                                                      root_screen->root_visual,
@@ -1535,7 +1533,7 @@ void reconfig_windows(bool redraw_bars) {
                                                                     walk->buffer,
                                                                     walk->bar,
                                                                     walk->rect.w,
-                                                                    bar_height);
+                                                                    config.bar_height);
 
             /* Set the WM_CLASS and WM_NAME (we don't need UTF-8) atoms */
             xcb_void_cookie_t class_cookie;
@@ -1598,12 +1596,12 @@ void reconfig_windows(bool redraw_bars) {
                 case POS_NONE:
                     break;
                 case POS_TOP:
-                    strut_partial.top = bar_height;
+                    strut_partial.top = config.bar_height;
                     strut_partial.top_start_x = walk->rect.x;
                     strut_partial.top_end_x = walk->rect.x + walk->rect.w;
                     break;
                 case POS_BOT:
-                    strut_partial.bottom = bar_height;
+                    strut_partial.bottom = config.bar_height;
                     strut_partial.bottom_start_x = walk->rect.x;
                     strut_partial.bottom_end_x = walk->rect.x + walk->rect.w;
                     break;
@@ -1667,9 +1665,9 @@ void reconfig_windows(bool redraw_bars) {
                    XCB_CONFIG_WINDOW_HEIGHT |
                    XCB_CONFIG_WINDOW_STACK_MODE;
             values[0] = walk->rect.x;
-            values[1] = walk->rect.y + walk->rect.h - bar_height;
+            values[1] = walk->rect.y + walk->rect.h - config.bar_height;
             values[2] = walk->rect.w;
-            values[3] = bar_height;
+            values[3] = config.bar_height;
             values[4] = XCB_STACK_MODE_ABOVE;
 
             DLOG("Destroying buffer for output %s\n", walk->name);
@@ -1695,7 +1693,7 @@ void reconfig_windows(bool redraw_bars) {
                                                                     walk->buffer,
                                                                     walk->bar,
                                                                     walk->rect.w,
-                                                                    bar_height);
+                                                                    config.bar_height);
 
             xcb_void_cookie_t map_cookie, umap_cookie;
             if (redraw_bars) {
@@ -1754,7 +1752,7 @@ void draw_bars(bool unhide) {
                       outputs_walk->bargc,
                       XCB_GC_FOREGROUND,
                       &color);
-        xcb_rectangle_t rect = {0, 0, outputs_walk->rect.w, bar_height};
+        xcb_rectangle_t rect = {0, 0, outputs_walk->rect.w, config.bar_height};
         xcb_poly_fill_rectangle(xcb_connection,
                                 outputs_walk->buffer,
                                 outputs_walk->bargc,
@@ -1786,7 +1784,7 @@ void draw_bars(bool unhide) {
                           outputs_walk->bargc,
                           MAX(0, (int16_t)(statusline_width - outputs_walk->rect.w + logical_px(4))), 0,
                           MAX(0, (int16_t)(outputs_walk->rect.w - statusline_width - traypx - logical_px(4))), 0,
-                          MIN(outputs_walk->rect.w - traypx - logical_px(4), (int)statusline_width), bar_height);
+                          MIN(outputs_walk->rect.w - traypx - logical_px(4), (int)statusline_width), config.bar_height);
         }
 
         if (!config.disable_ws) {
@@ -1824,7 +1822,7 @@ void draw_bars(bool unhide) {
                 xcb_rectangle_t rect_border = {i,
                                                logical_px(1),
                                                ws_walk->name_width + logical_px(10),
-                                               bar_height - logical_px(2)};
+                                               config.bar_height - logical_px(2)};
                 xcb_poly_fill_rectangle(xcb_connection,
                                         outputs_walk->buffer,
                                         outputs_walk->bargc,
@@ -1838,7 +1836,7 @@ void draw_bars(bool unhide) {
                 xcb_rectangle_t rect = {i + logical_px(1),
                                         logical_px(2),
                                         ws_walk->name_width + logical_px(8),
-                                        bar_height - logical_px(4)};
+                                        config.bar_height - logical_px(4)};
                 xcb_poly_fill_rectangle(xcb_connection,
                                         outputs_walk->buffer,
                                         outputs_walk->bargc,
@@ -1846,7 +1844,7 @@ void draw_bars(bool unhide) {
                                         &rect);
                 set_font_colors(outputs_walk->bargc, fg_color, bg_color);
                 draw_text(ws_walk->name, outputs_walk->buffer, outputs_walk->bargc,
-                          i + logical_px(5), bar_height / 2 - font.height / 2, ws_walk->name_width);
+                          i + logical_px(5), config.bar_height / 2 - font.height / 2, ws_walk->name_width);
                 i += logical_px(10) + ws_walk->name_width + logical_px(1);
             }
         }

@@ -53,6 +53,18 @@ static int config_null_cb(void *params_) {
     return 1;
 }
 
+/* Parse an integer */
+static int config_integer_cb(void *params_, long long val) {
+    if (!strcmp(cur_key, "bar_height")) {
+        DLOG("bar_height = %lld", val);
+        config.bar_height = (uint32_t) val;
+        return 1;
+    }
+
+    DLOG("got unexpected integer %lld for cur_key = %s\n", val, cur_key);
+    return 0;
+}
+
 /*
  * Parse a string
  *
@@ -211,6 +223,7 @@ static int config_boolean_cb(void *params_, int val) {
 /* A datastructure to pass all these callbacks to yajl */
 static yajl_callbacks outputs_callbacks = {
     .yajl_null = config_null_cb,
+    .yajl_integer = config_integer_cb,
     .yajl_boolean = config_boolean_cb,
     .yajl_string = config_string_cb,
     .yajl_map_key = config_map_key_cb,

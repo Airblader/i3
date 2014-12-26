@@ -521,6 +521,11 @@ static void dump_bar_config(yajl_gen gen, Barconfig *config) {
     YSTR_IF_SET(status_command);
     YSTR_IF_SET(font);
 
+    if (config->bar_height) {
+        ystr("bar_height");
+        y(integer, config->bar_height);
+    }
+
     ystr("workspace_buttons");
     y(bool, !config->hide_workspace_buttons);
 

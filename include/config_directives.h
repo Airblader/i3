@@ -74,6 +74,7 @@ CFGFUN(bar_hidden_state, const char *hidden_state);
 CFGFUN(bar_id, const char *bar_id);
 CFGFUN(bar_output, const char *output);
 CFGFUN(bar_verbose, const char *verbose);
+CFGFUN(bar_height, const long height);
 CFGFUN(bar_modifier, const char *modifier);
 CFGFUN(bar_position, const char *position);
 CFGFUN(bar_i3bar_command, const char *i3bar_command);
