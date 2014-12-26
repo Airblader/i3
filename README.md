@@ -106,3 +106,14 @@ Example:
   "border_bottom": 0 \
 }
 ```
+
+### Bar Height
+
+The height of any bar can be configured to have an arbitrary value. This is especially useful if you plan on using top/bottom borders on status blocks to make the bar taller. If the height is not set, it will be calculated as normal. To set it, use the `height` directive in the `bar` configuration block:
+
+````
+bar {
+        # height of the bar in pixels
+        height 25
+}
+```

@@ -451,6 +451,10 @@ CFGFUN(bar_verbose, const char *verbose) {
     current_bar.verbose = eval_boolstr(verbose);
 }
 
+CFGFUN(bar_height, const long height) {
+    current_bar.bar_height = (uint32_t) height;
+}
+
 CFGFUN(bar_modifier, const char *modifier) {
     if (strcmp(modifier, "Mod1") == 0)
         current_bar.modifier = M_MOD1;

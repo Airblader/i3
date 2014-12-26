@@ -60,7 +60,7 @@ xcb_connection_t *conn;
 /* The font we'll use */
 static i3Font font;
 
-/* Overall height of the bar (based on font size) */
+/* Overall height of the size */
 int bar_height;
 
 /* These are only relevant for XKB, which we only need for grabbing modifiers */
@@ -1154,7 +1154,15 @@ void init_xcb_late(char *fontname) {
     font = load_font(fontname, true);
     set_font(&font);
     DLOG("Calculated Font-height: %d\n", font.height);
-    bar_height = font.height + logical_px(6);
+
+    /*
+     * If the bar height was explicitly set, use it. Otherwise, calculate it
+     * based on the font size.
+     */
+    if (config.bar_height <= 0)
+        bar_height = font.height + logical_px(6);
+    else
+        bar_height = config.bar_height;
 
     xcb_flush(xcb_connection);
 

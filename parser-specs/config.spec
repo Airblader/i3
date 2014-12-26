@@ -380,6 +380,7 @@ state BAR:
   'workspace_buttons'      -> BAR_WORKSPACE_BUTTONS
   'strip_workspace_numbers' -> BAR_STRIP_WORKSPACE_NUMBERS
   'verbose'                -> BAR_VERBOSE
+  'height'                 -> BAR_HEIGHT
   'colors'                 -> BAR_COLORS_BRACE
   '}'
       -> call cfg_bar_finish(); INITIAL
@@ -456,6 +457,10 @@ state BAR_STRIP_WORKSPACE_NUMBERS:
 state BAR_VERBOSE:
   value = word
       -> call cfg_bar_verbose($value); BAR
+
+state BAR_HEIGHT:
+  value = number
+      -> call cfg_bar_height(&value); BAR
 
 state BAR_COLORS_BRACE:
   end
