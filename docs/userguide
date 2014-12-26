@@ -1263,16 +1263,16 @@ Defines the height of the bar in pixels. If this value is not set, it is calcula
 Manually setting a value can be useful, e.g., when using top and/or border bottoms on status blocks.
 
 *Syntax*:
------------
+--------------
 height <px>
------------
+--------------
 
 *Example*:
 --------------
 bar {
     height 25
 }
--------------
+--------------
 
 === Colors
 
