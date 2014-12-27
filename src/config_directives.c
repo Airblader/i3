@@ -223,6 +223,10 @@ CFGFUN(gap_size, const long width) {
     config.gap_size = width;
 }
 
+CFGFUN(inset, const long width) {
+    config.inset = width;
+}
+
 CFGFUN(smart_borders, const char *enable) {
     config.smart_borders = eval_boolstr(enable);
 }

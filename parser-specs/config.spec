@@ -23,6 +23,7 @@ state INITIAL:
   'font'                                   -> FONT
   'mode'                                   -> MODENAME
   'gap_size'                               -> GAP_SIZE
+  'inset'                                  -> INSET
   'smart_borders'                          -> SMART_BORDERS
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
@@ -59,6 +60,11 @@ state IGNORE_LINE:
 state GAP_SIZE:
   width = number
       -> call cfg_gap_size(&width)
+
+# inset <size>
+state INSET:
+  width = number
+      -> call cfg_inset(&width)
 
 # smart_borders true|false
 state SMART_BORDERS:

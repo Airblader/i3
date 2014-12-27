@@ -40,6 +40,7 @@ state INITIAL:
   'mode' -> MODE
   'bar' -> BAR
   'gap_size' -> GAP_SIZE
+  'inset' -> INSET
 
 state CRITERIA:
   ctype = 'class' -> CRITERION
@@ -108,6 +109,28 @@ state GAP_SIZE_CURRENT_DELTA:
 state GAP_SIZE_DELTA:
   delta = string
       -> call cmd_gap_size($way, NULL, $delta)
+
+state INSET:
+  current = 'current'
+      -> INSET_CURRENT
+  way = 'plus', 'minus'
+      -> INSET_DELTA
+  width = word
+      -> call cmd_inset(NULL, "set", $width)
+
+state INSET_CURRENT:
+  way = 'plus', 'minus'
+      -> INSET_CURRENT_DELTA
+  width = word
+      -> call cmd_inset("current", "set", $width)
+
+state INSET_CURRENT_DELTA:
+  delta = string
+      -> call cmd_inset($current, $way, $delta)
+
+state INSET_DELTA:
+  delta = string
+      -> call cmd_inset(NULL, $way, $delta)
 
 state BORDER_WIDTH:
   end

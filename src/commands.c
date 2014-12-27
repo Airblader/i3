@@ -2172,3 +2172,47 @@ void cmd_gap_size(I3_CMD, char *way, char *workspace, char *width) {
     // XXX: default reply for now, make this a better reply
     ysuccess(true);
 }
+
+void cmd_inset(I3_CMD, char *type, char *way, char *width) {
+    int pixels = atoi(width);
+    Con *workspace = con_get_workspace(focused);
+
+    int current_inset = config.inset;
+    if (type != NULL)
+        current_inset += workspace->inset;
+
+    bool reset = false;
+    if (!strcmp(way, "plus"))
+        current_inset += pixels;
+    else if (!strcmp(way, "minus"))
+        current_inset -= pixels;
+    else {
+        reset = true;
+        current_inset = pixels;
+    }
+
+    if (current_inset < 0)
+        current_inset = 0;
+
+    if (type == NULL) {
+        Con *output, *cur_ws = NULL;
+        /* Iterate through all currently existing workspaces. */
+        TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {
+            Con *content = output_get_content(output);
+            TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) {
+                if (reset)
+                    cur_ws->inset = 0;
+                else if (current_inset + cur_ws->inset < 0)
+                    cur_ws->inset = -current_inset;
+            }
+        }
+
+        config.inset = current_inset;
+    } else {
+        workspace->inset = current_inset - config.inset;
+    }
+
+    cmd_output->needs_tree_render = true;
+    // XXX: default reply for now, make this a better reply
+    ysuccess(true);
+}

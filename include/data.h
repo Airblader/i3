@@ -513,6 +513,10 @@ struct Con {
       * an additional gap_size relative to the global config's setting. */
     int gap_size_delta;
 
+    /** Only applicable for containers of type CT_WORKSPACE, this value is
+      * How much all containers are inset in the workspace. */
+    int inset;
+
     struct Con *parent;
 
     struct Rect rect;

@@ -214,8 +214,11 @@ struct Config {
     /* The number of currently parsed barconfigs */
     int number_barconfigs;
 
-    /* useless gap size */
+    /* Size of gaps between containers. */
     int gap_size;
+
+    /* How much the workspace itself is inset. */
+    int inset;
 
     /* Should single containers on a workspace receive a border? */
     bool smart_borders;
