@@ -2173,6 +2173,10 @@ void cmd_gap_size(I3_CMD, char *way, char *workspace, char *width) {
     ysuccess(true);
 }
 
+/**
+ * Implementation of 'inset [current] [plus|minus] <width>'
+ *
+ */
 void cmd_inset(I3_CMD, char *type, char *way, char *width) {
     int pixels = atoi(width);
     Con *workspace = con_get_workspace(focused);
