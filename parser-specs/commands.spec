@@ -96,12 +96,10 @@ state GAPS_WITH_TYPE:
       -> GAPS_WITH_SCOPE
 
 state GAPS_WITH_SCOPE:
-  mode = 'plus', 'minus'
-      -> GAPS_PLUS_MINUS
-  value = word
-      -> call cmd_gaps($type, $scope, "set", $value)
+  mode = 'plus', 'minus', 'set'
+      -> GAPS_WITH_MODE
 
-state GAPS_PLUS_MINUS:
+state GAPS_WITH_MODE:
   value = word
       -> call cmd_gaps($type, $scope, $mode, $value)
 

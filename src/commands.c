@@ -2124,13 +2124,14 @@ void cmd_debuglog(I3_CMD, char *argument) {
 }
 
 /**
- * Implementation of 'gaps inner|outer current|all [plus|minus] <px>'
+ * Implementation of 'gaps inner|outer current|all set|plus|minus <px>'
  *
  */
 void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
 #define CMD_GAPS(type)                                                       \
     int pixels = atoi(value);                                                \
     Con* workspace = con_get_workspace(focused);                             \
+                                                                             \
     int current_value = config.gap_config.type;                              \
     if (!strcmp(scope, "current"))                                           \
         current_value += workspace->gap_config.type;                         \
@@ -2139,9 +2140,13 @@ void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
         current_value += pixels;                                             \
     else if (!strcmp(mode, "minus"))                                         \
         current_value -= pixels;                                             \
-    else {                                                                   \
+    else if (!strcmp(mode, "set")) {                                         \
         current_value = pixels;                                              \
         reset = true;                                                        \
+    } else {                                                                 \
+        ELOG("Invalid mode %s when changing gaps", mode);                    \
+        ysuccess(false);                                                     \
+        return;                                                              \
     }                                                                        \
                                                                              \
     if (current_value < 0)                                                   \
@@ -2169,6 +2174,10 @@ void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
         CMD_GAPS(inner);
     } else if (!strcmp(type, "outer")) {
         CMD_GAPS(outer);
+    } else {
+        ELOG("Invalid type %s when changing gaps", type);
+        ysuccess(false);
+        return;
     }
 
     cmd_output->needs_tree_render = true;
