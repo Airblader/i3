@@ -170,13 +170,16 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
 
     bool should_inset = should_inset_con(con, children);
     if (!already_inset && should_inset) {
-        int gap_size = config.gap_size + con_get_workspace(con)->gap_size_delta;
+        Con *workspace = con_get_workspace(con);
+
+        int inner_gap = (config.gap_config.inner + workspace->gap_config.inner) / 2;
+        int outer_gap = 2 * inner_gap + config.gap_config.outer + workspace->gap_config.outer;
 
         Rect inset = (Rect) {
-            gap_size / (1 + has_adjacent_container(con, D_LEFT)),
-            gap_size / (1 + has_adjacent_container(con, D_UP)),
-            -1 * gap_size / (1 + has_adjacent_container(con, D_RIGHT)),
-            -1 * gap_size / (1 + has_adjacent_container(con, D_DOWN))
+            has_adjacent_container(con, D_LEFT)  ?  inner_gap :  outer_gap,
+            has_adjacent_container(con, D_UP)    ?  inner_gap :  outer_gap,
+            has_adjacent_container(con, D_RIGHT) ? -inner_gap : -outer_gap,
+            has_adjacent_container(con, D_DOWN)  ? -inner_gap : -outer_gap
         };
         inset.width -= inset.x;
         inset.height -= inset.y;

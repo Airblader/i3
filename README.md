@@ -35,7 +35,7 @@ Please note that I do not care too much for backwards compatibility. At the time
 
 # Screenshot
 
-![i3](http://i.imgur.com/kUmkrut.png)
+![i3](http://i.imgur.com/Jw2kom9.png)
 
 
 # New Features
@@ -44,40 +44,74 @@ Please note that I do not care too much for backwards compatibility. At the time
 
 ### gaps
 
-Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that the gaps between containers and the gaps between containers and the edge of the screen are the same.
+Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that the gaps between containers and the gaps between containers and the edge of the screen are the same. But I didn't stop there: these gaps are called "inner" gaps. This fork also allows setting "outer" gaps which inset all containers independently.
 
 In your i3 config, you can set a global gap size as shown below. This is the default value that will be used for all workspaces:
 
 ````
-gap_size <px>
+gaps inner <px>
+gaps outer <px>
 ```
 
 Additionally, you can issue commands with the following syntax. This is useful, for example, to bind keys to changing the gap size:
 
 ````
-gap_size [current] [plus|minus] <px>
+gaps inner|outer current|all set|plus|minus <px>
+
+# Examples
+gaps inner all set 20
+gaps outer current plus 5
 ```
 
-So, for example, `gap_size 10` would simply set the size of the gaps to 10 pixels. On the other hand, `gap_size plus 5` would increase the current gap size without having to know how much it actually is. Note that `gap_size 0` is basically equivalent to not using the gaps patch at all. This is the default value.
+Here are the individual parts explained:
+
+* `inner|outer` specifies whether you want to modify inner gaps (gaps between adjacent containers) or outer gaps (gaps between the edge of a screen and a container).
+* `current|all` determined whether you want to modify the setting for the current workspace only or for all workspaces.
+* `set|plus|minus` allows you to either set a new, fixed value or make a relative change (in-/decrement).
+
+Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will elinminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen.
 
 Here is an exceprt from my i3 config that shows how this can be utilized. Press `$mod+Shift+g` to enter a special mode to modify the gap size. From there, you can press either `+`, `-` or `0` to increase / decrease the gap size or turn gaps off for the current workspace. If you hold `Shift` while doing this, it will modify the setting globally for all workspaces.
 
+Here is one possible idea on how you can use this feature within your i3 config. Simply press `$mod+Shift+g` to enter the gaps mode. Then choose between `o` and `i` for modifying outer / inner gaps. In this mode, you can press one of `+` / `-` (in-/decrement for current workspace) or `0` (remove gaps for current workspace). If you also press `Shift` with these keys, the change will be global for all workspaces.
+
 ````
-set $mode_gap_size Gaps: [+|-|0] for current workspace, Shift + [+|-|0] for all workspaces
-mode "$mode_gap_size" {
-        bindsym plus gap_size current plus 5
-        bindsym minus gap_size current minus 5
-        bindsym 0 gap_size current 0
+set $mode_gaps Gaps: (o) outer, (i) inner
+set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
+set $mode_gaps_inner Inner Gaps: +|-|0 (local), Shift + +|-|0 (global)
+bindsym $mod+Shift+g mode "$mode_gaps"
 
-        bindsym Shift+plus gap_size plus 5
-        bindsym Shift+minus gap_size minus 5
-        bindsym Shift+0 gap_size 0
-
+mode "$mode_gaps" {
+        bindsym o      mode "$mode_gaps_outer"
+        bindsym i      mode "$mode_gaps_inner"
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
 
-bindsym $mod+Shift+g mode "$mode_gap_size"
+mode "$mode_gaps_inner" {
+        bindsym plus  gaps inner current plus 5
+        bindsym minus gaps inner current minus 5
+        bindsym 0     gaps inner current set 0
+
+        bindsym Shift+plus  gaps inner all plus 5
+        bindsym Shift+minus gaps inner all minus 5
+        bindsym Shift+0     gaps inner all set 0
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+}
+mode "$mode_gaps_outer" {
+        bindsym plus  gaps outer current plus 5
+        bindsym minus gaps outer current minus 5
+        bindsym 0     gaps outer current set 0
+
+        bindsym Shift+plus  gaps outer all plus 5
+        bindsym Shift+minus gaps outer all minus 5
+        bindsym Shift+0     gaps outer all set 0
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+}
 ```
 
 

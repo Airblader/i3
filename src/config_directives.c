@@ -219,8 +219,14 @@ CFGFUN(for_window, const char *command) {
     TAILQ_INSERT_TAIL(&assignments, assignment, assignments);
 }
 
-CFGFUN(gap_size, const long width) {
-    config.gap_size = width;
+CFGFUN(gaps, const char *scope, const long value) {
+    if (!strcmp(scope, "inner"))
+        config.gap_config.inner = value;
+    else if (!strcmp(scope, "outer"))
+        config.gap_config.outer = value;
+    else {
+        ELOG("Invalid command, cannot process scope %s", scope);
+    }
 }
 
 CFGFUN(smart_borders, const char *enable) {

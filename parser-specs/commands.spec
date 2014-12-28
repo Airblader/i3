@@ -39,7 +39,7 @@ state INITIAL:
   'scratchpad' -> SCRATCHPAD
   'mode' -> MODE
   'bar' -> BAR
-  'gap_size' -> GAP_SIZE
+  'gaps' -> GAPS
 
 state CRITERIA:
   ctype = 'class' -> CRITERION
@@ -86,28 +86,22 @@ state BORDER:
   border_style = '1pixel'
     -> call cmd_border($border_style, "1")
 
-# gap_size [current] [plus|minus] <size>
-state GAP_SIZE:
-  current = 'current'
-      -> GAP_SIZE_CURRENT
-  way = 'plus', 'minus'
-      -> GAP_SIZE_DELTA
-  width = word
-      -> call cmd_gap_size("set", NULL, $width)
+# gaps inner|outer [current] [plus|minus] <px>
+state GAPS:
+  type = 'inner', 'outer'
+      -> GAPS_WITH_TYPE
 
-state GAP_SIZE_CURRENT:
-  way = 'plus', 'minus'
-      -> GAP_SIZE_CURRENT_DELTA
-  width = word
-      -> call cmd_gap_size("set", "current", $width)
+state GAPS_WITH_TYPE:
+  scope = 'current', 'all'
+      -> GAPS_WITH_SCOPE
 
-state GAP_SIZE_CURRENT_DELTA:
-  delta = string
-      -> call cmd_gap_size($way, $current, $delta)
+state GAPS_WITH_SCOPE:
+  mode = 'plus', 'minus', 'set'
+      -> GAPS_WITH_MODE
 
-state GAP_SIZE_DELTA:
-  delta = string
-      -> call cmd_gap_size($way, NULL, $delta)
+state GAPS_WITH_MODE:
+  value = word
+      -> call cmd_gaps($type, $scope, $mode, $value)
 
 state BORDER_WIDTH:
   end

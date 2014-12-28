@@ -2208,48 +2208,60 @@ void cmd_debuglog(I3_CMD, char *argument) {
 }
 
 /**
- * Implementation of 'gap_size [current] [plus|minus] <width>'
+ * Implementation of 'gaps inner|outer current|all set|plus|minus <px>'
+ *
  */
-void cmd_gap_size(I3_CMD, char *way, char *workspace, char *width) {
-    int pixels = atoi(width);
-
-    Con *con_workspace = con_get_workspace(focused);
-    int current_gap_size = config.gap_size;
-    if (workspace != NULL)
-        current_gap_size += con_workspace->gap_size_delta;
-
-    /* If the global value is set to a fixed value, it should set the value on all workspaces
-     * to exactly this value, so in this case we need to reset the delta of each workspace. */
-    bool reset_deltas = false;
-
-    if (!strcmp(way, "plus")) {
-        current_gap_size += pixels;
-    } else if (!strcmp(way, "minus")) {
-        current_gap_size -= pixels;
-    } else {
-        reset_deltas = true;
-        current_gap_size = pixels;
+void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
+#define CMD_GAPS(type)                                                       \
+    int pixels = atoi(value);                                                \
+    Con* workspace = con_get_workspace(focused);                             \
+                                                                             \
+    int current_value = config.gap_config.type;                              \
+    if (!strcmp(scope, "current"))                                           \
+        current_value += workspace->gap_config.type;                         \
+    bool reset = false;                                                      \
+    if (!strcmp(mode, "plus"))                                               \
+        current_value += pixels;                                             \
+    else if (!strcmp(mode, "minus"))                                         \
+        current_value -= pixels;                                             \
+    else if (!strcmp(mode, "set")) {                                         \
+        current_value = pixels;                                              \
+        reset = true;                                                        \
+    } else {                                                                 \
+        ELOG("Invalid mode %s when changing gaps", mode);                    \
+        ysuccess(false);                                                     \
+        return;                                                              \
+    }                                                                        \
+                                                                             \
+    if (current_value < 0)                                                   \
+        current_value = 0;                                                   \
+                                                                             \
+    if (!strcmp(scope, "all")) {                                             \
+        Con *output, *cur_ws = NULL;                                         \
+        TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {                \
+            Con *content = output_get_content(output);                       \
+            TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) {          \
+                if (reset)                                                   \
+                    cur_ws->gap_config.type = 0;                             \
+                else if (current_value + cur_ws->gap_config.type < 0)        \
+                    cur_ws->gap_config.type = -current_value;                \
+            }                                                                \
+        }                                                                    \
+                                                                             \
+        config.gap_config.type = current_value;                              \
+    } else {                                                                 \
+        workspace->gap_config.type = current_value                           \
+                                     - config.gap_config.type;               \
     }
 
-    if (current_gap_size < 0)
-        current_gap_size = 0;
-
-    if (workspace == NULL) {
-        Con *output, *cur_ws = NULL;
-        /* Iterate through all currently existing workspaces. */
-        TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {
-            Con *content = output_get_content(output);
-            TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) {
-                if (reset_deltas)
-                    cur_ws->gap_size_delta = 0;
-                else if (current_gap_size + cur_ws->gap_size_delta < 0)
-                    cur_ws->gap_size_delta = -current_gap_size;
-            }
-        }
-
-        config.gap_size = current_gap_size;
+    if (!strcmp(type, "inner")) {
+        CMD_GAPS(inner);
+    } else if (!strcmp(type, "outer")) {
+        CMD_GAPS(outer);
     } else {
-        con_workspace->gap_size_delta = current_gap_size - config.gap_size;
+        ELOG("Invalid type %s when changing gaps", type);
+        ysuccess(false);
+        return;
     }
 
     cmd_output->needs_tree_render = true;

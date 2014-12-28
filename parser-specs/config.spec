@@ -22,7 +22,7 @@ state INITIAL:
   'bar'                                    -> BARBRACE
   'font'                                   -> FONT
   'mode'                                   -> MODENAME
-  'gap_size'                               -> GAP_SIZE
+  'gaps'                                   -> GAPS
   'smart_borders'                          -> SMART_BORDERS
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
@@ -55,10 +55,14 @@ state IGNORE_LINE:
   line
       -> INITIAL
 
-# gap_size <size>
-state GAP_SIZE:
-  width = number
-      -> call cfg_gap_size(&width)
+# gaps inner|outer <px>
+state GAPS:
+  scope = 'inner', 'outer'
+      -> GAPS_WITH_SCOPE
+
+state GAPS_WITH_SCOPE:
+  value = number
+      -> call cfg_gaps($scope, &value)
 
 # smart_borders true|false
 state SMART_BORDERS:

@@ -46,6 +46,7 @@ typedef struct Con Con;
 typedef struct Match Match;
 typedef struct Assignment Assignment;
 typedef struct Window i3Window;
+typedef struct gap_config_t gap_config_t;
 
 /******************************************************************************
  * Helper types
@@ -114,6 +115,11 @@ typedef enum {
     POINTER_WARPING_OUTPUT = 0,
     POINTER_WARPING_NONE = 1
 } warping_t;
+
+struct gap_config_t {
+    int inner;
+    int outer;
+};
 
 /**
  * Stores a rectangle, for example the size of a window, the child window etc.
@@ -524,9 +530,8 @@ struct Con {
      * workspace is not a named workspace (for named workspaces, num == -1) */
     int num;
 
-    /** Only applicable for containers of type CT_WORKSPACE, this value is
-      * an additional gap_size relative to the global config's setting. */
-    int gap_size_delta;
+    /** Only applicable for containers of type CT_WORKSPACE. */
+    gap_config_t gap_config;
 
     struct Con *parent;
 
