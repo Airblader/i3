@@ -289,13 +289,7 @@ void cmd_shmlog(I3_CMD, char *argument);
 void cmd_debuglog(I3_CMD, char *argument);
 
 /**
- * Implementation of 'gap_size [current] [plus|minus] <width>'
+ * Implementation of 'gaps inner|outer current|all [plus|minus] <px>'
  *
  */
-void cmd_gap_size(I3_CMD, char *way, char *workspace, char *width);
-
-/**
- * Implementation of 'inset [current] [plus|minus] <width>'
- *
- */
-void cmd_inset(I3_CMD, char *type, char *way, char *width);
+void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value);
