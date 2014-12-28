@@ -144,7 +144,7 @@ is(parser_calls("\nworkspace test"),
 ################################################################################
 
 is(parser_calls('unknown_literal'),
-   "ERROR: Expected one of these tokens: <end>, '[', 'move', 'exec', 'exit', 'restart', 'reload', 'shmlog', 'debuglog', 'border', 'layout', 'append_layout', 'workspace', 'focus', 'kill', 'open', 'fullscreen', 'split', 'floating', 'mark', 'unmark', 'resize', 'rename', 'nop', 'scratchpad', 'mode', 'bar', 'gap_size'\n" .
+   "ERROR: Expected one of these tokens: <end>, '[', 'move', 'exec', 'exit', 'restart', 'reload', 'shmlog', 'debuglog', 'border', 'layout', 'append_layout', 'workspace', 'focus', 'kill', 'open', 'fullscreen', 'split', 'floating', 'mark', 'unmark', 'resize', 'rename', 'nop', 'scratchpad', 'mode', 'bar', 'gaps'\n" .
    "ERROR: Your command: unknown_literal\n" .
    "ERROR:               ^^^^^^^^^^^^^^^",
    'error for unknown literal ok');
