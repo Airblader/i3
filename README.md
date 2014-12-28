@@ -27,6 +27,10 @@ apt-get install libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
 
 This may vary for other distributions. If you have trouble compiling it, just open an issue to let me know.
 
+## Arch Linux
+
+[i3-gaps](https://aur.archlinux.org/packages/i3-gaps/) is available on the AUR.
+
 # Updating
 
 You can update by simply switching into the directory of the repository and executing `git pull`. Then rebuild and install via `make && sudo make install`.
