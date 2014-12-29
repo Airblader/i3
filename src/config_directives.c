@@ -230,7 +230,10 @@ CFGFUN(gaps, const char *scope, const long value) {
 }
 
 CFGFUN(smart_borders, const char *enable) {
-    config.smart_borders = eval_boolstr(enable);
+    if (!strcmp(enable, "no_gaps"))
+        config.smart_borders = NO_GAPS;
+    else
+        config.smart_borders = eval_boolstr(enable) ? ON : OFF;
 }
 
 CFGFUN(floating_minimum_size, const long width, const long height) {

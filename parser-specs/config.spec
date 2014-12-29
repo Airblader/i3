@@ -65,8 +65,11 @@ state GAPS_WITH_SCOPE:
       -> call cfg_gaps($scope, &value)
 
 # smart_borders true|false
+# smart_borders no_gaps
 state SMART_BORDERS:
   enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
+      -> call cfg_smart_borders($enabled)
+  enabled = 'no_gaps'
       -> call cfg_smart_borders($enabled)
 
 # floating_minimum_size <width> x <height>

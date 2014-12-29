@@ -218,7 +218,7 @@ struct Config {
     gap_config_t gap_config;
 
     /* Should single containers on a workspace receive a border? */
-    bool smart_borders;
+    smart_borders_t smart_borders;
 };
 
 /**

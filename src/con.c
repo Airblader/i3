@@ -1090,7 +1090,8 @@ Con *con_descend_direction(Con *con, direction_t direction) {
 Rect con_border_style_rect(Con *con) {
     /* Smart border patch: don't put borders on if it's the only container
      * on this workspace. */
-    if (config.smart_borders) {
+    if (config.smart_borders == ON
+        || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
         Con *current = con;
         while (current != NULL && !con_is_floating(current)) {
             Con *parent = current->parent;
@@ -1689,4 +1690,23 @@ char *con_get_tree_representation(Con *con) {
     free(buf);
 
     return complete_buf;
+}
+
+/**
+ * Calculates the effective gap sizes for a container depending
+ * on whether it is adjacent to the edge of the screen or another
+ * container.
+ */
+gap_config_t calculate_effective_gaps(Con *con) {
+    Con *workspace = con_get_workspace(con);
+    if (workspace == NULL)
+        return (gap_config_t) { 0, 0 };
+
+    gap_config_t gaps = {
+        .inner = (config.gap_config.inner + workspace->gap_config.inner) / 2,
+        .outer = config.gap_config.outer + workspace->gap_config.outer
+    };
+    gaps.outer += 2 * gaps.inner;
+
+    return gaps;
 }
