@@ -71,7 +71,7 @@ Here are the individual parts explained:
 
 Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will elinminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen.
 
-Here is an exceprt from my i3 config that shows how this can be utilized. Press `$mod+Shift+g` to enter a special mode to modify the gap size. From there, you can press either `+`, `-` or `0` to increase / decrease the gap size or turn gaps off for the current workspace. If you hold `Shift` while doing this, it will modify the setting globally for all workspaces.
+Here is an excerpt from my i3 config that shows how this can be utilized. Press `$mod+Shift+g` to enter a special mode to modify the gap size. From there, you can press either `+`, `-` or `0` to increase / decrease the gap size or turn gaps off for the current workspace. If you hold `Shift` while doing this, it will modify the setting globally for all workspaces.
 
 Here is one possible idea on how you can use this feature within your i3 config. Simply press `$mod+Shift+g` to enter the gaps mode. Then choose between `o` and `i` for modifying outer / inner gaps. In this mode, you can press one of `+` / `-` (in-/decrement for current workspace) or `0` (remove gaps for current workspace). If you also press `Shift` with these keys, the change will be global for all workspaces.
 
