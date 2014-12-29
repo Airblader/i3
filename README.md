@@ -117,10 +117,10 @@ mode "$mode_gaps_outer" {
 
 ### Smart Borders
 
-With the original patch from [i3-extras](https://github.com/ashinkarov/i3-extras), I've made the smart border feature configurable. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with
+Based on the patch from [i3-extras](https://github.com/ashinkarov/i3-extras), smart borders have been added in a configurable way. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with the command below. `on` will always activate it, while `no_gaps` will only activate it if the gap size to the edge of the screen is `0`.
 
 ````
-smart_borders on
+smart_borders on|no_gaps
 ```
 
 
