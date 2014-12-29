@@ -1869,7 +1869,7 @@ void draw_bars(bool unhide) {
                           outputs_walk->bargc,
                           mask,
                           vals_border);
-            xcb_rectangle_t rect_border = {i, 1, binding.width + 10, font.height + 4};
+            xcb_rectangle_t rect_border = {i, 1, binding.width + 10, bar_height - 2};
             xcb_poly_fill_rectangle(xcb_connection,
                                     outputs_walk->buffer,
                                     outputs_walk->bargc,
@@ -1881,7 +1881,7 @@ void draw_bars(bool unhide) {
                           outputs_walk->bargc,
                           mask,
                           vals);
-            xcb_rectangle_t rect = {i + 1, 2, binding.width + 8, font.height + 2};
+            xcb_rectangle_t rect = {i + 1, 2, binding.width + 8, bar_height - 4};
             xcb_poly_fill_rectangle(xcb_connection,
                                     outputs_walk->buffer,
                                     outputs_walk->bargc,
@@ -1889,7 +1889,7 @@ void draw_bars(bool unhide) {
                                     &rect);
 
             set_font_colors(outputs_walk->bargc, fg_color, bg_color);
-            draw_text(binding.name, outputs_walk->buffer, outputs_walk->bargc, i + 5, 3, binding.width);
+            draw_text(binding.name, outputs_walk->buffer, outputs_walk->bargc, i + 5, bar_height / 2 - font.height / 2, binding.width);
 
             unhide = true;
         }
