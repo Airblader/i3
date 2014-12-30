@@ -75,6 +75,8 @@ typedef enum { ADJ_NONE = 0,
                ADJ_UPPER_SCREEN_EDGE = (1 << 2),
                ADJ_LOWER_SCREEN_EDGE = (1 << 4) } adjacent_t;
 
+typedef enum { OFF, ON, NO_GAPS } smart_borders_t;
+
 enum {
     BIND_NONE = 0,
     BIND_SHIFT = XCB_MOD_MASK_SHIFT,     /* (1 << 0) */
