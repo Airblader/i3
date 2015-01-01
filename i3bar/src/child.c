@@ -139,6 +139,8 @@ static int stdin_start_array(void *context) {
         first = TAILQ_FIRST(&statusline_head);
         I3STRING_FREE(first->full_text);
         FREE(first->color);
+        FREE(first->border);
+        FREE(first->background);
         FREE(first->name);
         FREE(first->instance);
         TAILQ_REMOVE(&statusline_head, first, blocks);
