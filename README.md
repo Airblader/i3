@@ -29,7 +29,7 @@ This may vary for other distributions. If you have trouble compiling it, just op
 
 ## Arch Linux
 
-[i3-gaps](https://aur.archlinux.org/packages/i3-gaps/) is available on the AUR.
+[i3-gaps-git](https://aur.archlinux.org/packages/i3-gaps-git/) and [i3-gaps-next-git](https://aur.archlinux.org/packages/i3-gaps-next-git/) are available on the AUR.
 
 # Updating
 
