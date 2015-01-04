@@ -29,7 +29,7 @@ This may vary for other distributions. If you have trouble compiling it, just op
 
 ## Arch Linux
 
-[i3-gaps](https://aur.archlinux.org/packages/i3-gaps/) is available on the AUR.
+[i3-gaps-git](https://aur.archlinux.org/packages/i3-gaps-git/) and [i3-gaps-next-git](https://aur.archlinux.org/packages/i3-gaps-next-git/) are available on the AUR.
 
 # Updating
 
@@ -70,10 +70,10 @@ gaps outer current plus 5
 Here are the individual parts explained:
 
 * `inner|outer` specifies whether you want to modify inner gaps (gaps between adjacent containers) or outer gaps (gaps between the edge of a screen and a container).
-* `current|all` determined whether you want to modify the setting for the current workspace only or for all workspaces.
+* `current|all` determines whether you want to modify the setting for the current workspace only or for all workspaces.
 * `set|plus|minus` allows you to either set a new, fixed value or make a relative change (in-/decrement).
 
-Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will elinminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen.
+Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will eliminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen.
 
 Here is an excerpt from my i3 config that shows how this can be utilized. Press `$mod+Shift+g` to enter a special mode to modify the gap size. From there, you can press either `+`, `-` or `0` to increase / decrease the gap size or turn gaps off for the current workspace. If you hold `Shift` while doing this, it will modify the setting globally for all workspaces.
 
