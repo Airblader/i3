@@ -80,8 +80,10 @@ ldflags_for_lib = $(shell pkg-config --exists 2>/dev/null $(1) && pkg-config --l
 # XCB common stuff
 XCB_CFLAGS  := $(call cflags_for_lib, xcb)
 XCB_CFLAGS  += $(call cflags_for_lib, xcb-event)
+XCB_CFLAGS  += $(call cflags_for_lib, xcb-image)
 XCB_LIBS    := $(call ldflags_for_lib, xcb,xcb)
 XCB_LIBS    += $(call ldflags_for_lib, xcb-event,xcb-event)
+XCB_LIBS    += $(call ldflags_for_lib, xcb-image,xcb-image)
 ifeq ($(shell pkg-config --exists xcb-util 2>/dev/null || echo 1),1)
 XCB_CFLAGS  += $(call cflags_for_lib, xcb-atom)
 XCB_CFLAGS  += $(call cflags_for_lib, xcb-aux)
