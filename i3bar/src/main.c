@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
     ev_signal_start(main_loop, sig_hup);
 
     /* From here on everything should run smooth for itself, just start listening for
-     * events. We stop simply stop the event-loop, when we are finished */
+     * events. We simply stop the event-loop when we are finished. */
     ev_loop(main_loop, 0);
 
     kill_child();
