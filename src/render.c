@@ -305,7 +305,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
     } else if (con->type == CT_ROOT) {
         Con *output;
         if (!fullscreen) {
-            TAILQ_FOREACH(output, &(con->nodes_head), nodes) {
+            TAILQ_FOREACH (output, &(con->nodes_head), nodes) {
                 render_con(output, false, false);
             }
         }
