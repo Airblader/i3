@@ -406,7 +406,7 @@ void handle_button(xcb_button_press_event_t *event) {
         x = original_x - offset;
         if (x >= 0) {
             struct status_block *block;
-            int last_sep_offset = 0;
+            int sep_offset_remainder = 0;
 
             TAILQ_FOREACH (block, &statusline_head, blocks) {
                 if (i3string_get_num_bytes(block->full_text) == 0)
@@ -414,14 +414,14 @@ void handle_button(xcb_button_press_event_t *event) {
 
                 last_block_x = block_x;
                 block_x += block->width + block->x_offset + block->x_append
-                           + get_sep_offset(block) + last_sep_offset;
+                           + get_sep_offset(block) + sep_offset_remainder;
 
                 if (x <= block_x && x >= last_block_x) {
                     send_block_clicked(event->detail, block->name, block->instance, event->root_x, event->root_y);
                     return;
                 }
 
-                last_sep_offset = block->sep_block_width - get_sep_offset(block);
+                sep_offset_remainder = block->sep_block_width - get_sep_offset(block);
             }
         }
         x = original_x;
