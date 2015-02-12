@@ -363,3 +363,9 @@ char *con_get_tree_representation(Con *con);
   * container.
   */
 gap_config_t calculate_effective_gaps(Con *con);
+
+/**
+ * force parent split containers to be redrawn
+ *
+ */
+void con_force_split_parents_redraw(Con *con);
