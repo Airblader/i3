@@ -2212,13 +2212,16 @@ void cmd_debuglog(I3_CMD, char *argument) {
  *
  */
 void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
-#define CMD_GAPS(type)                                                       \
+#define CMD_GAPS(type, other)                                                \
     int pixels = atoi(value);                                                \
     Con* workspace = con_get_workspace(focused);                             \
                                                                              \
-    int current_value = config.gaps.type;                                    \
-    if (!strcmp(scope, "current"))                                           \
+    int current_value = 0;                                                   \
+    if (!workspace->gaps.absolute)                                           \
+        current_value += config.gaps.type;                                   \
+    if (strcmp(scope, "current") == 0)                                       \
         current_value += workspace->gaps.type;                               \
+                                                                             \
     bool reset = false;                                                      \
     if (!strcmp(mode, "plus"))                                               \
         current_value += pixels;                                             \
@@ -2241,6 +2244,10 @@ void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
         TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {                \
             Con *content = output_get_content(output);                       \
             TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) {          \
+                if (cur_ws->gaps.absolute) {                                 \
+                    cur_ws->gaps.absolute = false;                           \
+                    cur_ws->gaps.other -= config.gaps.other;                 \
+                }                                                            \
                 if (reset)                                                   \
                     cur_ws->gaps.type = 0;                                   \
                 else if (current_value + cur_ws->gaps.type < 0)              \
@@ -2250,13 +2257,17 @@ void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
                                                                              \
         config.gaps.type = current_value;                                    \
     } else {                                                                 \
+        if (workspace->gaps.absolute) {                                      \
+            workspace->gaps.absolute = false;                                \
+            workspace->gaps.other -= config.gaps.other;                      \
+        }                                                                    \
         workspace->gaps.type = current_value - config.gaps.type;             \
     }
 
     if (!strcmp(type, "inner")) {
-        CMD_GAPS(inner);
+        CMD_GAPS(inner, outer);
     } else if (!strcmp(type, "outer")) {
-        CMD_GAPS(outer);
+        CMD_GAPS(outer, inner);
     } else {
         ELOG("Invalid type %s when changing gaps", type);
         ysuccess(false);
