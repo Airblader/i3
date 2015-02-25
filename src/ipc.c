@@ -151,6 +151,18 @@ static void dump_rect(yajl_gen gen, const char *name, Rect r) {
     y(map_close);
 }
 
+static void dump_gaps(yajl_gen gen, const char *name, gaps_t gaps) {
+    ystr(name);
+    y(map_open);
+    ystr("inner");
+    y(integer, gaps.inner);
+    ystr("outer");
+    y(integer, gaps.outer);
+    ystr("absolute");
+    y(bool, gaps.absolute);
+    y(map_close);
+}
+
 static void dump_binding(yajl_gen gen, Binding *bind) {
     y(map_open);
     ystr("input_code");
@@ -362,6 +374,8 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
     if (con->type == CT_WORKSPACE) {
         ystr("num");
         y(integer, con->num);
+
+        dump_gaps(gen, "gaps", con->gaps);
     }
 
     ystr("window");
