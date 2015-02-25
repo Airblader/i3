@@ -54,7 +54,7 @@ Con *workspace_get(const char *num, bool *created) {
         output = con_get_output(focused);
         /* look for assignments */
         struct Workspace_Assignment *assignment;
-        gap_config_t gaps = (gap_config_t) { 0, 0 };
+        gaps_t gaps = (gaps_t) { 0, 0 };
 
         /* We set workspace->num to the number if this workspace’s name begins
          * with a positive number. Otherwise it’s a named ws and num will be
@@ -96,7 +96,7 @@ Con *workspace_get(const char *num, bool *created) {
         workspace->workspace_layout = config.default_layout;
         workspace->num = parsed_num;
         LOG("num = %d\n", workspace->num);
-        workspace->gap_config = gaps;
+        workspace->gaps = gaps;
 
         workspace->parent = content;
         _workspace_apply_default_orientation(workspace);
@@ -221,7 +221,7 @@ Con *create_workspace_on_output(Output *output, Con *content) {
     struct Workspace_Assignment *assignment;
     TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
         if (strcmp(assignment->name, ws->name) == 0) {
-            ws->gap_config = assignment->gaps;
+            ws->gaps = assignment->gaps;
             break;
         }
     }

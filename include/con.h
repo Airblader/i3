@@ -362,7 +362,7 @@ char *con_get_tree_representation(Con *con);
   * on whether it is adjacent to the edge of the screen or another
   * container.
   */
-gap_config_t calculate_effective_gaps(Con *con);
+gaps_t calculate_effective_gaps(Con *con);
 
 /**
  * force parent split containers to be redrawn

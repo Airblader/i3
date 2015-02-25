@@ -215,7 +215,7 @@ struct Config {
     int number_barconfigs;
 
     /* Gap sizes */
-    gap_config_t gap_config;
+    gaps_t gaps;
 
     /* Should single containers on a workspace receive a border? */
     smart_borders_t smart_borders;

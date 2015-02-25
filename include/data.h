@@ -46,7 +46,7 @@ typedef struct Con Con;
 typedef struct Match Match;
 typedef struct Assignment Assignment;
 typedef struct Window i3Window;
-typedef struct gap_config_t gap_config_t;
+typedef struct gaps_t gaps_t;
 
 /******************************************************************************
  * Helper types
@@ -118,7 +118,7 @@ typedef enum {
     POINTER_WARPING_NONE = 1
 } warping_t;
 
-struct gap_config_t {
+struct gaps_t {
     int inner;
     int outer;
 
@@ -191,7 +191,7 @@ struct deco_render_params {
 struct Workspace_Assignment {
     char *name;
     char *output;
-    gap_config_t gaps;
+    gaps_t gaps;
 
     TAILQ_ENTRY(Workspace_Assignment) ws_assignments;
 };
@@ -542,7 +542,7 @@ struct Con {
     int num;
 
     /** Only applicable for containers of type CT_WORKSPACE. */
-    gap_config_t gap_config;
+    gaps_t gaps;
 
     struct Con *parent;
 

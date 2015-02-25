@@ -170,7 +170,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
 
     bool should_inset = should_inset_con(con, children);
     if (!already_inset && should_inset) {
-        gap_config_t gaps = calculate_effective_gaps(con);
+        gaps_t gaps = calculate_effective_gaps(con);
         Rect inset = (Rect) {
             has_adjacent_container(con, D_LEFT)  ?  gaps.inner :  gaps.outer,
             has_adjacent_container(con, D_UP)    ?  gaps.inner :  gaps.outer,

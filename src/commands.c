@@ -2216,9 +2216,9 @@ void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
     int pixels = atoi(value);                                                \
     Con* workspace = con_get_workspace(focused);                             \
                                                                              \
-    int current_value = config.gap_config.type;                              \
+    int current_value = config.gaps.type;                                    \
     if (!strcmp(scope, "current"))                                           \
-        current_value += workspace->gap_config.type;                         \
+        current_value += workspace->gaps.type;                               \
     bool reset = false;                                                      \
     if (!strcmp(mode, "plus"))                                               \
         current_value += pixels;                                             \
@@ -2242,16 +2242,15 @@ void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value) {
             Con *content = output_get_content(output);                       \
             TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) {          \
                 if (reset)                                                   \
-                    cur_ws->gap_config.type = 0;                             \
-                else if (current_value + cur_ws->gap_config.type < 0)        \
-                    cur_ws->gap_config.type = -current_value;                \
+                    cur_ws->gaps.type = 0;                                   \
+                else if (current_value + cur_ws->gaps.type < 0)              \
+                    cur_ws->gaps.type = -current_value;                      \
             }                                                                \
         }                                                                    \
                                                                              \
-        config.gap_config.type = current_value;                              \
+        config.gaps.type = current_value;                                    \
     } else {                                                                 \
-        workspace->gap_config.type = current_value                           \
-                                     - config.gap_config.type;               \
+        workspace->gaps.type = current_value - config.gaps.type;             \
     }
 
     if (!strcmp(type, "inner")) {

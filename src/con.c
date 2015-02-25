@@ -1750,20 +1750,20 @@ char *con_get_tree_representation(Con *con) {
 /**
  * Calculates the effective gap sizes for a container.
  */
-gap_config_t calculate_effective_gaps(Con *con) {
+gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
     if (workspace == NULL)
-        return (gap_config_t) { 0, 0 };
+        return (gaps_t) { 0, 0 };
 
-    gap_config_t gaps = {
-        .inner = workspace->gap_config.inner / 2,
-        .outer = workspace->gap_config.outer
+    gaps_t gaps = {
+        .inner = workspace->gaps.inner / 2,
+        .outer = workspace->gaps.outer
     };
 
     /* If the workspace doesn't claim an absolute override, add the default to it. */
-    if (!workspace->gap_config.absolute) {
-        gaps.inner += config.gap_config.inner / 2;
-        gaps.outer += config.gap_config.outer;
+    if (!workspace->gaps.absolute) {
+        gaps.inner += config.gaps.inner / 2;
+        gaps.outer += config.gaps.outer;
     }
 
     /* Outer gaps are added on top of inner gaps. */

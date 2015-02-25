@@ -250,12 +250,12 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
 CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
     if (!strcmp(scope, "inner")) {
         if (workspace == NULL)
-            config.gap_config.inner = value;
+            config.gaps.inner = value;
         else
             create_gaps_assignment(workspace, true, value);
     } else if (!strcmp(scope, "outer")) {
         if (workspace == NULL)
-            config.gap_config.outer = value;
+            config.gaps.outer = value;
         else
             create_gaps_assignment(workspace, false, value);
     } else {
