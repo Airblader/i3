@@ -77,6 +77,20 @@ Here are the individual parts explained:
 
 Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will eliminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen.
 
+Additionally, gaps can be specified on a per-workspace level by using the syntax known from assigning a workspace to a certain output:
+
+````
+workspace <ws> gaps inner <px>
+workspace <ws> gaps outer <px>
+```
+
+Note that multiple such assignments are allowed (and perhaps necessary). These values are absolute for that workspace, i.e., they are not added with the global default that was set. The `ws` variable can either be a number or a name, so both of these are valid:
+
+````
+workspace 1 gaps inner 0
+workspace "www" gaps inner 0
+```
+
 Here is one possible idea on how you can use this feature within your i3 config. Simply press `$mod+Shift+g` to enter the gaps mode. Then choose between `o` and `i` for modifying outer / inner gaps. In this mode, you can press one of `+` / `-` (in-/decrement for current workspace) or `0` (remove gaps for current workspace). If you also press `Shift` with these keys, the change will be global for all workspaces.
 
 ````
