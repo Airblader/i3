@@ -54,6 +54,7 @@ Con *workspace_get(const char *num, bool *created) {
         output = con_get_output(focused);
         /* look for assignments */
         struct Workspace_Assignment *assignment;
+        gap_config_t gaps = (gap_config_t) { 0, 0 };
 
         /* We set workspace->num to the number if this workspace’s name begins
          * with a positive number. Otherwise it’s a named ws and num will be
@@ -62,12 +63,21 @@ Con *workspace_get(const char *num, bool *created) {
 
         TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
             if (strcmp(assignment->name, num) == 0) {
-                DLOG("Found workspace name assignment to output \"%s\"\n", assignment->output);
-                GREP_FIRST(output, croot, !strcmp(child->name, assignment->output));
+                gaps = assignment->gaps;
+
+                if (assignment->output != NULL) {
+                    DLOG("Found workspace name assignment to output \"%s\"\n", assignment->output);
+                    GREP_FIRST(output, croot, !strcmp(child->name, assignment->output));
+                }
+
                 break;
             } else if (parsed_num != -1 && name_is_digits(assignment->name) && ws_name_to_number(assignment->name) == parsed_num) {
-                DLOG("Found workspace number assignment to output \"%s\"\n", assignment->output);
-                GREP_FIRST(output, croot, !strcmp(child->name, assignment->output));
+                gaps = assignment->gaps;
+
+                if (assignment->output != NULL) {
+                    DLOG("Found workspace number assignment to output \"%s\"\n", assignment->output);
+                    GREP_FIRST(output, croot, !strcmp(child->name, assignment->output));
+                }
             }
         }
 
@@ -86,6 +96,7 @@ Con *workspace_get(const char *num, bool *created) {
         workspace->workspace_layout = config.default_layout;
         workspace->num = parsed_num;
         LOG("num = %d\n", workspace->num);
+        workspace->gap_config = gaps;
 
         workspace->parent = content;
         _workspace_apply_default_orientation(workspace);
@@ -162,6 +173,7 @@ Con *create_workspace_on_output(Output *output, Con *content) {
         struct Workspace_Assignment *assignment;
         TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
             if (strcmp(assignment->name, ws->name) != 0 ||
+                assignment->output == NULL ||
                 strcmp(assignment->output, output->name) == 0)
                 continue;
 
@@ -205,6 +217,15 @@ Con *create_workspace_on_output(Output *output, Con *content) {
         }
         sasprintf(&(ws->name), "%d", c);
     }
+
+    struct Workspace_Assignment *assignment;
+    TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
+        if (strcmp(assignment->name, ws->name) == 0) {
+            ws->gap_config = assignment->gaps;
+            break;
+        }
+    }
+
     con_attach(ws, content, false);
 
     sasprintf(&name, "[i3 con] workspace %s", ws->name);

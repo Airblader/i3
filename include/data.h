@@ -121,6 +121,9 @@ typedef enum {
 struct gap_config_t {
     int inner;
     int outer;
+
+    /* If set, these gap values are absolute, i.e., other values are not added to it. */
+    bool absolute;
 };
 
 /**
@@ -182,12 +185,13 @@ struct deco_render_params {
 };
 
 /**
- * Stores which workspace (by name or number) goes to which output.
+ * Stores which workspace (by name or number) goes to which output and its gaps config.
  *
  */
 struct Workspace_Assignment {
     char *name;
     char *output;
+    gap_config_t gaps;
 
     TAILQ_ENTRY(Workspace_Assignment) ws_assignments;
 };

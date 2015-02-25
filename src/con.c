@@ -1748,9 +1748,7 @@ char *con_get_tree_representation(Con *con) {
 }
 
 /**
- * Calculates the effective gap sizes for a container depending
- * on whether it is adjacent to the edge of the screen or another
- * container.
+ * Calculates the effective gap sizes for a container.
  */
 gap_config_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
@@ -1758,9 +1756,17 @@ gap_config_t calculate_effective_gaps(Con *con) {
         return (gap_config_t) { 0, 0 };
 
     gap_config_t gaps = {
-        .inner = (config.gap_config.inner + workspace->gap_config.inner) / 2,
-        .outer = config.gap_config.outer + workspace->gap_config.outer
+        .inner = workspace->gap_config.inner / 2,
+        .outer = workspace->gap_config.outer
     };
+
+    /* If the workspace doesn't claim an absolute override, add the default to it. */
+    if (!workspace->gap_config.absolute) {
+        gaps.inner += config.gap_config.inner / 2;
+        gaps.outer += config.gap_config.outer;
+    }
+
+    /* Outer gaps are added on top of inner gaps. */
     gaps.outer += 2 * gaps.inner;
 
     return gaps;

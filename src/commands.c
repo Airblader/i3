@@ -1289,7 +1289,7 @@ void cmd_move_workspace_to_output(I3_CMD, char *name) {
             bool used_assignment = false;
             struct Workspace_Assignment *assignment;
             TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
-                if (strcmp(assignment->output, current_output->name) != 0)
+                if (assignment->output == NULL || strcmp(assignment->output, current_output->name) != 0)
                     continue;
 
                 /* check if this workspace is already attached to the tree */

@@ -62,7 +62,7 @@ state GAPS:
 
 state GAPS_WITH_SCOPE:
   value = number
-      -> call cfg_gaps($scope, &value)
+      -> call cfg_gaps($workspace, $scope, &value)
 
 # smart_borders true|false
 # smart_borders no_gaps
@@ -230,13 +230,16 @@ state FORCE_DISPLAY_URGENCY_HINT_MS:
       -> call cfg_force_display_urgency_hint(&duration_ms)
 
 # workspace <workspace> output <output>
+# workspace <workspace> gaps inner|outer <px>
 state WORKSPACE:
   workspace = word
-    -> WORKSPACE_OUTPUT
+    -> WORKSPACE_COMMAND
 
-state WORKSPACE_OUTPUT:
+state WORKSPACE_COMMAND:
   'output'
       -> WORKSPACE_OUTPUT_STR
+  'gaps'
+      -> GAPS
 
 state WORKSPACE_OUTPUT_STR:
   output = word
