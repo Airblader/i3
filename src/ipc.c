@@ -158,8 +158,6 @@ static void dump_gaps(yajl_gen gen, const char *name, gaps_t gaps) {
     y(integer, gaps.inner);
     ystr("outer");
     y(integer, gaps.outer);
-    ystr("absolute");
-    y(bool, gaps.absolute);
     y(map_close);
 }
 

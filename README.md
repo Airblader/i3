@@ -84,7 +84,8 @@ workspace <ws> gaps inner <px>
 workspace <ws> gaps outer <px>
 ```
 
-Note that multiple such assignments are allowed (and perhaps necessary). These values are absolute for that workspace, i.e., they are not added with the global default that was set. The `ws` variable can either be a number or a name, so both of these are valid:
+It is important that these commands are specified after the global default since they are meant to override it.
+Note that multiple such assignments are allowed (and perhaps necessary).  The `ws` variable can either be a number or a name, so both of these are valid:
 
 ````
 workspace 1 gaps inner 0

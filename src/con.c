@@ -1756,15 +1756,9 @@ gaps_t calculate_effective_gaps(Con *con) {
         return (gaps_t) { 0, 0 };
 
     gaps_t gaps = {
-        .inner = workspace->gaps.inner / 2,
-        .outer = workspace->gaps.outer
+        .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
+        .outer = workspace->gaps.outer + config.gaps.outer
     };
-
-    /* If the workspace doesn't claim an absolute override, add the default to it. */
-    if (!workspace->gaps.absolute) {
-        gaps.inner += config.gaps.inner / 2;
-        gaps.outer += config.gaps.outer;
-    }
 
     /* Outer gaps are added on top of inner gaps. */
     gaps.outer += 2 * gaps.inner;

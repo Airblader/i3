@@ -225,7 +225,6 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
     struct Workspace_Assignment *assignment;
     TAILQ_FOREACH (assignment, &ws_assignments, ws_assignments) {
         if (strcasecmp(assignment->name, workspace) == 0) {
-            assignment->gaps.absolute = true;
             if (inner)
                 assignment->gaps.inner = value;
             else
@@ -239,7 +238,6 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
     assignment = scalloc(sizeof(struct Workspace_Assignment));
     assignment->name = sstrdup(workspace);
     assignment->output = NULL;
-    assignment->gaps.absolute = true;
     if (inner)
         assignment->gaps.inner = value;
     else
@@ -252,12 +250,12 @@ CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
         if (workspace == NULL)
             config.gaps.inner = value;
         else
-            create_gaps_assignment(workspace, true, value);
+            create_gaps_assignment(workspace, true, value - config.gaps.inner);
     } else if (!strcmp(scope, "outer")) {
         if (workspace == NULL)
             config.gaps.outer = value;
         else
-            create_gaps_assignment(workspace, false, value);
+            create_gaps_assignment(workspace, false, value - config.gaps.outer);
     } else {
         ELOG("Invalid command, cannot process scope %s", scope);
     }

@@ -121,9 +121,6 @@ typedef enum {
 struct gaps_t {
     int inner;
     int outer;
-
-    /* If set, these gap values are absolute, i.e., other values are not added to it. */
-    bool absolute;
 };
 
 /**

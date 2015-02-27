@@ -424,11 +424,6 @@ static int json_bool(void *ctx, int val) {
             current_swallow->restart_mode = val;
     }
 
-    if (parsing_gaps) {
-        if (strcasecmp(last_key, "absolute") == 0)
-            json_node->gaps.absolute = val;
-    }
-
     return 1;
 }
 
