@@ -369,3 +369,9 @@ gaps_t calculate_effective_gaps(Con *con);
  *
  */
 void con_force_split_parents_redraw(Con *con);
+
+/**
+ * Recursively check whether the (potential) parent container
+ * contains the (potential) child container.
+ */
+bool con_has_parent(Con *parent, Con *child);

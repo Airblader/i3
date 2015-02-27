@@ -136,9 +136,27 @@ bool should_inset_con(Con *con, int children) {
  * the container is not touching the edge of the screen in that direction.
  */
 bool has_adjacent_container(Con *con, direction_t direction) {
+    Con *workspace = con_get_workspace(con);
+    Con *fullscreen = con_get_fullscreen_con(workspace, CF_GLOBAL);
+    if (fullscreen == NULL)
+        fullscreen = con_get_fullscreen_con(workspace, CF_OUTPUT);
+
+    /* If this container is fullscreen by itself, there's no adjacent container. */
+    if (con == fullscreen)
+        return false;
+
     Con *first = con;
-    Con *tmp = NULL;
-    return resize_find_tiling_participants(&first, &tmp, direction);
+    Con *second = NULL;
+    bool found_neighbor = resize_find_tiling_participants(&first, &second, direction);
+    if (!found_neighbor)
+        return false;
+
+    /* If we have an adjacent container and nothing is fullscreen, we consider it. */
+    if (fullscreen == NULL)
+        return true;
+
+    /* For fullscreen containers, only consider the adjacent container if it is also fullscreen. */
+    return con_has_parent(fullscreen, con) && con_has_parent(fullscreen, second);
 }
 
 /*
