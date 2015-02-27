@@ -1765,3 +1765,20 @@ gaps_t calculate_effective_gaps(Con *con) {
 
     return gaps;
 }
+
+/**
+ * Recursively check whether the (potential) parent container
+ * contains the (potential) child container.
+ */
+bool con_has_parent(Con *parent, Con *child) {
+    Con *current = NULL;
+    TAILQ_FOREACH(current, &(parent->nodes_head), nodes) {
+        if (current == child)
+            return true;
+
+        if (con_has_parent(current, child))
+            return true;
+    }
+
+    return false;
+}
