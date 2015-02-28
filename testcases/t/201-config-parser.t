@@ -433,7 +433,7 @@ client.focused          #4c7899 #285577 #ffffff #2e9ef4
 EOT
 
 my $expected_all_tokens = <<'EOT';
-ERROR: CONFIG: Expected one of these tokens: <end>, '#', 'set', 'bindsym', 'bindcode', 'bind', 'bar', 'font', 'mode', 'gaps', 'floating_minimum_size', 'floating_maximum_size', 'floating_modifier', 'default_orientation', 'workspace_layout', 'new_window', 'new_float', 'hide_edge_borders', 'for_window', 'assign', 'focus_follows_mouse', 'mouse_warping', 'force_focus_wrapping', 'force_xinerama', 'force-xinerama', 'workspace_auto_back_and_forth', 'fake_outputs', 'fake-outputs', 'force_display_urgency_hint', 'workspace', 'ipc_socket', 'ipc-socket', 'restart_state', 'popup_during_fullscreen', 'exec_always', 'exec', 'client.background', 'client.focused_inactive', 'client.focused', 'client.unfocused', 'client.urgent', 'client.placeholder'
+ERROR: CONFIG: Expected one of these tokens: <end>, '#', 'set', 'bindsym', 'bindcode', 'bind', 'bar', 'font', 'mode', 'gaps', 'smart_borders', 'floating_minimum_size', 'floating_maximum_size', 'floating_modifier', 'default_orientation', 'workspace_layout', 'new_window', 'new_float', 'hide_edge_borders', 'for_window', 'assign', 'focus_follows_mouse', 'mouse_warping', 'force_focus_wrapping', 'force_xinerama', 'force-xinerama', 'workspace_auto_back_and_forth', 'fake_outputs', 'fake-outputs', 'force_display_urgency_hint', 'workspace', 'ipc_socket', 'ipc-socket', 'restart_state', 'popup_during_fullscreen', 'exec_always', 'exec', 'client.background', 'client.focused_inactive', 'client.focused', 'client.unfocused', 'client.urgent', 'client.placeholder'
 EOT
 
 my $expected_end = <<'EOT';
@@ -647,7 +647,7 @@ EOT
 
 $expected = <<'EOT';
 cfg_bar_output(LVDS-1)
-ERROR: CONFIG: Expected one of these tokens: <end>, '#', 'set', 'i3bar_command', 'status_command', 'socket_path', 'mode', 'hidden_state', 'id', 'modifier', 'wheel_up_cmd', 'wheel_down_cmd', 'position', 'output', 'tray_output', 'font', 'binding_mode_indicator', 'workspace_buttons', 'strip_workspace_numbers', 'verbose', 'colors', '}'
+ERROR: CONFIG: Expected one of these tokens: <end>, '#', 'set', 'i3bar_command', 'status_command', 'socket_path', 'mode', 'hidden_state', 'id', 'modifier', 'wheel_up_cmd', 'wheel_down_cmd', 'position', 'output', 'tray_output', 'font', 'binding_mode_indicator', 'workspace_buttons', 'strip_workspace_numbers', 'verbose', 'height', 'colors', '}'
 ERROR: CONFIG: (in file <stdin>)
 ERROR: CONFIG: Line   1: bar {
 ERROR: CONFIG: Line   2:     output LVDS-1
