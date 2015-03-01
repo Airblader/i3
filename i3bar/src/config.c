@@ -57,7 +57,7 @@ static int config_null_cb(void *params_) {
 static int config_integer_cb(void *params_, long long val) {
     if (!strcmp(cur_key, "bar_height")) {
         DLOG("bar_height = %lld", val);
-        config.bar_height = (uint32_t) val;
+        config.bar_height = (uint32_t)val;
         return 1;
     }
 

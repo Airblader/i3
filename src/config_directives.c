@@ -223,7 +223,7 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
     DLOG("Setting gaps for workspace %s", workspace);
 
     struct Workspace_Assignment *assignment;
-    TAILQ_FOREACH (assignment, &ws_assignments, ws_assignments) {
+    TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
         if (strcasecmp(assignment->name, workspace) == 0) {
             if (inner)
                 assignment->gaps.inner = value;
@@ -495,7 +495,7 @@ CFGFUN(bar_verbose, const char *verbose) {
 }
 
 CFGFUN(bar_height, const long height) {
-    current_bar.bar_height = (uint32_t) height;
+    current_bar.bar_height = (uint32_t)height;
 }
 
 CFGFUN(bar_modifier, const char *modifier) {

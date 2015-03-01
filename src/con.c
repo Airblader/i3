@@ -1136,8 +1136,7 @@ Con *con_descend_direction(Con *con, direction_t direction) {
 Rect con_border_style_rect(Con *con) {
     /* Smart border patch: don't put borders on if it's the only container
      * on this workspace. */
-    if (config.smart_borders == ON
-        || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
+    if (config.smart_borders == ON || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
         Con *current = con;
         while (current != NULL && !con_is_floating(current)) {
             Con *parent = current->parent;
@@ -1145,7 +1144,7 @@ Rect con_border_style_rect(Con *con) {
                 break;
 
             if (parent->type == CT_WORKSPACE)
-                return (Rect) { 0, 0, 0, 0 };
+                return (Rect){0, 0, 0, 0};
             else
                 current = parent;
         }
@@ -1753,12 +1752,11 @@ char *con_get_tree_representation(Con *con) {
 gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
     if (workspace == NULL)
-        return (gaps_t) { 0, 0 };
+        return (gaps_t){0, 0};
 
     gaps_t gaps = {
         .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
-        .outer = workspace->gaps.outer + config.gaps.outer
-    };
+        .outer = workspace->gaps.outer + config.gaps.outer};
 
     /* Outer gaps are added on top of inner gaps. */
     gaps.outer += 2 * gaps.inner;

@@ -126,8 +126,7 @@ bool should_inset_con(Con *con, int children) {
     if (con_is_leaf(con))
         return true;
 
-    return (con->layout == L_STACKED || con->layout == L_TABBED)
-        && children > 0;
+    return (con->layout == L_STACKED || con->layout == L_TABBED) && children > 0;
 }
 
 /*
@@ -189,12 +188,11 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
     bool should_inset = should_inset_con(con, children);
     if (!already_inset && should_inset) {
         gaps_t gaps = calculate_effective_gaps(con);
-        Rect inset = (Rect) {
-            has_adjacent_container(con, D_LEFT)  ?  gaps.inner :  gaps.outer,
-            has_adjacent_container(con, D_UP)    ?  gaps.inner :  gaps.outer,
+        Rect inset = (Rect){
+            has_adjacent_container(con, D_LEFT) ? gaps.inner : gaps.outer,
+            has_adjacent_container(con, D_UP) ? gaps.inner : gaps.outer,
             has_adjacent_container(con, D_RIGHT) ? -gaps.inner : -gaps.outer,
-            has_adjacent_container(con, D_DOWN)  ? -gaps.inner : -gaps.outer
-        };
+            has_adjacent_container(con, D_DOWN) ? -gaps.inner : -gaps.outer};
         inset.width -= inset.x;
         inset.height -= inset.y;
 
@@ -323,7 +321,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
     } else if (con->type == CT_ROOT) {
         Con *output;
         if (!fullscreen) {
-            TAILQ_FOREACH (output, &(con->nodes_head), nodes) {
+            TAILQ_FOREACH(output, &(con->nodes_head), nodes) {
                 render_con(output, false, false);
             }
         }
