@@ -73,6 +73,8 @@ static void clear_statusline(struct statusline_head *head, bool free_resources) 
             FREE(first->color);
             FREE(first->name);
             FREE(first->instance);
+            FREE(first->background);
+            FREE(first->border);
         }
 
         TAILQ_REMOVE(head, first, blocks);
