@@ -804,21 +804,6 @@ static void handle_client_message(xcb_client_message_event_t *event) {
             XCB_ATOM_CARDINAL, 32, 4,
             &r);
         xcb_flush(conn);
-    } else if (event->type == A_WM_CHANGE_STATE) {
-        /* http://tronche.com/gui/x/icccm/sec-4.html#s-4.1.4 */
-        Con *con = con_by_window_id(event->window);
-
-        if (con && event->data.data32[0] == 3) {
-            /* this request is so we can play some animiation showing the
-             * window physically moving to the tray before we close it (I
-             * think) */
-            DLOG("Client has requested iconic state. Closing this con. (con = %p)\n", con);
-            tree_close(con, DONT_KILL_WINDOW, false, false);
-            tree_render();
-        } else {
-            DLOG("Not handling WM_CHANGE_STATE request. (window = %d, state = %d)\n", event->window, event->data.data32[0]);
-        }
-
     } else if (event->type == A__NET_CURRENT_DESKTOP) {
         /* This request is used by pagers and bars to change the current
          * desktop likely as a result of some user action. We interpret this as
@@ -1282,7 +1267,7 @@ void handle_event(int type, xcb_generic_event_t *event) {
             /* See The XKB Extension: Library Specification, section 14.1 */
             /* We check if the current group (each group contains
              * two levels) has been changed. Mode_switch activates
-             * group XkbGroup2Index */
+             * group XCB_XKB_GROUP_2 */
             if (xkb_current_group == state->group)
                 return;
             xkb_current_group = state->group;
@@ -1292,7 +1277,7 @@ void handle_event(int type, xcb_generic_event_t *event) {
                 grab_all_keys(conn, false);
             } else {
                 DLOG("Mode_switch enabled\n");
-                grab_all_keys(conn, false);
+                grab_all_keys(conn, true);
             }
         }
 
