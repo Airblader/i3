@@ -106,13 +106,24 @@ struct xcb_colors_t {
 };
 struct xcb_colors_t colors;
 
-const static int ws_hoff_px = 4, /* Horizontal offset between a workspace label and button borders */
-    ws_voff_px = 3,              /* Vertical offset between a workspace label and button borders */
-    ws_spacing_px = 1,           /* Offset between two workspace buttons */
-    sb_hoff_px = 4,              /* Offset between the statusline and 1) workspace buttons on the left
-                                     *                                   2) the tray or screen edge on the right */
-    tray_loff_px = 2,            /* Additional offset between the tray and the statusline, if the tray is not empty */
-    sep_voff_px = 4;             /* Vertical offset between the bar and a separator */
+/* Horizontal offset between a workspace label and button borders */
+const static int ws_hoff_px = 4;
+
+/* Vertical offset between a workspace label and button borders */
+const static int ws_voff_px = 3;
+
+/* Offset between two workspace buttons */
+const static int ws_spacing_px = 1;
+
+/* Offset between the statusline and 1) workspace buttons on the left
+ *                                   2) the tray or screen edge on the right */
+const static int sb_hoff_px = 4;
+
+/* Additional offset between the tray and the statusline, if the tray is not empty */
+const static int tray_loff_px = 2;
+
+/* Vertical offset between the bar and a separator */
+const static int sep_voff_px = 4;
 
 /* We define xcb_request_failed as a macro to include the relevant line-number */
 #define xcb_request_failed(cookie, err_msg) _xcb_request_failed(cookie, err_msg, __LINE__)
