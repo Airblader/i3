@@ -30,7 +30,7 @@
 /* Global variables for child_*() */
 i3bar_child child;
 
-/* stdin- and sigchild-watchers */
+/* stdin- and SIGCHLD-watchers */
 ev_io *stdin_io;
 ev_child *child_sig;
 
@@ -74,6 +74,7 @@ static void clear_statusline(struct statusline_head *head, bool free_resources) 
             FREE(first->color);
             FREE(first->name);
             FREE(first->instance);
+            FREE(first->min_width_str);
             FREE(first->background);
             FREE(first->border);
         }
@@ -126,7 +127,7 @@ __attribute__((format(printf, 1, 2))) static void set_statusline_error(const cha
 }
 
 /*
- * Stop and free() the stdin- and sigchild-watchers
+ * Stop and free() the stdin- and SIGCHLD-watchers
  *
  */
 void cleanup(void) {
@@ -171,6 +172,9 @@ static int stdin_start_map(void *context) {
     ctx->block.border_bottom = 1;
     ctx->block.border_left = 1;
 
+    /* Use markup by default */
+    ctx->block.is_markup = true;
+
     return 1;
 }
 
@@ -209,6 +213,9 @@ static int stdin_string(void *context, const unsigned char *val, size_t len) {
     if (strcasecmp(ctx->last_map_key, "border") == 0) {
         sasprintf(&(ctx->block.border), "%.*s", len, val);
     }
+    if (strcasecmp(ctx->last_map_key, "markup") == 0) {
+        ctx->block.is_markup = (len == strlen("pango") && !strncasecmp((const char *)val, "pango", strlen("pango")));
+    }
     if (strcasecmp(ctx->last_map_key, "align") == 0) {
         if (len == strlen("center") && !strncmp((const char *)val, "center", strlen("center"))) {
             ctx->block.align = ALIGN_CENTER;
@@ -218,9 +225,10 @@ static int stdin_string(void *context, const unsigned char *val, size_t len) {
             ctx->block.align = ALIGN_LEFT;
         }
     } else if (strcasecmp(ctx->last_map_key, "min_width") == 0) {
-        i3String *text = i3string_from_markup_with_length((const char *)val, len);
-        ctx->block.min_width = (uint32_t)predict_text_width(text);
-        i3string_free(text);
+        char *copy = (char *)malloc(len + 1);
+        strncpy(copy, (const char *)val, len);
+        copy[len] = 0;
+        ctx->block.min_width_str = copy;
     }
     if (strcasecmp(ctx->last_map_key, "name") == 0) {
         char *copy = (char *)malloc(len + 1);
@@ -274,6 +282,19 @@ static int stdin_end_map(void *context) {
         new_block->full_text = i3string_from_utf8("SPEC VIOLATION: full_text is NULL!");
     if (new_block->urgent)
         ctx->has_urgent = true;
+
+    if (new_block->min_width_str) {
+        i3String *text = i3string_from_utf8(new_block->min_width_str);
+        i3string_set_markup(text, new_block->is_markup);
+        new_block->min_width = (uint32_t)predict_text_width(text);
+        i3string_free(text);
+    }
+
+    i3string_set_markup(new_block->full_text, new_block->is_markup);
+
+    if (new_block->short_text != NULL)
+        i3string_set_markup(new_block->short_text, new_block->is_markup);
+
     TAILQ_INSERT_TAIL(&statusline_buffer, new_block, blocks);
     return 1;
 }
@@ -291,7 +312,7 @@ static int stdin_end_array(void *context) {
     struct status_block *current;
     TAILQ_FOREACH(current, &statusline_head, blocks) {
         DLOG("full_text = %s\n", i3string_as_utf8(current->full_text));
-        DLOG("short_text = %s\n", i3string_as_utf8(current->short_text));
+        DLOG("short_text = %s\n", (current->short_text == NULL ? NULL : i3string_as_utf8(current->short_text)));
         DLOG("color = %s\n", current->color);
     }
     DLOG("end of dump\n");
@@ -433,8 +454,8 @@ void stdin_io_first_line_cb(struct ev_loop *loop, ev_io *watcher, int revents) {
 }
 
 /*
- * We received a sigchild, meaning, that the child-process terminated.
- * We simply free the respective data-structures and don't care for input
+ * We received a SIGCHLD, meaning, that the child process terminated.
+ * We simply free the respective data structures and don't care for input
  * anymore
  *
  */
@@ -471,7 +492,7 @@ void child_write_output(void) {
 }
 
 /*
- * Start a child-process with the specified command and reroute stdin.
+ * Start a child process with the specified command and reroute stdin.
  * We actually start a $SHELL to execute the command so we don't have to care
  * about arguments and such.
  *
@@ -599,7 +620,7 @@ void send_block_clicked(int button, const char *name, const char *instance, int 
 }
 
 /*
- * kill()s the child-process (if any). Called when exit()ing.
+ * kill()s the child process (if any). Called when exit()ing.
  *
  */
 void kill_child_at_exit(void) {
@@ -611,8 +632,8 @@ void kill_child_at_exit(void) {
 }
 
 /*
- * kill()s the child-process (if existent) and closes and
- * free()s the stdin- and sigchild-watchers
+ * kill()s the child process (if existent) and closes and
+ * free()s the stdin- and SIGCHLD-watchers
  *
  */
 void kill_child(void) {
@@ -627,7 +648,7 @@ void kill_child(void) {
 }
 
 /*
- * Sends a SIGSTOP to the child-process (if existent)
+ * Sends a SIGSTOP to the child process (if existent)
  *
  */
 void stop_child(void) {
@@ -638,7 +659,7 @@ void stop_child(void) {
 }
 
 /*
- * Sends a SIGCONT to the child-process (if existent)
+ * Sends a SIGCONT to the child process (if existent)
  *
  */
 void cont_child(void) {

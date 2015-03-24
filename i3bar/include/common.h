@@ -40,7 +40,13 @@ struct status_block {
     char *color;
     char *background;
     char *border;
+
+    /* min_width can be specified either as a numeric value (in pixels) or as a
+     * string. For strings, we set min_width to the measured text width of
+     * min_width_str. */
     uint32_t min_width;
+    char *min_width_str;
+
     blockalign_t align;
 
     bool urgent;
@@ -49,6 +55,7 @@ struct status_block {
     uint32_t border_right;
     uint32_t border_bottom;
     uint32_t border_left;
+    bool is_markup;
 
     /* The amount of pixels necessary to render a separater after the block. */
     uint32_t sep_block_width;
