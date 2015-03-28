@@ -172,9 +172,6 @@ static int stdin_start_map(void *context) {
     ctx->block.border_bottom = 1;
     ctx->block.border_left = 1;
 
-    /* Use markup by default */
-    ctx->block.is_markup = true;
-
     return 1;
 }
 
