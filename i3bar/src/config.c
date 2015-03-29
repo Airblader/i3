@@ -38,7 +38,7 @@ static int config_map_key_cb(void *params_, const unsigned char *keyVal, size_t 
 }
 
 /*
- * Parse a null-value (current_workspace)
+ * Parse a null value (current_workspace)
  *
  */
 static int config_null_cb(void *params_) {
@@ -57,7 +57,7 @@ static int config_null_cb(void *params_) {
 static int config_integer_cb(void *params_, long long val) {
     if (!strcmp(cur_key, "bar_height")) {
         DLOG("bar_height = %lld", val);
-        config.bar_height = (uint32_t) val;
+        config.bar_height = (uint32_t)val;
         return 1;
     }
 
@@ -156,6 +156,13 @@ static int config_string_cb(void *params_, const unsigned char *val, size_t _len
         return 1;
     }
 
+    if (!strcmp(cur_key, "separator_symbol")) {
+        DLOG("separator = %.*s\n", len, val);
+        I3STRING_FREE(config.separator_symbol);
+        config.separator_symbol = i3string_from_utf8_with_length((const char *)val, len);
+        return 1;
+    }
+
     if (!strcmp(cur_key, "outputs")) {
         DLOG("+output %.*s\n", len, val);
         int new_num_outputs = config.num_outputs + 1;
@@ -244,7 +251,7 @@ static yajl_callbacks outputs_callbacks = {
 };
 
 /*
- * Start parsing the received bar configuration json-string
+ * Start parsing the received bar configuration JSON string
  *
  */
 void parse_config_json(char *json) {
@@ -254,13 +261,13 @@ void parse_config_json(char *json) {
 
     state = yajl_parse(handle, (const unsigned char *)json, strlen(json));
 
-    /* FIXME: Proper errorhandling for JSON-parsing */
+    /* FIXME: Proper error handling for JSON parsing */
     switch (state) {
         case yajl_status_ok:
             break;
         case yajl_status_client_canceled:
         case yajl_status_error:
-            ELOG("Could not parse config-reply!\n");
+            ELOG("Could not parse config reply!\n");
             exit(EXIT_FAILURE);
             break;
     }

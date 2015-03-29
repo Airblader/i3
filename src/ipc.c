@@ -167,7 +167,7 @@ static void dump_binding(yajl_gen gen, Binding *bind) {
     y(integer, bind->keycode);
 
     ystr("input_type");
-    ystr((const char*)(bind->input_type == B_KEYBOARD ? "keyboard" : "mouse"));
+    ystr((const char *)(bind->input_type == B_KEYBOARD ? "keyboard" : "mouse"));
 
     ystr("symbol");
     if (bind->symbol == NULL)
@@ -409,7 +409,8 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
         ystr("transient_for");
         if (con->window->transient_for == XCB_NONE)
             y(null);
-        else y(integer, con->window->transient_for);
+        else
+            y(integer, con->window->transient_for);
 
         y(map_close);
     }
@@ -461,6 +462,10 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
     y(array_open);
     Match *match;
     TAILQ_FOREACH(match, &(con->swallow_head), matches) {
+        /* We will generate a new restart_mode match specification after this
+         * loop, so skip this one. */
+        if (match->restart_mode)
+            continue;
         y(map_open);
         if (match->dock != -1) {
             ystr("dock");
@@ -608,6 +613,11 @@ static void dump_bar_config(yajl_gen gen, Barconfig *config) {
     if (config->bar_height) {
         ystr("bar_height");
         y(integer, config->bar_height);
+    }
+
+    if (config->separator_symbol) {
+        ystr("separator_symbol");
+        ystr(config->separator_symbol);
     }
 
     ystr("workspace_buttons");

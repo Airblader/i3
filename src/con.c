@@ -1136,8 +1136,7 @@ Con *con_descend_direction(Con *con, direction_t direction) {
 Rect con_border_style_rect(Con *con) {
     /* Smart border patch: don't put borders on if it's the only container
      * on this workspace. */
-    if (config.smart_borders == ON
-        || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
+    if (config.smart_borders == ON || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
         Con *current = con;
         while (current != NULL && !con_is_floating(current)) {
             Con *parent = current->parent;
@@ -1145,7 +1144,7 @@ Rect con_border_style_rect(Con *con) {
                 break;
 
             if (parent->type == CT_WORKSPACE)
-                return (Rect) { 0, 0, 0, 0 };
+                return (Rect){0, 0, 0, 0};
             else
                 current = parent;
         }
@@ -1166,12 +1165,12 @@ Rect con_border_style_rect(Con *con) {
     /* Shortcut to avoid calling con_adjacent_borders() on dock containers. */
     int border_style = con_border_style(con);
     if (border_style == BS_NONE)
-        return (Rect) {0, 0, 0, 0};
+        return (Rect){0, 0, 0, 0};
     borders_to_hide = con_adjacent_borders(con) & config.hide_edge_borders;
     if (border_style == BS_NORMAL) {
-        result = (Rect) {border_width, 0, -(2 * border_width), -(border_width)};
+        result = (Rect){border_width, 0, -(2 * border_width), -(border_width)};
     } else {
-        result = (Rect) {border_width, border_width, -(2 * border_width), -(2 * border_width)};
+        result = (Rect){border_width, border_width, -(2 * border_width), -(2 * border_width)};
     }
 
     /* Floating windows are never adjacent to any other window, so
@@ -1490,7 +1489,7 @@ Rect con_minimum_size(Con *con) {
 
     if (con_is_leaf(con)) {
         DLOG("leaf node, returning 75x50\n");
-        return (Rect) {0, 0, 75, 50};
+        return (Rect){0, 0, 75, 50};
     }
 
     if (con->type == CT_FLOATING_CON) {
@@ -1510,7 +1509,7 @@ Rect con_minimum_size(Con *con) {
         }
         DLOG("stacked/tabbed now, returning %d x %d + deco_rect = %d\n",
              max_width, max_height, deco_height);
-        return (Rect) {0, 0, max_width, max_height + deco_height};
+        return (Rect){0, 0, max_width, max_height + deco_height};
     }
 
     /* For horizontal/vertical split containers we sum up the width (h-split)
@@ -1530,7 +1529,7 @@ Rect con_minimum_size(Con *con) {
             }
         }
         DLOG("split container, returning width = %d x height = %d\n", width, height);
-        return (Rect) {0, 0, width, height};
+        return (Rect){0, 0, width, height};
     }
 
     ELOG("Unhandled case, type = %d, layout = %d, split = %d\n",
@@ -1753,12 +1752,11 @@ char *con_get_tree_representation(Con *con) {
 gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
     if (workspace == NULL)
-        return (gaps_t) { 0, 0 };
+        return (gaps_t){0, 0};
 
     gaps_t gaps = {
         .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
-        .outer = workspace->gaps.outer + config.gaps.outer
-    };
+        .outer = workspace->gaps.outer + config.gaps.outer};
 
     /* Outer gaps are added on top of inner gaps. */
     gaps.outer += 2 * gaps.inner;
