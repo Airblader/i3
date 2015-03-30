@@ -40,6 +40,7 @@ state INITIAL:
   'workspace_auto_back_and_forth'          -> WORKSPACE_BACK_AND_FORTH
   'fake_outputs', 'fake-outputs'           -> FAKE_OUTPUTS
   'force_display_urgency_hint'             -> FORCE_DISPLAY_URGENCY_HINT
+  'focus_on_window_activation'             -> FOCUS_ON_WINDOW_ACTIVATION
   'workspace'                              -> WORKSPACE
   'ipc_socket', 'ipc-socket'               -> IPC_SOCKET
   'restart_state'                          -> RESTART_STATE
@@ -228,6 +229,11 @@ state FORCE_DISPLAY_URGENCY_HINT_MS:
       ->
   end
       -> call cfg_force_display_urgency_hint(&duration_ms)
+
+# focus_on_window_activation <smart|urgent|focus|none>
+state FOCUS_ON_WINDOW_ACTIVATION:
+  mode = word
+      -> call cfg_focus_on_window_activation($mode)
 
 # workspace <workspace> output <output>
 # workspace <workspace> gaps inner|outer <px>
