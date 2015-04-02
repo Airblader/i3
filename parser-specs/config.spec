@@ -33,6 +33,7 @@ state INITIAL:
   'hide_edge_borders'                      -> HIDE_EDGE_BORDERS
   'for_window'                             -> FOR_WINDOW
   'assign'                                 -> ASSIGN
+  'no_focus'                               -> NO_FOCUS
   'focus_follows_mouse'                    -> FOCUS_FOLLOWS_MOUSE
   'mouse_warping'                          -> MOUSE_WARPING
   'force_focus_wrapping'                   -> FORCE_FOCUS_WRAPPING
@@ -168,6 +169,15 @@ state ASSIGN_WORKSPACE:
       ->
   workspace = string
       -> call cfg_assign($workspace)
+
+# no_focus <criteria>
+state NO_FOCUS:
+  '['
+      -> call cfg_criteria_init(NO_FOCUS_END); CRITERIA
+
+state NO_FOCUS_END:
+  end
+      -> call cfg_no_focus()
 
 # Criteria: Used by for_window and assign.
 state CRITERIA:
