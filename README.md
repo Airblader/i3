@@ -9,27 +9,7 @@ This fork, much like i3 itself, maintains two branches: The `gaps` branch is the
 
 # Installation
 
-First, clone the repository and switch into that folder. From there, installing (and updating) i3 is as easy as `make && sudo make install`. The next time you log in, simply select i3 as the desktop environment in your login manager. If you don't use one, start i3 from your `.xinitrc` or similar (in this case, I'm sure you know what to do – if not, google it).
-
-When first compiling i3, you need to install a few dependencies. The following is a list of packages needed when compiling the `gaps` branch on a fresh installation of Ubuntu 14.04. The package names for other distros will be different, but if you use, e.g., Arch, you probably know how to figure them out anyway.
-
-
-````
-apt-get install libxcb1-dev libxcb-keysyms1-dev libpango1.0-dev libxcb-util0-dev libxcb-icccm4-dev \
-  libyajl-dev libstartup-notification0-dev libxcb-randr0-dev libev-dev libxcb-cursor-dev libxcb-xinerama0-dev
-```
-
-To compile `gaps-next`, you'll need the following as well:
-
-````
-apt-get install libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
-```
-
-This may vary for other distributions. If you have trouble compiling it, just open an issue to let me know.
-
-## Arch Linux
-
-[i3-gaps-git](https://aur.archlinux.org/packages/i3-gaps-git/) and [i3-gaps-next-git](https://aur.archlinux.org/packages/i3-gaps-next-git/) are available on the AUR.
+Please refer to the wiki to see how i3-gaps can be installed and for which distributions there are packages available.
 
 # Updating
 
