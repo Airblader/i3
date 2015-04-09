@@ -113,6 +113,16 @@ mode "$mode_gaps_outer" {
 }
 ```
 
+### Smart Gaps
+
+If you want gaps to only be used if there is more than one container on the workspace, you can use
+
+````
+smart_gaps on
+```
+
+This will disable all gaps (outer and inner) on the workspace whenever only one container is on the current workspace.
+
 
 ### Smart Borders
 
