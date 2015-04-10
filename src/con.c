@@ -520,6 +520,9 @@ int con_num_children(Con *con) {
  * this will return 2 instead of 1.
  */
 int con_num_visible_children(Con *con) {
+    if (con == NULL)
+        return 0;
+
     int children = 0;
     Con *current = NULL;
     TAILQ_FOREACH(current, &(con->nodes_head), nodes) {
@@ -1157,20 +1160,8 @@ Con *con_descend_direction(Con *con, direction_t direction) {
  *
  */
 Rect con_border_style_rect(Con *con) {
-    /* Smart border patch: don't put borders on if it's the only container
-     * on this workspace. */
-    if (config.smart_borders == ON || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
-        Con *current = con;
-        while (current != NULL && !con_is_floating(current)) {
-            Con *parent = current->parent;
-            if (con_num_children(parent) != 1)
-                break;
-
-            if (parent->type == CT_WORKSPACE)
-                return (Rect){0, 0, 0, 0};
-            else
-                current = parent;
-        }
+    if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
+        return (Rect){0, 0, 0, 0};
     }
 
     adjacent_t borders_to_hide = ADJ_NONE;
