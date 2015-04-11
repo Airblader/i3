@@ -2,7 +2,7 @@
 
 This is a fork of [i3wm](http://www.i3wm.org), a tiling window manager for Linux. It includes a few additional features which you can read up on below.
 
-If you want to check out how you could use them, you could check out my [dotfiles repository](https://www.github.com/Airblader/dotfiles).
+If you want to check out how you could use them, you could check out my [dotfiles repository](https://www.github.com/Airblader/dotfiles-manjaro).
 
 This fork, much like i3 itself, maintains two branches: The `gaps` branch is the equivalent of i3's stable `master` branch while `gaps-next` contains `gaps` and i3's `next`.
 
