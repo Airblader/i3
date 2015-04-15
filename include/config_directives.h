@@ -42,6 +42,7 @@ CFGFUN(exec, const char *exectype, const char *no_startup_id, const char *comman
 CFGFUN(for_window, const char *command);
 CFGFUN(gaps, const char *workspace, const char *type, const long value);
 CFGFUN(smart_borders, const char *enable);
+CFGFUN(smart_gaps, const char *enable);
 CFGFUN(floating_minimum_size, const long width, const long height);
 CFGFUN(floating_maximum_size, const long width, const long height);
 CFGFUN(default_orientation, const char *orientation);
