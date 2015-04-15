@@ -514,6 +514,32 @@ int con_num_children(Con *con) {
     return children;
 }
 
+/**
+ * Returns the number of visible non-floating children of this container.
+ * For example, if the container contains a hsplit which has two children,
+ * this will return 2 instead of 1.
+ */
+int con_num_visible_children(Con *con) {
+    if (con == NULL)
+        return 0;
+
+    int children = 0;
+    Con *current = NULL;
+    TAILQ_FOREACH(current, &(con->nodes_head), nodes) {
+        /* Leaf nodes are a child. */
+        if (con_is_leaf(current))
+            children++;
+        /* Stacked and tabbed containers are only considered one child. */
+        else if (current->layout == L_TABBED || current->layout == L_STACKED)
+            children++;
+        /* Split containers need to be recursed. */
+        else if (current->layout == L_SPLITH || current->layout == L_SPLITV)
+            children += con_num_visible_children(current);
+    }
+
+    return children;
+}
+
 /*
  * Updates the percent attribute of the children of the given container. This
  * function needs to be called when a window is added or removed from a
@@ -1143,20 +1169,8 @@ Con *con_descend_direction(Con *con, direction_t direction) {
  *
  */
 Rect con_border_style_rect(Con *con) {
-    /* Smart border patch: don't put borders on if it's the only container
-     * on this workspace. */
-    if (config.smart_borders == ON || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
-        Con *current = con;
-        while (current != NULL && !con_is_floating(current)) {
-            Con *parent = current->parent;
-            if (con_num_children(parent) != 1)
-                break;
-
-            if (parent->type == CT_WORKSPACE)
-                return (Rect){0, 0, 0, 0};
-            else
-                current = parent;
-        }
+    if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
+        return (Rect){0, 0, 0, 0};
     }
 
     adjacent_t borders_to_hide = ADJ_NONE;
@@ -1756,7 +1770,7 @@ char *con_get_tree_representation(Con *con) {
  */
 gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
-    if (workspace == NULL)
+    if (workspace == NULL || (config.smart_gaps && con_num_visible_children(workspace) <= 1))
         return (gaps_t){0, 0};
 
     gaps_t gaps = {
