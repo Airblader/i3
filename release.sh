@@ -1,9 +1,9 @@
 #!/bin/zsh
 # This script is used to prepare a new release of i3.
 
-export RELEASE_VERSION="4.10.1"
-export PREVIOUS_VERSION="4.10"
-export RELEASE_BRANCH="next"
+export RELEASE_VERSION="4.10.2"
+export PREVIOUS_VERSION="4.10.1"
+export RELEASE_BRANCH="master"
 
 if [ ! -e "../i3.github.io" ]
 then
@@ -135,6 +135,10 @@ debsign -k4AC8EE1D ${TMPDIR}/debian/*.changes
 # Section 3: website
 ################################################################################
 
+# Ensure we are in the correct branch for copying the docs.
+cd ${TMPDIR}/i3
+git checkout ${RELEASE_BRANCH}
+
 cd ${TMPDIR}
 git clone --quiet ${STARTDIR}/../i3.github.io
 cd i3.github.io
@@ -172,6 +176,7 @@ git commit -a -m "update docs for ${RELEASE_VERSION}"
 
 git remote remove origin
 git remote add origin git@github.com:i3/i3.github.io.git
+git config --add remote.origin.push "+refs/heads/master:refs/heads/master"
 
 ################################################################################
 # Section 4: prepare release announcement email
@@ -182,12 +187,14 @@ cat >email.txt <<EOT
 From: Michael Stapelberg <michael@i3wm.org>
 To: i3-announce@i3.zekjur.net
 Subject: i3 v${RELEASE_VERSION} released
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 
 Hi,
 
 I just released i3 v${RELEASE_VERSION}. Release notes follow:
 EOT
-cat ${TMPDIR}/i3/RELEASE-NOTES-${RELEASE_VERSION}.txt >>email.txt
+cat ${TMPDIR}/i3/RELEASE-NOTES-${RELEASE_VERSION} >>email.txt
 
 ################################################################################
 # Section 5: final push instructions
@@ -199,6 +206,7 @@ echo "When satisfied, run:"
 echo "  cd ${TMPDIR}/i3"
 echo "  git checkout next"
 echo "  vi debian/changelog"
+echo "  git commit -a -m \"debian: update changelog\""
 echo "  git push"
 echo ""
 echo "  cd ${TMPDIR}/i3.github.io"
@@ -208,7 +216,7 @@ echo "  cd ${TMPDIR}/debian"
 echo "  dput *.changes"
 echo ""
 echo "  cd ${TMPDIR}"
-echo "  sendmail < email.txt"
+echo "  sendmail -t < email.txt"
 echo ""
 echo "Announce on:"
 echo "  twitter"
