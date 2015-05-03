@@ -178,7 +178,7 @@ static void draw_separator(uint32_t x, struct status_block *block) {
         uint32_t separator_x = MAX(x - block->sep_block_width, center_x - separator_symbol_width / 2);
         set_font_colors(statusline_ctx, colors.sep_fg, colors.bar_bg);
         draw_text(config.separator_symbol, statusline_pm, statusline_ctx,
-                  separator_x, logical_px(ws_voff_px), x - separator_x);
+                  separator_x, bar_height / 2 - font.height / 2, x - separator_x);
     }
 }
 
