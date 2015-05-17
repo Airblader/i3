@@ -335,7 +335,7 @@ void cmd_criteria_add(I3_CMD, char *ctype, char *cvalue) {
 
     if (strcmp(ctype, "con_id") == 0) {
         char *end;
-        long parsed = strtol(cvalue, &end, 10);
+        long parsed = strtol(cvalue, &end, 0);
         if (parsed == LONG_MIN ||
             parsed == LONG_MAX ||
             parsed < 0 ||
@@ -350,7 +350,7 @@ void cmd_criteria_add(I3_CMD, char *ctype, char *cvalue) {
 
     if (strcmp(ctype, "id") == 0) {
         char *end;
-        long parsed = strtol(cvalue, &end, 10);
+        long parsed = strtol(cvalue, &end, 0);
         if (parsed == LONG_MIN ||
             parsed == LONG_MAX ||
             parsed < 0 ||
@@ -1830,6 +1830,30 @@ void cmd_move_window_to_center(I3_CMD, char *method) {
     }
 
     // XXX: default reply for now, make this a better reply
+    ysuccess(true);
+}
+
+/*
+ * Implementation of 'move [window|container] [to] position mouse'
+ *
+ */
+void cmd_move_window_to_mouse(I3_CMD) {
+    HANDLE_EMPTY_MATCH;
+
+    owindow *current;
+    TAILQ_FOREACH(current, &owindows, owindows) {
+        Con *floating_con = con_inside_floating(current->con);
+        if (floating_con == NULL) {
+            DLOG("con %p / %s is not floating, cannot move it to the mouse position.\n",
+                 current->con, current->con->name);
+            continue;
+        }
+
+        DLOG("moving floating container %p / %s to cursor position\n", floating_con, floating_con->name);
+        floating_move_to_pointer(floating_con);
+    }
+
+    cmd_output->needs_tree_render = true;
     ysuccess(true);
 }
 
