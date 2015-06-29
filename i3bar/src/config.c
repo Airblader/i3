@@ -294,7 +294,12 @@ static int config_integer_cb(void *params_, long long val) {
         return 1;
     }
 
-    DLOG("got unexpected integer %lld for cur_key = %s\n", val, cur_key);
+    if (!strcmp(cur_key, "tray_padding")) {
+        DLOG("tray_padding = %lld\n", val);
+        config.tray_padding = val;
+        return 1;
+    }
+
     return 0;
 }
 

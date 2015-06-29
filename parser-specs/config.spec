@@ -441,6 +441,7 @@ state BAR:
   'position'               -> BAR_POSITION
   'output'                 -> BAR_OUTPUT
   'tray_output'            -> BAR_TRAY_OUTPUT
+  'tray_padding'           -> BAR_TRAY_PADDING
   'font'                   -> BAR_FONT
   'separator_symbol'       -> BAR_SEPARATOR_SYMBOL
   'binding_mode_indicator' -> BAR_BINDING_MODE_INDICATOR
@@ -512,6 +513,16 @@ state BAR_OUTPUT:
 state BAR_TRAY_OUTPUT:
   output = word
       -> call cfg_bar_tray_output($output); BAR
+
+state BAR_TRAY_PADDING:
+  padding_px = number
+      -> BAR_TRAY_PADDING_PX
+
+state BAR_TRAY_PADDING_PX:
+  'px'
+      ->
+  end
+      -> call cfg_bar_tray_padding(&padding_px); BAR
 
 state BAR_FONT:
   font = string
