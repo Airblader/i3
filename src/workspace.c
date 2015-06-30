@@ -750,7 +750,7 @@ workspace_prev_on_output_end:
  */
 void workspace_back_and_forth(void) {
     if (!previous_workspace_name) {
-        DLOG("No previous workspace name set. Not switching.");
+        DLOG("No previous workspace name set. Not switching.\n");
         return;
     }
 
@@ -763,7 +763,7 @@ void workspace_back_and_forth(void) {
  */
 Con *workspace_back_and_forth_get(void) {
     if (!previous_workspace_name) {
-        DLOG("no previous workspace name set.");
+        DLOG("No previous workspace name set.\n");
         return NULL;
     }
 

@@ -137,6 +137,11 @@ CFGFUN(criteria_add, const char *ctype, const char *cvalue) {
         return;
     }
 
+    if (strcmp(ctype, "workspace") == 0) {
+        current_match->workspace = regex_new(cvalue);
+        return;
+    }
+
     ELOG("Unknown criterion: %s\n", ctype);
 }
 
@@ -425,7 +430,7 @@ CFGFUN(focus_on_window_activation, const char *mode) {
         return;
     }
 
-    DLOG("Set new focus_on_window_activation mode = %i", config.focus_on_window_activation);
+    DLOG("Set new focus_on_window_activation mode = %i.\n", config.focus_on_window_activation);
 }
 
 CFGFUN(show_marks, const char *value) {
@@ -506,7 +511,7 @@ CFGFUN(assign, const char *workspace) {
         ELOG("Match is empty, ignoring this assignment\n");
         return;
     }
-    DLOG("new assignment, using above criteria, to workspace %s\n", workspace);
+    DLOG("New assignment, using above criteria, to workspace \"%s\".\n", workspace);
     Assignment *assignment = scalloc(sizeof(Assignment));
     match_copy(&(assignment->match), current_match);
     assignment->type = A_TO_WORKSPACE;
@@ -520,7 +525,7 @@ CFGFUN(no_focus) {
         return;
     }
 
-    DLOG("new assignment, using above criteria, to ignore focus on manage");
+    DLOG("New assignment, using above criteria, to ignore focus on manage.\n");
     Assignment *assignment = scalloc(sizeof(Assignment));
     match_copy(&(assignment->match), current_match);
     assignment->type = A_NO_FOCUS;
