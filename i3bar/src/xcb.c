@@ -115,9 +115,6 @@ struct xcb_colors_t colors;
 /* Horizontal offset between a workspace label and button borders */
 static const int ws_hoff_px = 4;
 
-/* Vertical offset between a workspace label and button borders */
-static const int ws_voff_px = 3;
-
 /* Offset between two workspace buttons */
 static const int ws_spacing_px = 1;
 
