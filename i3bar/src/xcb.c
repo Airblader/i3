@@ -487,11 +487,6 @@ void handle_button(xcb_button_press_event_t *event) {
         x = original_x;
     }
 
-    if (cur_ws == NULL) {
-        DLOG("No workspace active?\n");
-        return;
-    }
-
     /* If a custom command was specified for this mouse button, it overrides
      * the default behavior. */
     binding_t *binding;
@@ -503,6 +498,10 @@ void handle_button(xcb_button_press_event_t *event) {
         return;
     }
 
+    if (cur_ws == NULL) {
+        DLOG("No workspace active?\n");
+        return;
+    }
     switch (event->detail) {
         case 4:
             /* Mouse wheel up. We select the previous ws, if any.
