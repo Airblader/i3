@@ -1260,7 +1260,7 @@ void init_xcb_late(char *fontname) {
      * based on the font size.
      */
     if (config.bar_height <= 0)
-        bar_height = font.height + 2 * logical_px(config.tray_padding);
+        bar_height = font.height + 2 * logical_px(ws_voff_px);
     else
         bar_height = config.bar_height;
     icon_size = bar_height - 2 * logical_px(config.tray_padding);
