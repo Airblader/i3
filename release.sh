@@ -1,14 +1,20 @@
 #!/bin/zsh
 # This script is used to prepare a new release of i3.
 
-export RELEASE_VERSION="4.10.2"
-export PREVIOUS_VERSION="4.10.1"
+export RELEASE_VERSION="4.10.3"
+export PREVIOUS_VERSION="4.10.2"
 export RELEASE_BRANCH="master"
 
 if [ ! -e "../i3.github.io" ]
 then
 	echo "../i3.github.io does not exist."
 	echo "Use git clone git://github.com/i3/i3.github.io"
+	exit 1
+fi
+
+if ! (cd ../i3.github.io && git pull)
+then
+	echo "Could not update ../i3.github.io repository"
 	exit 1
 fi
 
@@ -74,12 +80,12 @@ if [ "${RELEASE_BRANCH}" = "master" ]; then
 	git checkout master
 	git merge --no-ff release-${RELEASE_VERSION} -m "Merge branch 'release-${RELEASE_VERSION}'"
 	git checkout next
-	git merge --no-ff master -m "Merge branch 'master' into next"
+	git merge --no-ff -X ours master -m "Merge branch 'master' into next"
 else
 	git checkout next
 	git merge --no-ff release-${RELEASE_VERSION} -m "Merge branch 'release-${RELEASE_VERSION}'"
 	git checkout master
-	git merge --no-ff next -m "Merge branch 'next' into master"
+	git merge --no-ff -X theirs next -m "Merge branch 'next' into master"
 fi
 
 git remote remove origin
@@ -98,6 +104,7 @@ mkdir debian
 # Copy over the changelog because we expect it to be locally modified in the
 # start directory.
 cp "${STARTDIR}/debian/changelog" i3/debian/changelog
+(cd i3 && git add debian/changelog && git commit -m 'Update debian/changelog')
 
 cat > ${TMPDIR}/Dockerfile <<EOT
 FROM debian:sid
@@ -147,7 +154,6 @@ git add downloads/i3-${RELEASE_VERSION}.tar.bz2*
 cp ${TMPDIR}/i3/RELEASE-NOTES-${RELEASE_VERSION} downloads/RELEASE-NOTES-${RELEASE_VERSION}.txt
 git add downloads/RELEASE-NOTES-${RELEASE_VERSION}.txt
 sed -i "s,<h2>Documentation for i3 v[^<]*</h2>,<h2>Documentation for i3 v${RELEASE_VERSION}</h2>,g" docs/index.html
-sed -i "s,Verify you are using i3 ≥ .*,Verify you are using i3 ≥ ${RELEASE_VERSION},g" docs/debugging.html
 sed -i "s,<span style=\"margin-left: 2em; color: #c0c0c0\">[^<]*</span>,<span style=\"margin-left: 2em; color: #c0c0c0\">${RELEASE_VERSION}</span>,g" index.html
 sed -i "s,The current stable version is .*$,The current stable version is ${RELEASE_VERSION}.,g" downloads/index.html
 sed -i "s,<tbody>,<tbody>\n  <tr>\n    <td>${RELEASE_VERSION}</td>\n    <td><a href=\"/downloads/i3-${RELEASE_VERSION}.tar.bz2\">i3-${RELEASE_VERSION}.tar.bz2</a></td>\n    <td>$(ls -lh ../i3/i3-${RELEASE_VERSION}.tar.bz2 | awk -F " " {'print $5'} | sed 's/K$/ KiB/g')</td>\n    <td><a href=\"/downloads/i3-${RELEASE_VERSION}.tar.bz2.asc\">signature</a></td>\n    <td>$(date +'%Y-%m-%d')</td>\n    <td><a href=\"/downloads/RELEASE-NOTES-${RELEASE_VERSION}.txt\">release notes</a></td>\n  </tr>\n,g" downloads/index.html
@@ -162,15 +168,17 @@ git commit -a -m "save docs for ${PREVIOUS_VERSION}"
 for i in $(find _docs -maxdepth 1 -and -type f -and \! -regex ".*\.\(html\|man\)$" -and \! -name "Makefile")
 do
 	base="$(basename $i)"
-	[ -e "${STARTDIR}/docs/${base}" ] && cp "${STARTDIR}/docs/${base}" "_docs/${base}"
+	[ -e "${TMPDIR}/i3/docs/${base}" ] && cp "${TMPDIR}/i3/docs/${base}" "_docs/${base}"
 done
+
+sed -i "s,Verify you are using i3 ≥ .*,Verify you are using i3 ≥ ${RELEASE_VERSION},g" _docs/debugging
 
 (cd _docs && make)
 
 for i in $(find _docs -maxdepth 1 -and -type f -and \! -regex ".*\.\(html\|man\)$" -and \! -name "Makefile")
 do
 	base="$(basename $i)"
-	[ -e "${STARTDIR}/docs/${base}" ] && cp "_docs/${base}.html" docs/
+	[ -e "${TMPDIR}/i3/docs/${base}" ] && cp "_docs/${base}.html" docs/
 done
 
 git commit -a -m "update docs for ${RELEASE_VERSION}"
@@ -222,5 +230,4 @@ echo ""
 echo "Announce on:"
 echo "  twitter"
 echo "  google+"
-echo "  mailing list"
 echo "  #i3 topic"
