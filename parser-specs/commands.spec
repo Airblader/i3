@@ -100,12 +100,14 @@ state GAPS_WITH_TYPE:
       -> GAPS_WITH_SCOPE
 
 state GAPS_WITH_SCOPE:
+  side = 'top', 'left', 'bottom', 'right', 'horizontal', 'vertical'
+      -> GAPS_WITH_SCOPE
   mode = 'plus', 'minus', 'set'
       -> GAPS_WITH_MODE
 
 state GAPS_WITH_MODE:
   value = word
-      -> call cmd_gaps($type, $scope, $mode, $value)
+      -> call cmd_gaps($type, $scope, $side, $mode, $value)
 
 state BORDER_WIDTH:
   end

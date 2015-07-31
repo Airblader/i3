@@ -249,16 +249,16 @@ CFGFUN(for_window, const char *command) {
     TAILQ_INSERT_TAIL(&assignments, assignment, assignments);
 }
 
-void create_gaps_assignment(const char *workspace, bool inner, const long value) {
+void create_gaps_assignment(const char *workspace, bool inner, margin_t values) {
     DLOG("Setting gaps for workspace %s", workspace);
 
     struct Workspace_Assignment *assignment;
     TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
         if (strcasecmp(assignment->name, workspace) == 0) {
             if (inner)
-                assignment->gaps.inner = value;
+                assignment->gaps.inner = values.top;
             else
-                assignment->gaps.outer = value;
+                assignment->gaps.outer = values;
 
             return;
         }
@@ -269,23 +269,52 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
     assignment->name = sstrdup(workspace);
     assignment->output = NULL;
     if (inner)
-        assignment->gaps.inner = value;
+        assignment->gaps.inner = values.top;
     else
-        assignment->gaps.outer = value;
+        assignment->gaps.outer = values;
     TAILQ_INSERT_TAIL(&ws_assignments, assignment, ws_assignments);
 }
 
-CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
+CFGFUN(gaps, const char *workspace, const char *scope, const char *side, const long value) {
     if (!strcmp(scope, "inner")) {
+        if (side != NULL)
+            LOG("Specifying a side for inner gaps is not supported, ignoring.\n");
+
         if (workspace == NULL)
             config.gaps.inner = value;
         else
-            create_gaps_assignment(workspace, true, value - config.gaps.inner);
+            create_gaps_assignment(workspace, true, (margin_t) {value - config.gaps.inner, 0, 0, 0});
     } else if (!strcmp(scope, "outer")) {
-        if (workspace == NULL)
-            config.gaps.outer = value;
-        else
-            create_gaps_assignment(workspace, false, value - config.gaps.outer);
+        if (workspace == NULL) {
+            if (side == NULL || strcasecmp(side, "top") == 0 || strcasecmp(side, "vertical") == 0) {
+                config.gaps.outer.top = value;
+            }
+            if ( side == NULL || strcasecmp(side, "left") == 0 || strcasecmp(side, "horizontal") == 0) {
+                config.gaps.outer.left = value;
+            }
+            if (side == NULL || strcasecmp(side, "bottom") == 0 || strcasecmp(side, "vertical") == 0) {
+                config.gaps.outer.bottom = value;
+            }
+            if (side == NULL || strcasecmp(side, "right") == 0 || strcasecmp(side, "horizontal") == 0) {
+                config.gaps.outer.right = value;
+            }
+        } else {
+            margin_t margin = config.gaps.outer;
+            if (side == NULL || strcasecmp(side, "top") == 0 || strcasecmp(side, "vertical") == 0) {
+                margin.top = value - margin.top;
+            }
+            if ( side == NULL || strcasecmp(side, "left") == 0 || strcasecmp(side, "horizontal") == 0) {
+                margin.left = value - margin.left;
+            }
+            if (side == NULL || strcasecmp(side, "bottom") == 0 || strcasecmp(side, "vertical") == 0) {
+                margin.bottom = value - margin.bottom;
+            }
+            if (side == NULL || strcasecmp(side, "right") == 0 || strcasecmp(side, "horizontal") == 0) {
+                margin.right = value - margin.right;
+            }
+
+            create_gaps_assignment(workspace, false, margin);
+        }
     } else {
         ELOG("Invalid command, cannot process scope %s", scope);
     }

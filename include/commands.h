@@ -307,7 +307,7 @@ void cmd_shmlog(I3_CMD, char *argument);
 void cmd_debuglog(I3_CMD, char *argument);
 
 /**
- * Implementation of 'gaps inner|outer current|all set|plus|minus <px>'
+ * Implementation of 'gaps inner|outer current|all [top|left|bottom|right|horizontal|vertical] set|plus|minus <px>'
  *
  */
-void cmd_gaps(I3_CMD, char *type, char *scope, char *mode, char *value);
+void cmd_gaps(I3_CMD, char *type, char *scope, char *side, char *mode, char *value);

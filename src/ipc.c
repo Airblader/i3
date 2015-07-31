@@ -127,7 +127,18 @@ static void dump_gaps(yajl_gen gen, const char *name, gaps_t gaps) {
     ystr("inner");
     y(integer, gaps.inner);
     ystr("outer");
-    y(integer, gaps.outer);
+    
+    y(map_open);
+    ystr("top");
+    y(integer, gaps.outer.top);
+    ystr("left");
+    y(integer, gaps.outer.left);
+    ystr("bottom");
+    y(integer, gaps.outer.bottom);
+    ystr("right");
+    y(integer, gaps.outer.right);
+    y(map_close);
+    
     y(map_close);
 }
 

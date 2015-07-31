@@ -66,8 +66,14 @@ state GAPS:
       -> GAPS_WITH_SCOPE
 
 state GAPS_WITH_SCOPE:
+  side = 'top', 'left', 'bottom', 'right', 'horizontal', 'vertical'
+      -> GAPS_WITH_SCOPE_AND_SIDE
   value = number
-      -> call cfg_gaps($workspace, $scope, &value)
+      -> call cfg_gaps($workspace, $scope, NULL, &value)
+
+state GAPS_WITH_SCOPE_AND_SIDE:
+  value = number
+      -> call cfg_gaps($workspace, $scope, $side, &value)
 
 # smart_borders true|false
 # smart_borders no_gaps

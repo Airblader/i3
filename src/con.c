@@ -1247,6 +1247,13 @@ Con *con_descend_direction(Con *con, direction_t direction) {
     return con_descend_direction(most, direction);
 }
 
+bool has_outer_gaps(gaps_t gaps) {
+    return gaps.outer.top > 0 ||
+        gaps.outer.left > 0 ||
+        gaps.outer.bottom > 0 ||
+        gaps.outer.right > 0;
+}
+
 /*
  * Returns a "relative" Rect which contains the amount of pixels that need to
  * be added to the original Rect to get the final position (obviously the
@@ -1254,7 +1261,8 @@ Con *con_descend_direction(Con *con, direction_t direction) {
  *
  */
 Rect con_border_style_rect(Con *con) {
-    if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
+    if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) ||
+            (config.smart_borders == NO_GAPS && !has_outer_gaps(calculate_effective_gaps(con)))) {
         if (!con_is_floating(con))
             return (Rect){0, 0, 0, 0};
     }
@@ -1857,14 +1865,22 @@ char *con_get_tree_representation(Con *con) {
 gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
     if (workspace == NULL || (config.smart_gaps && con_num_visible_children(workspace) <= 1))
-        return (gaps_t){0, 0};
+        return (gaps_t){0, (margin_t) {0,0,0,0}};
 
     gaps_t gaps = {
         .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
-        .outer = workspace->gaps.outer + config.gaps.outer};
-
+        .outer = {
+            .top = workspace->gaps.outer.top + config.gaps.outer.top,
+            .left = workspace->gaps.outer.left + config.gaps.outer.left,
+            .bottom = workspace->gaps.outer.bottom + config.gaps.outer.bottom,
+            .right = workspace->gaps.outer.right + config.gaps.outer.right
+        }};
+        
     /* Outer gaps are added on top of inner gaps. */
-    gaps.outer += 2 * gaps.inner;
+    gaps.outer.top += 2 * gaps.inner;
+    gaps.outer.left += 2 * gaps.inner;
+    gaps.outer.bottom += 2 * gaps.inner;
+    gaps.outer.right += 2 * gaps.inner;
 
     return gaps;
 }
