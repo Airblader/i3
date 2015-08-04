@@ -242,7 +242,7 @@ CFGFUN(for_window, const char *command) {
         return;
     }
     DLOG("\t should execute command %s for the criteria mentioned above\n", command);
-    Assignment *assignment = scalloc(sizeof(Assignment));
+    Assignment *assignment = scalloc(1, sizeof(Assignment));
     assignment->type = A_COMMAND;
     match_copy(&(assignment->match), current_match);
     assignment->dest.command = sstrdup(command);
@@ -265,7 +265,7 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
     }
 
     // Assignment does not yet exist, let's create it.
-    assignment = scalloc(sizeof(struct Workspace_Assignment));
+    assignment = scalloc(1, sizeof(struct Workspace_Assignment));
     assignment->name = sstrdup(workspace);
     assignment->output = NULL;
     if (inner)
@@ -454,7 +454,7 @@ CFGFUN(workspace, const char *workspace, const char *output) {
         }
     }
     if (!duplicate) {
-        assignment = scalloc(sizeof(struct Workspace_Assignment));
+        assignment = scalloc(1, sizeof(struct Workspace_Assignment));
         assignment->name = sstrdup(workspace);
         assignment->output = sstrdup(output);
         TAILQ_INSERT_TAIL(&ws_assignments, assignment, ws_assignments);
@@ -512,7 +512,7 @@ CFGFUN(assign, const char *workspace) {
         return;
     }
     DLOG("New assignment, using above criteria, to workspace \"%s\".\n", workspace);
-    Assignment *assignment = scalloc(sizeof(Assignment));
+    Assignment *assignment = scalloc(1, sizeof(Assignment));
     match_copy(&(assignment->match), current_match);
     assignment->type = A_TO_WORKSPACE;
     assignment->dest.workspace = sstrdup(workspace);
@@ -526,7 +526,7 @@ CFGFUN(no_focus) {
     }
 
     DLOG("New assignment, using above criteria, to ignore focus on manage.\n");
-    Assignment *assignment = scalloc(sizeof(Assignment));
+    Assignment *assignment = scalloc(1, sizeof(Assignment));
     match_copy(&(assignment->match), current_match);
     assignment->type = A_NO_FOCUS;
     TAILQ_INSERT_TAIL(&assignments, assignment, assignments);
@@ -613,7 +613,7 @@ static void bar_configure_binding(const char *button, const char *command) {
         }
     }
 
-    struct Barbinding *new_binding = scalloc(sizeof(struct Barbinding));
+    struct Barbinding *new_binding = scalloc(1, sizeof(struct Barbinding));
     new_binding->input_code = input_code;
     new_binding->command = sstrdup(command);
     TAILQ_INSERT_TAIL(&(current_bar.bar_bindings), new_binding, bindings);
@@ -727,7 +727,7 @@ CFGFUN(bar_finish) {
 
     /* Copy the current (static) structure into a dynamically allocated
      * one, then cleanup our static one. */
-    Barconfig *bar_config = scalloc(sizeof(Barconfig));
+    Barconfig *bar_config = scalloc(1, sizeof(Barconfig));
     memcpy(bar_config, &current_bar, sizeof(Barconfig));
     TAILQ_INSERT_TAIL(&barconfigs, bar_config, configs);
 
