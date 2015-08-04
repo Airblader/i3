@@ -1104,7 +1104,7 @@ int ipc_create_socket(const char *filename) {
     char *copy = sstrdup(resolved);
     const char *dir = dirname(copy);
     if (!path_exists(dir))
-        mkdirp(dir);
+        mkdirp(dir, DEFAULT_DIR_MODE);
     free(copy);
 
     /* Unlink the unix domain socket before */
