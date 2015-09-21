@@ -765,6 +765,7 @@ void x_push_node(Con *con) {
              * not visible right now */
             if (!con->parent ||
                 con->parent->layout != L_STACKED ||
+                con->parent->layout != L_TABBED ||
                 TAILQ_FIRST(&(con->parent->focus_head)) == con)
                 /* Render the decoration now to make the correct decoration visible
                  * from the very first moment. Later calls will be cached, so this

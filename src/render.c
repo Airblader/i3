@@ -450,10 +450,8 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
                 child->deco_rect.width = child->rect.width;
                 child->deco_rect.height = deco_height;
 
-                if (children > 1 || (child->border_style != BS_PIXEL && child->border_style != BS_NONE)) {
-                    child->rect.y += (deco_height * children);
-                    child->rect.height -= (deco_height * children);
-                }
+                child->rect.y += (deco_height * children);
+                child->rect.height -= (deco_height * children);
             }
 
             /* tabbed layout */
@@ -473,13 +471,9 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
                     child->deco_rect.width += (child->rect.width - (child->deco_rect.x + child->deco_rect.width));
                 }
 
-                if (children > 1 || (child->border_style != BS_PIXEL && child->border_style != BS_NONE)) {
-                    child->rect.y += deco_height;
-                    child->rect.height -= deco_height;
-                    child->deco_rect.height = deco_height;
-                } else {
-                    child->deco_rect.height = (child->border_style == BS_PIXEL ? 1 : 0);
-                }
+                child->rect.y += deco_height;
+                child->rect.height -= deco_height;
+                child->deco_rect.height = deco_height;
             }
 
             /* dockarea layout */

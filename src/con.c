@@ -1361,11 +1361,8 @@ int con_border_style(Con *con) {
         return BS_NONE;
     }
 
-    if (con->parent->layout == L_STACKED)
-        return (con_num_children(con->parent) == 1 ? con->border_style : BS_NORMAL);
-
-    if (con->parent->layout == L_TABBED && con->border_style != BS_NORMAL)
-        return (con_num_children(con->parent) == 1 ? con->border_style : BS_NORMAL);
+    if (con->parent->layout == L_STACKED || con->parent->layout == L_TABBED)
+        return BS_NORMAL;
 
     if (con->parent->type == CT_DOCKAREA)
         return BS_NONE;
@@ -1630,7 +1627,8 @@ Rect con_minimum_size(Con *con) {
         Con *child;
         TAILQ_FOREACH(child, &(con->nodes_head), nodes) {
             Rect min = con_minimum_size(child);
-            deco_height += child->deco_rect.height;
+            if (con->layout == L_STACKED)
+                deco_height += child->deco_rect.height;
             max_width = max(max_width, min.width);
             max_height = max(max_height, min.height);
         }
