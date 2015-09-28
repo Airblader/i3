@@ -1120,27 +1120,10 @@ void cmd_mark(I3_CMD, char *mark, char *toggle) {
     }
 
     DLOG("matching: %p / %s\n", current->con, current->con->name);
-    current->con->mark_changed = true;
-    if (toggle != NULL && current->con->mark && strcmp(current->con->mark, mark) == 0) {
-        DLOG("removing window mark %s\n", mark);
-        FREE(current->con->mark);
+    if (toggle != NULL) {
+        con_mark_toggle(current->con, mark);
     } else {
-        DLOG("marking window with str %s\n", mark);
-        FREE(current->con->mark);
-        current->con->mark = sstrdup(mark);
-    }
-
-    DLOG("Clearing all non-matched windows with this mark\n");
-    Con *con;
-    TAILQ_FOREACH(con, &all_cons, all_cons) {
-        /* Skip matched window, we took care of it already. */
-        if (current->con == con)
-            continue;
-
-        if (con->mark && strcmp(con->mark, mark) == 0) {
-            FREE(con->mark);
-            con->mark_changed = true;
-        }
+        con_mark(current->con, mark);
     }
 
     cmd_output->needs_tree_render = true;
@@ -1153,24 +1136,7 @@ void cmd_mark(I3_CMD, char *mark, char *toggle) {
  *
  */
 void cmd_unmark(I3_CMD, char *mark) {
-    if (mark == NULL) {
-        Con *con;
-        TAILQ_FOREACH(con, &all_cons, all_cons) {
-            if (con->mark == NULL)
-                continue;
-
-            FREE(con->mark);
-            con->mark_changed = true;
-        }
-        DLOG("Removed all window marks.\n");
-    } else {
-        Con *con = con_by_mark(mark);
-        if (con != NULL) {
-            FREE(con->mark);
-            con->mark_changed = true;
-        }
-        DLOG("Removed window mark \"%s\".\n", mark);
-    }
+    con_unmark(mark);
 
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
@@ -1194,41 +1160,37 @@ void cmd_mode(I3_CMD, char *mode) {
  *
  */
 void cmd_move_con_to_output(I3_CMD, char *name) {
-    owindow *current;
-
-    DLOG("should move window to output %s\n", name);
-
+    DLOG("Should move window to output \"%s\".\n", name);
     HANDLE_EMPTY_MATCH;
 
-    Output *current_output = NULL;
-    // TODO: fix the handling of criteria
-    TAILQ_FOREACH(current, &owindows, owindows)
-    current_output = get_output_of_con(current->con);
-    assert(current_output != NULL);
-
-    Output *output = get_output_from_string(current_output, name);
-    if (!output) {
-        LOG("No such output found.\n");
-        ysuccess(false);
-        return;
-    }
-
-    /* get visible workspace on output */
-    Con *ws = NULL;
-    GREP_FIRST(ws, output_get_content(output->con), workspace_is_visible(child));
-    if (!ws) {
-        ysuccess(false);
-        return;
-    }
-
+    owindow *current;
+    bool had_error = false;
     TAILQ_FOREACH(current, &owindows, owindows) {
         DLOG("matching: %p / %s\n", current->con, current->con->name);
+
+        Output *current_output = get_output_of_con(current->con);
+        assert(current_output != NULL);
+
+        Output *output = get_output_from_string(current_output, name);
+        if (output == NULL) {
+            ELOG("Could not find output \"%s\", skipping.\n", name);
+            had_error = true;
+            continue;
+        }
+
+        Con *ws = NULL;
+        GREP_FIRST(ws, output_get_content(output->con), workspace_is_visible(child));
+        if (ws == NULL) {
+            ELOG("Could not find a visible workspace on output %p.\n", output);
+            had_error = true;
+            continue;
+        }
+
         con_move_to_workspace(current->con, ws, true, false, false);
     }
 
     cmd_output->needs_tree_render = true;
-    // XXX: default reply for now, make this a better reply
-    ysuccess(true);
+    ysuccess(!had_error);
 }
 
 /*
