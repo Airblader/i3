@@ -1145,8 +1145,8 @@ char *init_xcb_early() {
 
     depth = root_screen->root_depth;
     colormap = root_screen->default_colormap;
-    visual_type = xcb_aux_find_visual_by_attrs(root_screen, -1, 32);
-    if (visual_type) {
+    visual_type = config.transparency ? xcb_aux_find_visual_by_attrs(root_screen, -1, 32) : NULL;
+    if (visual_type != NULL) {
         depth = xcb_aux_get_depth_of_visual(root_screen, visual_type->visual_id);
         colormap = xcb_generate_id(xcb_connection);
         xcb_void_cookie_t cm_cookie = xcb_create_colormap_checked(xcb_connection,

@@ -101,11 +101,12 @@ int main(int argc, char **argv) {
     static struct option long_opt[] = {
         {"socket", required_argument, 0, 's'},
         {"bar_id", required_argument, 0, 'b'},
+        {"transparency", no_argument, 0, 't'},
         {"help", no_argument, 0, 'h'},
         {"version", no_argument, 0, 'v'},
         {NULL, 0, 0, 0}};
 
-    while ((opt = getopt_long(argc, argv, "b:s:hv", long_opt, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "b:s:thv", long_opt, &option_index)) != -1) {
         switch (opt) {
             case 's':
                 socket_path = expand_path(optarg);
@@ -116,6 +117,9 @@ int main(int argc, char **argv) {
                 break;
             case 'b':
                 config.bar_id = sstrdup(optarg);
+                break;
+            case 't':
+                config.transparency = true;
                 break;
             default:
                 print_usage(argv[0]);
