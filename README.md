@@ -170,3 +170,18 @@ bar {
         height 25
 }
 ```
+
+### Transparency / RGBA Colors
+
+As an experimental feature, i3-gaps allows you to use RGBA colors for i3bar which allows for transparency. Please note that this has two implications:
+
+* Due to technical constraints which can only be solved by a lot of effort, the background of tray icons will always be fully transparent, no matter what the background color of your i3bar is.
+* This is experimental and bugs will only be fixed if doing so doesn't involve a lot of effort / big changes. The ability to easily stay up to date with upstream has priority.
+
+In order to use this feature, run i3bar with the additional argument `-t`. This can be done in your i3 config as follows:
+
+````
+bar {
+        i3bar_command i3bar -t
+}
+```
