@@ -55,7 +55,7 @@ struct status_block {
     uint32_t border_right;
     uint32_t border_bottom;
     uint32_t border_left;
-    bool is_markup;
+    bool pango_markup;
 
     /* The amount of pixels necessary to render a separater after the block. */
     uint32_t sep_block_width;
