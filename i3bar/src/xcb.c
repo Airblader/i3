@@ -208,8 +208,9 @@ void refresh_statusline(bool use_short_text) {
             continue;
 
         block->width = predict_text_width(block->full_text);
-        /* Add some padding. */
-        block->width += logical_px(2) + block->border_left + block->border_right;
+        /* Add padding for the border if we have to draw it. */
+        if (block->border)
+            block->width += logical_px(block->border_left + block->border_right);
 
         /* Compute offset and append for text aligment in min_width. */
         if (block->min_width <= block->width) {
@@ -281,16 +282,16 @@ void refresh_statusline(bool use_short_text) {
             /* Draw the background. */
             bool is_border = !!block->border;
             draw_util_rectangle(&statusline_surface, bg_color,
-                                x + is_border * block->border_left,
-                                logical_px(1) + is_border * block->border_top,
-                                block->width + block->x_offset + block->x_append - is_border * (block->border_right + block->border_left),
-                                bar_height - is_border * (block->border_bottom + block->border_top) - logical_px(2));
+                                x + is_border * logical_px(block->border_left),
+                                logical_px(1) + is_border * logical_px(block->border_top),
+                                block->width + block->x_offset + block->x_append - is_border * logical_px(block->border_right + block->border_left),
+                                bar_height - is_border * logical_px(block->border_bottom + block->border_top) - logical_px(2));
         }
 
         draw_util_text(block->full_text, &statusline_surface, fg_color, colors.bar_bg,
-                       x + block->x_offset + logical_px(1) + block->border_left,
+                       x + block->x_offset + logical_px(block->border_left),
                        bar_height / 2 - font.height / 2,
-                       block->width - logical_px(1) - block->border_left - block->border_right);
+                       block->width - logical_px(block->border_left - block->border_right));
         x += block->width + block->sep_block_width + block->x_offset + block->x_append;
 
         /* If this is not the last block, draw a separator. */
