@@ -448,6 +448,20 @@ bool con_is_floating(Con *con) {
 }
 
 /*
+ * Returns true if the container is a docked container.
+ *
+ */
+bool con_is_docked(Con *con) {
+    if (con->parent == NULL)
+        return false;
+
+    if (con->parent->type == CT_DOCKAREA)
+        return true;
+
+    return con_is_docked(con->parent);
+}
+
+/*
  * Checks if the given container is either floating or inside some floating
  * container. It returns the FLOATING_CON container.
  *
@@ -1043,6 +1057,12 @@ bool con_move_to_mark(Con *con, const char *mark) {
     if (con_is_floating(target)) {
         DLOG("target container is floating, moving container to target's workspace.\n");
         con_move_to_workspace(con, con_get_workspace(target), true, false, false);
+        return true;
+    }
+
+    if (con->type == CT_WORKSPACE) {
+        DLOG("target container is a workspace, simply moving the container there.\n");
+        con_move_to_workspace(con, target, true, false, false);
         return true;
     }
 
