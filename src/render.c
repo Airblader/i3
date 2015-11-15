@@ -71,7 +71,9 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
             }
         }
         inset.height = -inset.y;
-        con->deco_rect = rect_add(con->deco_rect, inset);
+        if (con->parent != NULL && (con->parent->layout == L_TABBED || con->parent->layout == L_STACKED)) {
+            con->deco_rect = rect_add(con->deco_rect, inset);
+        }
 
         params.x = con->rect.x;
         params.y = con->rect.y;
