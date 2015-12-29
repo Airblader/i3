@@ -171,6 +171,8 @@ state ASSIGN:
 state ASSIGN_WORKSPACE:
   '→'
       ->
+  'workspace'
+      ->
   workspace = string
       -> call cfg_assign($workspace)
 
