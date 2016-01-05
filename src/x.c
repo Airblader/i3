@@ -299,7 +299,7 @@ void x_window_kill(xcb_window_t window, kill_window_t kill_window) {
     free(event);
 }
 
-static void x_draw_decoration_border(Con *con, struct deco_render_params *p) {
+static void x_draw_title_border(Con *con, struct deco_render_params *p) {
     assert(con->parent != NULL);
 
     Rect *dr = &(con->deco_rect);
@@ -344,7 +344,7 @@ static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p
     }
 
     /* Redraw the border. */
-    x_draw_decoration_border(con, p);
+    x_draw_title_border(con, p);
 }
 
 /*
@@ -464,21 +464,24 @@ void x_draw_decoration(Con *con) {
          * rectangle because some childs are not freely resizable and we want
          * their background color to "shine through". */
         if (!(borders_to_hide & ADJ_LEFT_SCREEN_EDGE)) {
-            draw_util_rectangle(conn, &(con->frame_buffer), p->color->background,
-                                0, 0, br.x, r->height);
+            draw_util_rectangle(conn, &(con->frame_buffer), p->color->decoration_border, 0, 0, br.x, r->height);
         }
         if (!(borders_to_hide & ADJ_RIGHT_SCREEN_EDGE)) {
-            draw_util_rectangle(conn, &(con->frame_buffer), p->color->background,
-                                r->width + (br.width + br.x), 0, -(br.width + br.x), r->height);
+            draw_util_rectangle(conn, &(con->frame_buffer),
+                                p->color->decoration_border, r->width + (br.width + br.x), 0,
+                                -(br.width + br.x), r->height);
         }
         if (!(borders_to_hide & ADJ_LOWER_SCREEN_EDGE)) {
-            draw_util_rectangle(conn, &(con->frame_buffer), p->color->background,
-                                br.x, r->height + (br.height + br.y), r->width + br.width, -(br.height + br.y));
+            draw_util_rectangle(conn, &(con->frame_buffer),
+                                p->color->decoration_border, br.x, r->height + (br.height +
+                                                                                br.y),
+                                r->width + br.width, -(br.height + br.y));
         }
         /* pixel border needs an additional line at the top */
         if (p->border_style == BS_PIXEL && !(borders_to_hide & ADJ_UPPER_SCREEN_EDGE)) {
-            draw_util_rectangle(conn, &(con->frame_buffer), p->color->background,
-                                br.x, 0, r->width + br.width, br.y);
+            draw_util_rectangle(conn, &(con->frame_buffer),
+                                p->color->decoration_border, br.x, 0, r->width + br.width,
+                                br.y);
         }
 
         /* Highlight the side of the border at which the next window will be
@@ -521,27 +524,30 @@ void x_draw_decoration(Con *con) {
                         con->deco_rect.x, con->deco_rect.y, con->deco_rect.width, con->deco_rect.height);
 
     /* 5: draw two unconnected horizontal lines in border color */
-    x_draw_decoration_border(con, p);
+    x_draw_title_border(con, p);
 
     /* 6: draw the title */
     int text_offset_y = (con->deco_rect.height - config.font.height) / 2;
 
     struct Window *win = con->window;
     if (win == NULL) {
-        /* we have a split container which gets a representation
-         * of its children as title
-         */
-        char *_title;
-        char *tree = con_get_tree_representation(con);
-        sasprintf(&_title, "i3: %s", tree);
-        free(tree);
+        i3String *title;
+        if (con->title_format == NULL) {
+            char *_title;
+            char *tree = con_get_tree_representation(con);
+            sasprintf(&_title, "i3: %s", tree);
+            free(tree);
 
-        i3String *title = i3string_from_utf8(_title);
+            title = i3string_from_utf8(_title);
+            FREE(_title);
+        } else {
+            title = con_parse_title_format(con);
+        }
+
         draw_util_text(title, &(parent->frame_buffer),
                        p->color->text, p->color->background,
                        con->deco_rect.x + 2, con->deco_rect.y + text_offset_y,
                        con->deco_rect.width - 2);
-        FREE(_title);
         I3STRING_FREE(title);
 
         goto after_title;
@@ -599,12 +605,12 @@ void x_draw_decoration(Con *con) {
         FREE(formatted_mark);
     }
 
-    i3String *title = win->title_format == NULL ? win->name : window_parse_title_format(win);
+    i3String *title = con->title_format == NULL ? win->name : con_parse_title_format(con);
     draw_util_text(title, &(parent->frame_buffer),
                    p->color->text, p->color->background,
                    con->deco_rect.x + logical_px(2) + indent_px, con->deco_rect.y + text_offset_y,
                    con->deco_rect.width - logical_px(2) - indent_px - mark_width - logical_px(2));
-    if (win->title_format != NULL)
+    if (con->title_format != NULL)
         I3STRING_FREE(title);
 
 after_title:

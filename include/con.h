@@ -453,3 +453,9 @@ void con_force_split_parents_redraw(Con *con);
  * contains the (potential) child container.
  */
 bool con_has_parent(Con *parent, Con *child);
+
+/**
+ * Returns the window title considering the current title format.
+ *
+ */
+i3String *con_parse_title_format(Con *con);
