@@ -12,6 +12,10 @@
 #include <float.h>
 #include <stdarg.h>
 
+#ifdef I3_ASAN_ENABLED
+#include <sanitizer/lsan_interface.h>
+#endif
+
 #include "all.h"
 #include "shmlog.h"
 
@@ -62,6 +66,11 @@
         HANDLE_INVALID_MATCH;                           \
                                                         \
         if (match_is_empty(current_match)) {            \
+            while (!TAILQ_EMPTY(&owindows)) {           \
+                owindow *ow = TAILQ_FIRST(&owindows);   \
+                TAILQ_REMOVE(&owindows, ow, owindows);  \
+                free(ow);                               \
+            }                                           \
             owindow *ow = smalloc(sizeof(owindow));     \
             ow->con = focused;                          \
             TAILQ_INIT(&owindows);                      \
@@ -1653,6 +1662,9 @@ void cmd_layout_toggle(I3_CMD, const char *toggle_mode) {
  */
 void cmd_exit(I3_CMD) {
     LOG("Exiting due to user command.\n");
+#ifdef I3_ASAN_ENABLED
+    __lsan_do_leak_check();
+#endif
     ipc_shutdown();
     unlink(config.ipc_socket_path);
     xcb_disconnect(conn);
@@ -2001,6 +2013,8 @@ void cmd_rename_workspace(I3_CMD, const char *old_name, const char *new_name) {
     }
 
     /* Change the name and try to parse it as a number. */
+    /* old_name might refer to workspace->name, so copy it before free()ing */
+    char *old_name_copy = sstrdup(old_name);
     FREE(workspace->name);
     workspace->name = sstrdup(new_name);
 
@@ -2041,7 +2055,8 @@ void cmd_rename_workspace(I3_CMD, const char *old_name, const char *new_name) {
     ewmh_update_desktop_viewport();
     ewmh_update_current_desktop();
 
-    startup_sequence_rename_workspace(old_name, new_name);
+    startup_sequence_rename_workspace(old_name_copy, new_name);
+    free(old_name_copy);
 }
 
 /*

@@ -84,6 +84,7 @@ bool tree_restore(const char *path, xcb_get_geometry_reply_t *geometry) {
     focused = croot;
 
     tree_append_json(focused, globbed, NULL);
+    free(globbed);
 
     DLOG("appended tree, using new root\n");
     croot = TAILQ_FIRST(&(croot->nodes_head));
@@ -265,11 +266,8 @@ bool tree_close_internal(Con *con, kill_window_t kill_window, bool dont_kill_par
             add_ignore_event(cookie.sequence, 0);
         }
         ipc_send_window_event("close", con);
-        FREE(con->window->class_class);
-        FREE(con->window->class_instance);
-        i3string_free(con->window->name);
-        FREE(con->window->ran_assignments);
-        FREE(con->window);
+        window_free(con->window);
+        con->window = NULL;
     }
 
     Con *ws = con_get_workspace(con);
@@ -327,6 +325,12 @@ bool tree_close_internal(Con *con, kill_window_t kill_window, bool dont_kill_par
     free(con->name);
     FREE(con->deco_render_params);
     TAILQ_REMOVE(&all_cons, con, all_cons);
+    while (!TAILQ_EMPTY(&(con->swallow_head))) {
+        Match *match = TAILQ_FIRST(&(con->swallow_head));
+        TAILQ_REMOVE(&(con->swallow_head), match, matches);
+        match_free(match);
+        free(match);
+    }
     free(con);
 
     /* in the case of floating windows, we already focused another container

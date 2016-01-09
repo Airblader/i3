@@ -12,6 +12,18 @@
 #include "all.h"
 
 /*
+ * Frees an i3Window and all its members.
+ *
+ */
+void window_free(i3Window *win) {
+    FREE(win->class_class);
+    FREE(win->class_instance);
+    i3string_free(win->name);
+    FREE(win->ran_assignments);
+    FREE(win);
+}
+
+/*
  * Updates the WM_CLASS (consisting of the class and instance) for the
  * given window.
  *
@@ -244,6 +256,7 @@ void window_update_role(i3Window *win, xcb_get_property_reply_t *prop, bool befo
  */
 void window_update_type(i3Window *window, xcb_get_property_reply_t *reply) {
     xcb_atom_t new_type = xcb_get_preferred_window_type(reply);
+    free(reply);
     if (new_type == XCB_NONE) {
         DLOG("cannot read _NET_WM_WINDOW_TYPE from window.\n");
         return;

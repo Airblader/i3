@@ -608,7 +608,8 @@ void con_mark(Con *con, const char *mark, mark_mode_t mode) {
         DLOG("Removing all existing marks on con = %p.\n", con);
 
         mark_t *current;
-        TAILQ_FOREACH(current, &(con->marks_head), marks) {
+        while (!TAILQ_EMPTY(&(con->marks_head))) {
+            current = TAILQ_FIRST(&(con->marks_head));
             con_unmark(con, current->name);
         }
     }
@@ -2022,6 +2023,7 @@ char *con_get_tree_representation(Con *con) {
                   (TAILQ_FIRST(&(con->nodes_head)) == child ? "" : " "), child_txt);
         free(buf);
         buf = tmp_buf;
+        free(child_txt);
     }
 
     /* 3) close the brackets */
