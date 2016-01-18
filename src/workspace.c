@@ -112,6 +112,7 @@ Con *workspace_get(const char *num, bool *created) {
         ewmh_update_number_of_desktops();
         ewmh_update_desktop_names();
         ewmh_update_desktop_viewport();
+        ewmh_update_wm_desktop();
         if (created != NULL)
             *created = true;
     } else if (created != NULL) {
@@ -484,6 +485,7 @@ static void _workspace_show(Con *workspace) {
             ewmh_update_number_of_desktops();
             ewmh_update_desktop_names();
             ewmh_update_desktop_viewport();
+            ewmh_update_wm_desktop();
         }
     }
 
