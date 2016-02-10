@@ -87,9 +87,9 @@ state BORDER:
   border_style = 'normal', 'pixel'
     -> BORDER_WIDTH
   border_style = 'none', 'toggle'
-    -> call cmd_border($border_style, "0")
+    -> call cmd_border($border_style, 0)
   border_style = '1pixel'
-    -> call cmd_border($border_style, "1")
+    -> call cmd_border($border_style, 1)
 
 # gaps inner|outer [current] [plus|minus] <px>
 state GAPS:
@@ -110,9 +110,9 @@ state GAPS_WITH_MODE:
 
 state BORDER_WIDTH:
   end
-    -> call cmd_border($border_style, "2")
-  border_width = word
-    -> call cmd_border($border_style, $border_width)
+    -> call cmd_border($border_style, 2)
+  border_width = number
+    -> call cmd_border($border_style, &border_width)
 
 # layout default|stacked|stacking|tabbed|splitv|splith
 # layout toggle [split|all]
