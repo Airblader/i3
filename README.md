@@ -24,7 +24,7 @@ Please note that I do not care too much for backwards compatibility. At the time
 
 # Screenshot
 
-![i3](http://i.imgur.com/Jw2kom9.png)
+![i3](http://i.imgur.com/y8sZE6o.jpg)
 
 
 # New Features
