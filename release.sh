@@ -1,8 +1,8 @@
 #!/bin/zsh
 # This script is used to prepare a new release of i3.
 
-export RELEASE_VERSION="4.11"
-export PREVIOUS_VERSION="4.10.4"
+export RELEASE_VERSION="4.12"
+export PREVIOUS_VERSION="4.11"
 export RELEASE_BRANCH="next"
 
 if [ ! -e "../i3.github.io" ]
@@ -194,7 +194,7 @@ git config --add remote.origin.push "+refs/heads/master:refs/heads/master"
 cd ${TMPDIR}
 cat >email.txt <<EOT
 From: Michael Stapelberg <michael@i3wm.org>
-To: i3-announce@i3.zekjur.net
+To: i3-announce@freelists.org
 Subject: i3 v${RELEASE_VERSION} released
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
