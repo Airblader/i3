@@ -27,7 +27,7 @@ const char *DEFAULT_BINDING_MODE = "default";
  * the list of modes.
  *
  */
-static struct Mode *mode_from_name(const char *name) {
+static struct Mode *mode_from_name(const char *name, bool pango_markup) {
     struct Mode *mode;
 
     /* Try to find the mode in the list of modes and return it */
@@ -39,6 +39,7 @@ static struct Mode *mode_from_name(const char *name) {
     /* If the mode was not found, create a new one */
     mode = scalloc(1, sizeof(struct Mode));
     mode->name = sstrdup(name);
+    mode->pango_markup = pango_markup;
     mode->bindings = scalloc(1, sizeof(struct bindings_head));
     TAILQ_INIT(mode->bindings);
     SLIST_INSERT_HEAD(&modes, mode, modes);
@@ -54,7 +55,7 @@ static struct Mode *mode_from_name(const char *name) {
  */
 Binding *configure_binding(const char *bindtype, const char *modifiers, const char *input_code,
                            const char *release, const char *border, const char *whole_window,
-                           const char *command, const char *modename) {
+                           const char *command, const char *modename, bool pango_markup) {
     Binding *new_binding = scalloc(1, sizeof(Binding));
     DLOG("bindtype %s, modifiers %s, input code %s, release %s\n", bindtype, modifiers, input_code, release);
     new_binding->release = (release != NULL ? B_UPON_KEYRELEASE : B_UPON_KEYPRESS);
@@ -91,7 +92,7 @@ Binding *configure_binding(const char *bindtype, const char *modifiers, const ch
     if (group_bits_set > 1)
         ELOG("Keybinding has more than one Group specified, but your X server is always in precisely one group. The keybinding can never trigger.\n");
 
-    struct Mode *mode = mode_from_name(modename);
+    struct Mode *mode = mode_from_name(modename, pango_markup);
     TAILQ_INSERT_TAIL(mode->bindings, new_binding, bindings);
 
     return new_binding;
@@ -143,6 +144,27 @@ void grab_all_keys(xcb_connection_t *conn) {
         for (uint32_t i = 0; i < bind->number_keycodes; i++)
             grab_keycode_for_binding(conn, bind, bind->translated_to[i]);
     }
+}
+
+/*
+ * Release the button grabs on all managed windows and regrab them,
+ * reevaluating which buttons need to be grabbed.
+ *
+ */
+void regrab_all_buttons(xcb_connection_t *conn) {
+    bool grab_scrollwheel = bindings_should_grab_scrollwheel_buttons();
+    xcb_grab_server(conn);
+
+    Con *con;
+    TAILQ_FOREACH(con, &all_cons, all_cons) {
+        if (con->window == NULL)
+            continue;
+
+        xcb_ungrab_button(conn, XCB_BUTTON_INDEX_ANY, con->window->id, XCB_BUTTON_MASK_ANY);
+        xcb_grab_buttons(conn, con->window->id, grab_scrollwheel);
+    }
+
+    xcb_ungrab_server(conn);
 }
 
 /*
@@ -337,6 +359,7 @@ void translate_keysyms(void) {
         return;
     }
 
+    bool has_errors = false;
     Binding *bind;
     TAILQ_FOREACH(bind, bindings, bindings) {
         if (bind->input_type == B_MOUSE) {
@@ -407,6 +430,21 @@ void translate_keysyms(void) {
             sasprintf(&tmp, "%s %d", keycodes, bind->translated_to[n]);
             free(keycodes);
             keycodes = tmp;
+
+            /* check for duplicate bindings */
+            Binding *check;
+            TAILQ_FOREACH(check, bindings, bindings) {
+                if (check == bind)
+                    continue;
+                if (check->symbol != NULL)
+                    continue;
+                if (check->keycode != bind->translated_to[n] ||
+                    check->event_state_mask != bind->event_state_mask ||
+                    check->release != bind->release)
+                    continue;
+                has_errors = true;
+                ELOG("Duplicate keybinding in config file:\n  keysym = %s, keycode = %d, state_mask = 0x%x\n", bind->symbol, check->keycode, bind->event_state_mask);
+            }
         }
         DLOG("state=0x%x, cfg=\"%s\", sym=0x%x → keycodes%s (%d)\n",
              bind->event_state_mask, bind->symbol, keysym, keycodes, bind->number_keycodes);
@@ -415,6 +453,10 @@ void translate_keysyms(void) {
 
     xkb_state_unref(dummy_state);
     xkb_state_unref(dummy_state_no_shift);
+
+    if (has_errors) {
+        start_config_error_nagbar(current_configpath, true);
+    }
 }
 
 /*
@@ -436,7 +478,8 @@ void switch_mode(const char *new_mode) {
         grab_all_keys(conn);
 
         char *event_msg;
-        sasprintf(&event_msg, "{\"change\":\"%s\"}", mode->name);
+        sasprintf(&event_msg, "{\"change\":\"%s\", \"pango_markup\":%s}",
+                  mode->name, (mode->pango_markup ? "true" : "false"));
 
         ipc_send_event("mode", I3_IPC_EVENT_MODE, event_msg);
         FREE(event_msg);
@@ -533,8 +576,6 @@ void check_for_duplicate_bindings(struct context *context) {
 
             /* Check if one is using keysym while the other is using bindsym.
              * If so, skip. */
-            /* XXX: It should be checked at a later place (when translating the
-             * keysym to keycodes) if there are any duplicates */
             if ((bind->symbol == NULL && current->symbol != NULL) ||
                 (bind->symbol != NULL && current->symbol == NULL))
                 continue;
@@ -598,8 +639,8 @@ void binding_free(Binding *bind) {
 /*
  * Runs the given binding and handles parse errors. If con is passed, it will
  * execute the command binding with that container selected by criteria.
- * Returns a CommandResult for running the binding's command. Caller should
- * render tree if needs_tree_render is true. Free with command_result_free().
+ * Returns a CommandResult for running the binding's command. Free with
+ * command_result_free().
  *
  */
 CommandResult *run_binding(Binding *bind, Con *con) {
@@ -767,4 +808,34 @@ bool load_keymap(void) {
     xkb_keymap = new_keymap;
 
     return true;
+}
+
+/*
+ * Returns true if the current config has any binding to a scroll wheel button
+ * (4 or 5) which is a whole-window binding.
+ * We need this to figure out whether we should grab all buttons or just 1-3
+ * when managing a window. See #2049.
+ *
+ */
+bool bindings_should_grab_scrollwheel_buttons(void) {
+    Binding *bind;
+    TAILQ_FOREACH(bind, bindings, bindings) {
+        /* We are only interested in whole window mouse bindings. */
+        if (bind->input_type != B_MOUSE || !bind->whole_window)
+            continue;
+
+        char *endptr;
+        long button = strtol(bind->symbol + (sizeof("button") - 1), &endptr, 10);
+        if (button == LONG_MAX || button == LONG_MIN || button < 0 || *endptr != '\0' || endptr == bind->symbol) {
+            ELOG("Could not parse button number, skipping this binding. Please report this bug in i3.\n");
+            continue;
+        }
+
+        /* If the binding is for either scrollwheel button, we need to grab everything. */
+        if (button == 4 || button == 5) {
+            return true;
+        }
+    }
+
+    return false;
 }

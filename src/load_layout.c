@@ -29,7 +29,9 @@ static bool parsing_deco_rect;
 static bool parsing_window_rect;
 static bool parsing_geometry;
 static bool parsing_focus;
+static bool parsing_marks;
 struct Match *current_swallow;
+static bool swallow_is_empty;
 
 /* This list is used for reordering the focus stack after parsing the 'focus'
  * array. */
@@ -48,6 +50,7 @@ static int json_start_map(void *ctx) {
         current_swallow = smalloc(sizeof(Match));
         match_init(current_swallow);
         TAILQ_INSERT_TAIL(&(json_node->swallow_head), current_swallow, matches);
+        swallow_is_empty = true;
     } else {
         if (!parsing_rect && !parsing_deco_rect && !parsing_window_rect && !parsing_geometry && !parsing_gaps) {
             if (last_key && strcasecmp(last_key, "floating_nodes") == 0) {
@@ -85,6 +88,7 @@ static int json_end_map(void *ctx) {
                 Match *match = TAILQ_FIRST(&(json_node->swallow_head));
                 TAILQ_REMOVE(&(json_node->swallow_head), match, matches);
                 match_free(match);
+                free(match);
             }
         }
 
@@ -151,6 +155,13 @@ static int json_end_map(void *ctx) {
         json_node = json_node->parent;
     }
 
+    if (parsing_swallows && swallow_is_empty) {
+        /* We parsed an empty swallow definition. This is an invalid layout
+         * definition, hence we reject it. */
+        ELOG("Layout file is invalid: found an empty swallow definition.\n");
+        return 0;
+    }
+
     parsing_gaps = false;
     parsing_rect = false;
     parsing_deco_rect = false;
@@ -161,12 +172,16 @@ static int json_end_map(void *ctx) {
 
 static int json_end_array(void *ctx) {
     LOG("end of array\n");
-    if (!parsing_swallows && !parsing_focus) {
+    if (!parsing_swallows && !parsing_focus && !parsing_marks) {
         con_fix_percent(json_node);
     }
     if (parsing_swallows) {
         parsing_swallows = false;
     }
+    if (parsing_marks) {
+        parsing_marks = false;
+    }
+
     if (parsing_focus) {
         /* Clear the list of focus mappings */
         struct focus_mapping *mapping;
@@ -219,6 +234,9 @@ static int json_key(void *ctx, const unsigned char *val, size_t len) {
     if (strcasecmp(last_key, "focus") == 0)
         parsing_focus = true;
 
+    if (strcasecmp(last_key, "marks") == 0)
+        parsing_marks = true;
+
     return 1;
 }
 
@@ -229,20 +247,32 @@ static int json_string(void *ctx, const unsigned char *val, size_t len) {
         sasprintf(&sval, "%.*s", len, val);
         if (strcasecmp(last_key, "class") == 0) {
             current_swallow->class = regex_new(sval);
+            swallow_is_empty = false;
         } else if (strcasecmp(last_key, "instance") == 0) {
             current_swallow->instance = regex_new(sval);
+            swallow_is_empty = false;
         } else if (strcasecmp(last_key, "window_role") == 0) {
             current_swallow->window_role = regex_new(sval);
+            swallow_is_empty = false;
         } else if (strcasecmp(last_key, "title") == 0) {
             current_swallow->title = regex_new(sval);
+            swallow_is_empty = false;
         } else {
             ELOG("swallow key %s unknown\n", last_key);
         }
         free(sval);
+    } else if (parsing_marks) {
+        char *mark;
+        sasprintf(&mark, "%.*s", (int)len, val);
+
+        con_mark(json_node, mark, MM_ADD);
     } else {
         if (strcasecmp(last_key, "name") == 0) {
             json_node->name = scalloc(len + 1, 1);
             memcpy(json_node->name, val, len);
+        } else if (strcasecmp(last_key, "title_format") == 0) {
+            json_node->title_format = scalloc(len + 1, 1);
+            memcpy(json_node->title_format, val, len);
         } else if (strcasecmp(last_key, "sticky_group") == 0) {
             json_node->sticky_group = scalloc(len + 1, 1);
             memcpy(json_node->sticky_group, val, len);
@@ -341,13 +371,12 @@ static int json_string(void *ctx, const unsigned char *val, size_t len) {
                 LOG("Unhandled \"last_splitlayout\": %s\n", buf);
             free(buf);
         } else if (strcasecmp(last_key, "mark") == 0) {
+            DLOG("Found deprecated key \"mark\".\n");
+
             char *buf = NULL;
             sasprintf(&buf, "%.*s", (int)len, val);
 
-            /* We unmark any containers using this mark to avoid duplicates. */
-            con_unmark(buf);
-
-            json_node->mark = buf;
+            con_mark(json_node, buf, MM_REPLACE);
         } else if (strcasecmp(last_key, "floating") == 0) {
             char *buf = NULL;
             sasprintf(&buf, "%.*s", (int)len, val);
@@ -426,12 +455,15 @@ static int json_int(void *ctx, long long val) {
     if (parsing_swallows) {
         if (strcasecmp(last_key, "id") == 0) {
             current_swallow->id = val;
+            swallow_is_empty = false;
         }
         if (strcasecmp(last_key, "dock") == 0) {
             current_swallow->dock = val;
+            swallow_is_empty = false;
         }
         if (strcasecmp(last_key, "insert_where") == 0) {
             current_swallow->insert_where = val;
+            swallow_is_empty = false;
         }
     }
     if (parsing_gaps) {
@@ -454,8 +486,10 @@ static int json_bool(void *ctx, int val) {
         json_node->sticky = val;
 
     if (parsing_swallows) {
-        if (strcasecmp(last_key, "restart_mode") == 0)
+        if (strcasecmp(last_key, "restart_mode") == 0) {
             current_swallow->restart_mode = val;
+            swallow_is_empty = false;
+        }
     }
 
     return 1;
@@ -601,6 +635,7 @@ void tree_append_json(Con *con, const char *filename, char **errormsg) {
     parsing_window_rect = false;
     parsing_geometry = false;
     parsing_focus = false;
+    parsing_marks = false;
     setlocale(LC_NUMERIC, "C");
     stat = yajl_parse(hand, (const unsigned char *)buf, n);
     if (stat != yajl_status_ok) {
@@ -618,8 +653,11 @@ void tree_append_json(Con *con, const char *filename, char **errormsg) {
 
     setlocale(LC_NUMERIC, "");
     yajl_complete_parse(hand);
+    yajl_free(hand);
+    yajl_gen_free(g);
 
     fclose(f);
+    free(buf);
     if (to_focus)
         con_focus(to_focus);
 }

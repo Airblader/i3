@@ -24,7 +24,7 @@ Please note that I do not care too much for backwards compatibility. At the time
 
 # Screenshot
 
-![i3](http://i.imgur.com/Jw2kom9.png)
+![i3](http://i.imgur.com/y8sZE6o.jpg)
 
 
 # New Features
@@ -33,7 +33,7 @@ Please note that I do not care too much for backwards compatibility. At the time
 
 ### gaps
 
-Note: Gaps will only work correctly if you disable window titlebars entirely. Unfortunately this is necessary due to the way i3 creates such bars on windows. You can disable them via `for_window [class="^.*"] border pixel 0` in your config.
+Note: Gaps will only work correctly if you disable window titlebars entirely. Unfortunately this is necessary due to the way i3 creates such bars on windows. You can disable them via `for_window [class="^.*"] border pixel 0` in your config. You can also use any non-zero value as long as you only use pixel-style borders.
 
 Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that the gaps between containers and the gaps between containers and the edge of the screen are the same. But I didn't stop there: these gaps are called "inner" gaps. This fork also allows setting "outer" gaps which inset all containers independently.
 
@@ -168,5 +168,20 @@ The height of any bar can be configured to have an arbitrary value. This is espe
 bar {
         # height of the bar in pixels
         height 25
+}
+```
+
+### Transparency / RGBA Colors
+
+As an experimental feature, i3-gaps allows you to use RGBA colors for i3bar which allows for transparency. Please note that this has two implications:
+
+* Due to technical constraints which can only be solved by a lot of effort, the background of tray icons will always be fully transparent, no matter what the background color of your i3bar is.
+* This is experimental and bugs will only be fixed if doing so doesn't involve a lot of effort / big changes. The ability to easily stay up to date with upstream has priority.
+
+In order to use this feature, run i3bar with the additional argument `-t`. This can be done in your i3 config as follows:
+
+````
+bar {
+        i3bar_command i3bar -t
 }
 ```

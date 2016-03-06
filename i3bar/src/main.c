@@ -101,11 +101,12 @@ int main(int argc, char **argv) {
     static struct option long_opt[] = {
         {"socket", required_argument, 0, 's'},
         {"bar_id", required_argument, 0, 'b'},
+        {"transparency", no_argument, 0, 't'},
         {"help", no_argument, 0, 'h'},
         {"version", no_argument, 0, 'v'},
         {NULL, 0, 0, 0}};
 
-    while ((opt = getopt_long(argc, argv, "b:s:hv", long_opt, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "b:s:thv", long_opt, &option_index)) != -1) {
         switch (opt) {
             case 's':
                 socket_path = expand_path(optarg);
@@ -116,6 +117,9 @@ int main(int argc, char **argv) {
                 break;
             case 'b':
                 config.bar_id = sstrdup(optarg);
+                break;
+            case 't':
+                config.transparency = true;
                 break;
             default:
                 print_usage(argv[0]);
@@ -137,6 +141,8 @@ int main(int argc, char **argv) {
 
     if (socket_path == NULL) {
         socket_path = atom_sock_path;
+    } else {
+        free(atom_sock_path);
     }
 
     if (socket_path == NULL) {
@@ -149,6 +155,7 @@ int main(int argc, char **argv) {
         /* Request the bar configuration. When it arrives, we fill the config array. */
         i3_send_msg(I3_IPC_MESSAGE_TYPE_GET_BAR_CONFIG, config.bar_id);
     }
+    free(socket_path);
 
     /* We listen to SIGTERM/QUIT/INT and try to exit cleanly, by stopping the main loop.
      * We only need those watchers on the stack, so putting them on the stack saves us
