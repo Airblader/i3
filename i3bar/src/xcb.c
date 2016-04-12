@@ -317,7 +317,7 @@ void draw_statusline(i3_output *output, uint32_t clip_left, bool use_focus_color
                                 bar_height - is_border * logical_px(block->border_bottom + block->border_top) - logical_px(2));
         }
 
-        draw_util_text(block->full_text, &output->statusline_buffer, fg_color, colors.bar_bg,
+        draw_util_text(text, &output->statusline_buffer, fg_color, colors.bar_bg,
                        x + render->x_offset + logical_px(block->border_left),
                        bar_height / 2 - font.height / 2,
                        render->width - logical_px(block->border_left - block->border_right));
