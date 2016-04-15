@@ -12,6 +12,7 @@
 #include "all.h"
 #include "yajl_utils.h"
 
+#include <stdint.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <fcntl.h>
@@ -227,7 +228,7 @@ static void dump_binding(yajl_gen gen, Binding *bind) {
 void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
     y(map_open);
     ystr("id");
-    y(integer, (long int)con);
+    y(integer, (uintptr_t)con);
 
     ystr("type");
     switch (con->type) {
@@ -456,7 +457,7 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
     ystr("focus");
     y(array_open);
     TAILQ_FOREACH(node, &(con->focus_head), focused) {
-        y(integer, (long int)node);
+        y(integer, (uintptr_t)node);
     }
     y(array_close);
 
