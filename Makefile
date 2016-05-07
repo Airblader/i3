@@ -46,7 +46,7 @@ dist: distclean
 	mkdir i3-${VERSION}/docs
 	# Pre-generate documentation
 	$(MAKE) docs
-	# Cleanup τεχ output files
+	# Cleanup the output files
 	find docs -regex ".*\.\(aux\|out\|log\|toc\|bm\|dvi\|log\)" -exec rm '{}' \;
 	find docs -maxdepth 1 -type f ! \( -name "*.xcf" -or -name "*.svg" \) -exec cp '{}' i3-${VERSION}/docs \;
 	# Only copy source code from i3-input
