@@ -739,14 +739,11 @@ int con_num_visible_children(Con *con) {
     int children = 0;
     Con *current = NULL;
     TAILQ_FOREACH(current, &(con->nodes_head), nodes) {
-        /* Leaf nodes are a child. */
-        if (con_is_leaf(current))
+        /* Visible leaf nodes are a child. */
+        if (!con_is_hidden(current) && con_is_leaf(current))
             children++;
-        /* Stacked and tabbed containers are only considered one child. */
-        else if (current->layout == L_TABBED || current->layout == L_STACKED)
-            children++;
-        /* Split containers need to be recursed. */
-        else if (current->layout == L_SPLITH || current->layout == L_SPLITV)
+        /* All other containers need to be recursed. */
+        else
             children += con_num_visible_children(current);
     }
 
@@ -1470,7 +1467,9 @@ Con *con_descend_direction(Con *con, direction_t direction) {
  *
  */
 Rect con_border_style_rect(Con *con) {
-    if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) || (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0)) {
+    if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) ||
+        (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0) ||
+        (config.hide_edge_borders == HEBM_SMART && con_num_visible_children(con_get_workspace(con)) <= 1)) {
         if (!con_is_floating(con))
             return (Rect){0, 0, 0, 0};
     }
