@@ -25,6 +25,7 @@ state INITIAL:
   'mode'                                   -> MODENAME
   'gaps'                                   -> GAPS
   'smart_borders'                          -> SMART_BORDERS
+  'smart_gaps_size'                        -> SMART_GAPS_SIZE
   'smart_gaps'                             -> SMART_GAPS
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
@@ -81,6 +82,15 @@ state SMART_BORDERS:
 state SMART_GAPS:
   enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
       -> call cfg_smart_gaps($enabled)
+
+
+# smart_gaps_size <size>
+state SMART_GAPS_SIZE:
+  size = number
+      -> call cfg_smart_gaps_size(&size)
+
+
+
 
 # floating_minimum_size <width> x <height>
 state FLOATING_MINIMUM_SIZE_WIDTH:
