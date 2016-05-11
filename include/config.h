@@ -240,6 +240,7 @@ struct Config {
 
     /* Disable gaps if there is only one container on the workspace */
     bool smart_gaps;
+    int smart_gaps_size;
 };
 
 /**
