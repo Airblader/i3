@@ -546,7 +546,7 @@ Con *workspace_next(void) {
                     continue;
                 if (!first)
                     first = child;
-                if (!first_opposite && child->num != -1)
+                if (!first_opposite || (child->num != -1 && child->num < first_opposite->num))
                     first_opposite = child;
                 if (child == current) {
                     found_current = true;
@@ -565,7 +565,7 @@ Con *workspace_next(void) {
             NODES_FOREACH(output_get_content(output)) {
                 if (child->type != CT_WORKSPACE)
                     continue;
-                if (!first)
+                if (!first || (child->num != -1 && child->num < first->num))
                     first = child;
                 if (!first_opposite && child->num == -1)
                     first_opposite = child;
@@ -611,13 +611,13 @@ Con *workspace_prev(void) {
                         continue;
                     if (!last)
                         last = child;
-                    if (!first_opposite && child->num != -1)
+                    if (!first_opposite || (child->num != -1 && child->num > first_opposite->num))
                         first_opposite = child;
                     if (child == current) {
                         found_current = true;
                     } else if (child->num == -1 && found_current) {
                         prev = child;
-                        goto workspace_prev_end;
+                        return prev;
                     }
                 }
             }
@@ -631,7 +631,7 @@ Con *workspace_prev(void) {
             NODES_FOREACH_REVERSE(output_get_content(output)) {
                 if (child->type != CT_WORKSPACE)
                     continue;
-                if (!last)
+                if (!last || (child->num != -1 && last->num < child->num))
                     last = child;
                 if (!first_opposite && child->num == -1)
                     first_opposite = child;
@@ -649,7 +649,6 @@ Con *workspace_prev(void) {
     if (!prev)
         prev = first_opposite ? first_opposite : last;
 
-workspace_prev_end:
     return prev;
 }
 
