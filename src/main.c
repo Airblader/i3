@@ -538,7 +538,11 @@ int main(int argc, char *argv[]) {
 
     xcb_void_cookie_t cookie;
     cookie = xcb_change_window_attributes_checked(conn, root, XCB_CW_EVENT_MASK, (uint32_t[]){ROOT_EVENT_MASK});
-    check_error(conn, cookie, "Another window manager seems to be running");
+    xcb_generic_error_t *error = xcb_request_check(conn, cookie);
+    if (error != NULL) {
+        ELOG("Another window manager seems to be running (X error %d)\n", error->error_code);
+        return 1;
+    }
 
     xcb_get_geometry_reply_t *greply = xcb_get_geometry_reply(conn, gcookie, NULL);
     if (greply == NULL) {
@@ -822,7 +826,7 @@ int main(int argc, char *argv[]) {
                       (uint32_t[]){XCB_GX_COPY, ~0, XCB_FILL_STYLE_SOLID, XCB_SUBWINDOW_MODE_INCLUDE_INFERIORS});
 
         xcb_copy_area(conn, root->root, pixmap, gc, 0, 0, 0, 0, width, height);
-        xcb_change_window_attributes_checked(conn, root->root, XCB_CW_BACK_PIXMAP, (uint32_t[]){pixmap});
+        xcb_change_window_attributes(conn, root->root, XCB_CW_BACK_PIXMAP, (uint32_t[]){pixmap});
         xcb_flush(conn);
         xcb_free_gc(conn, gc);
         xcb_free_pixmap(conn, pixmap);
