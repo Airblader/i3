@@ -20,8 +20,6 @@ Please refer to the [wiki](https://github.com/Airblader/i3/wiki/Compiling-&-Inst
 
 You can update by simply switching into the directory of the repository and executing `git pull`. Then rebuild and install via `make && sudo make install`.
 
-Please note that I do not care too much for backwards compatibility. At the time of installation, this readme will always be up to date. When I change something, I will update the readme as well. Before pulling, please check if something has changed and adapt your config / scripts accordingly. If there are any questions on how to adapt something, please feel free to contact me by opening an issue.
-
 # Screenshot
 
 ![i3](http://i.imgur.com/y8sZE6o.jpg)
