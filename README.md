@@ -16,10 +16,6 @@ This fork, much like i3 itself, maintains two branches: The `gaps` branch is the
 
 Please refer to the [wiki](https://github.com/Airblader/i3/wiki/Compiling-&-Installing) to see how i3-gaps can be installed and for which distributions there are packages available.
 
-# Updating
-
-You can update by simply switching into the directory of the repository and executing `git pull`. Then rebuild and install via `make && sudo make install`.
-
 # Screenshot
 
 ![i3](http://i.imgur.com/y8sZE6o.jpg)
