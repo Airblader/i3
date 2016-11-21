@@ -45,7 +45,10 @@ dist_xsessions_DATA = \
 
 noinst_LIBRARIES = libi3.a
 
-check_PROGRAMS = test.commands_parser test.config_parser
+check_PROGRAMS = \
+	test.commands_parser \
+	test.config_parser \
+	test.inject_randr15
 
 check_SCRIPTS = \
 	testcases/complete-run.pl
@@ -401,6 +404,19 @@ i3_config_wizard_i3_config_wizard_SOURCES = \
 	i3-config-wizard/main.c \
 	i3-config-wizard/xcb.h
 
+test_inject_randr15_CPPFLAGS = \
+	$(AM_CPPFLAGS)
+
+test_inject_randr15_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(i3_CFLAGS)
+
+test_inject_randr15_SOURCES = \
+	testcases/inject_randr1.5.c
+
+test_inject_randr15_LDADD = \
+	$(i3_LDADD)
+
 test_commands_parser_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DTEST_PARSER
@@ -457,7 +473,6 @@ i3_SOURCES = \
 	include/config_parser.h \
 	include/con.h \
 	include/data.h \
-	include/debug.h \
 	include/display_version.h \
 	include/ewmh.h \
 	include/fake_outputs.h \
@@ -502,7 +517,6 @@ i3_SOURCES = \
 	src/config.c \
 	src/config_directives.c \
 	src/config_parser.c \
-	src/debug.c \
 	src/display_version.c \
 	src/ewmh.c \
 	src/fake_outputs.c \
