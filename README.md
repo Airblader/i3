@@ -33,14 +33,14 @@ Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between c
 
 In your i3 config, you can set a global gap size as shown below. This is the default value that will be used for all workspaces:
 
-````
+```
 gaps inner <px>
 gaps outer <px>
 ```
 
 Additionally, you can issue commands with the following syntax. This is useful, for example, to bind keys to changing the gap size:
 
-````
+```
 gaps inner|outer current|all set|plus|minus <px>
 
 # Examples
@@ -58,7 +58,7 @@ Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` 
 
 Additionally, gaps can be specified on a per-workspace level by using the syntax known from assigning a workspace to a certain output:
 
-````
+```
 workspace <ws> gaps inner <px>
 workspace <ws> gaps outer <px>
 ```
@@ -66,14 +66,14 @@ workspace <ws> gaps outer <px>
 It is important that these commands are specified after the global default since they are meant to override it.
 Note that multiple such assignments are allowed (and perhaps necessary).  The `ws` variable can either be a number or a name, so both of these are valid:
 
-````
+```
 workspace 1 gaps inner 0
 workspace "www" gaps inner 0
 ```
 
 Here is one possible idea on how you can use this feature within your i3 config. Simply press `$mod+Shift+g` to enter the gaps mode. Then choose between `o` and `i` for modifying outer / inner gaps. In this mode, you can press one of `+` / `-` (in-/decrement for current workspace) or `0` (remove gaps for current workspace). If you also press `Shift` with these keys, the change will be global for all workspaces.
 
-````
+```
 set $mode_gaps Gaps: (o) outer, (i) inner
 set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
 set $mode_gaps_inner Inner Gaps: +|-|0 (local), Shift + +|-|0 (global)
@@ -116,7 +116,7 @@ mode "$mode_gaps_outer" {
 
 If you want gaps to only be used if there is more than one container on the workspace, you can use
 
-````
+```
 smart_gaps on
 ```
 
@@ -127,7 +127,7 @@ This will disable all gaps (outer and inner) on the workspace whenever only one 
 
 Based on the patch from [i3-extras](https://github.com/ashinkarov/i3-extras), smart borders have been added in a configurable way. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with the command below. `on` will always activate it, while `no_gaps` will only activate it if the gap size to the edge of the screen is `0`.
 
-````
+```
 smart_borders on|no_gaps
 ```
 
@@ -144,7 +144,7 @@ i3bar now supports setting a background and border color for the individual bloc
 
 Example:
 
-````
+```
 { \
   "full_text": "example", \
   "color": "\#FFFFFF", \
@@ -158,7 +158,7 @@ Example:
 
 The height of any bar can be configured to have an arbitrary value. This is especially useful if you plan on using top/bottom borders on status blocks to make the bar taller. If the height is not set, it will be calculated as normal. To set it, use the `height` directive in the `bar` configuration block:
 
-````
+```
 bar {
         # height of the bar in pixels
         height 25
@@ -174,7 +174,7 @@ As an experimental feature, i3-gaps allows you to use RGBA colors for i3bar whic
 
 In order to use this feature, run i3bar with the additional argument `-t`. This can be done in your i3 config as follows:
 
-````
+```
 bar {
         i3bar_command i3bar -t
 }
