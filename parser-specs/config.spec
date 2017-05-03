@@ -349,6 +349,8 @@ state BINDING:
       ->
   whole_window = '--whole-window'
       ->
+  exclude_titlebar = '--exclude-titlebar'
+      ->
   modifiers = 'Mod1', 'Mod2', 'Mod3', 'Mod4', 'Mod5', 'Shift', 'Control', 'Ctrl', 'Mode_switch', 'Group1', 'Group2', 'Group3', 'Group4', '$mod'
       ->
   '+'
@@ -363,8 +365,10 @@ state BINDCOMMAND:
       ->
   whole_window = '--whole-window'
       ->
+  exclude_titlebar = '--exclude-titlebar'
+      ->
   command = string
-      -> call cfg_binding($bindtype, $modifiers, $key, $release, $border, $whole_window, $command)
+      -> call cfg_binding($bindtype, $modifiers, $key, $release, $border, $whole_window, $exclude_titlebar, $command)
 
 ################################################################################
 # Mode configuration
@@ -404,6 +408,8 @@ state MODE_BINDING:
       ->
   whole_window = '--whole-window'
       ->
+  exclude_titlebar = '--exclude-titlebar'
+      ->
   modifiers = 'Mod1', 'Mod2', 'Mod3', 'Mod4', 'Mod5', 'Shift', 'Control', 'Ctrl', 'Mode_switch', 'Group1', 'Group2', 'Group3', 'Group4', '$mod'
       ->
   '+'
@@ -418,8 +424,10 @@ state MODE_BINDCOMMAND:
       ->
   whole_window = '--whole-window'
       ->
+  exclude_titlebar = '--exclude-titlebar'
+      ->
   command = string
-      -> call cfg_mode_binding($bindtype, $modifiers, $key, $release, $border, $whole_window, $command); MODE
+      -> call cfg_mode_binding($bindtype, $modifiers, $key, $release, $border, $whole_window, $exclude_titlebar, $command); MODE
 
 ################################################################################
 # Bar configuration (i3bar)
