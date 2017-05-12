@@ -544,5 +544,5 @@ bool has_adjacent_container(Con *con, direction_t direction) {
         return true;
 
     /* For fullscreen containers, only consider the adjacent container if it is also fullscreen. */
-    return con_has_parent(fullscreen, con) && con_has_parent(fullscreen, second);
+    return con_has_parent(con, fullscreen) && con_has_parent(second, fullscreen);
 }

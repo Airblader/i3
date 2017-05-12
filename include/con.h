@@ -140,6 +140,12 @@ Con *con_inside_floating(Con *con);
 bool con_inside_focused(Con *con);
 
 /**
+ * Checks if the container has the given parent as an actual parent.
+ *
+ */
+bool con_has_parent(Con *con, Con *parent);
+
+/**
  * Returns the container with the given client window ID or NULL if no such
  * container exists.
  *
@@ -462,12 +468,6 @@ gaps_t calculate_effective_gaps(Con *con);
  *
  */
 void con_force_split_parents_redraw(Con *con);
-
-/**
- * Recursively check whether the (potential) parent container
- * contains the (potential) child container.
- */
-bool con_has_parent(Con *parent, Con *child);
 
 /**
  * Returns the window title considering the current title format.

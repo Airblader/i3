@@ -526,6 +526,23 @@ bool con_inside_focused(Con *con) {
 }
 
 /*
+ * Checks if the container has the given parent as an actual parent.
+ *
+ */
+bool con_has_parent(Con *con, Con *parent) {
+    Con *current = con->parent;
+    if (current == NULL) {
+        return false;
+    }
+
+    if (current == parent) {
+        return true;
+    }
+
+    return con_has_parent(current, parent);
+}
+
+/*
  * Returns the container with the given client window ID or NULL if no such
  * container exists.
  *
@@ -2135,23 +2152,6 @@ gaps_t calculate_effective_gaps(Con *con) {
     gaps.outer += 2 * gaps.inner;
 
     return gaps;
-}
-
-/**
- * Recursively check whether the (potential) parent container
- * contains the (potential) child container.
- */
-bool con_has_parent(Con *parent, Con *child) {
-    Con *current = NULL;
-    TAILQ_FOREACH(current, &(parent->nodes_head), nodes) {
-        if (current == child)
-            return true;
-
-        if (con_has_parent(current, child))
-            return true;
-    }
-
-    return false;
 }
 
 /*
