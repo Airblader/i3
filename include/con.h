@@ -474,3 +474,9 @@ void con_force_split_parents_redraw(Con *con);
  *
  */
 i3String *con_parse_title_format(Con *con);
+
+/**
+ * Swaps the two containers.
+ *
+ */
+bool con_swap(Con *first, Con *second);
