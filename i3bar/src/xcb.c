@@ -1185,6 +1185,7 @@ void xcb_chk_cb(struct ev_loop *loop, ev_check *watcher, int revents) {
             case XCB_CONFIGURE_REQUEST:
                 /* ConfigureRequest, sent by a tray child */
                 handle_configure_request((xcb_configure_request_event_t *)event);
+                break;
             case XCB_RESIZE_REQUEST:
                 /* ResizeRequest sent by a tray child using override_redirect. */
                 handle_resize_request((xcb_resize_request_event_t *)event);
@@ -1268,6 +1269,12 @@ char *init_xcb_early() {
     ev_io_init(xcb_io, &xcb_io_cb, xcb_get_file_descriptor(xcb_connection), EV_READ);
     ev_prepare_init(xcb_prep, &xcb_prep_cb);
     ev_check_init(xcb_chk, &xcb_chk_cb);
+
+    /* Within an event loop iteration, run the xcb_chk watcher last: other
+     * watchers might call xcb_flush(), which, unexpectedly, can also read
+     * events into the queue (see _xcb_conn_wait). Hence, we need to drain xcb’s
+     * queue last, otherwise we risk dead-locking. */
+    ev_set_priority(xcb_chk, EV_MINPRI);
 
     ev_io_start(main_loop, xcb_io);
     ev_prepare_start(main_loop, xcb_prep);
