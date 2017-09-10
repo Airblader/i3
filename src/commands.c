@@ -1841,7 +1841,7 @@ void cmd_swap(I3_CMD, const char *mode, const char *arg) {
             return;
         }
 
-        con = (Con *)target;
+        con = con_by_con_id(target);
     } else if (strcmp(mode, "mark") == 0) {
         con = con_by_mark(arg);
     } else {
@@ -1854,7 +1854,7 @@ void cmd_swap(I3_CMD, const char *mode, const char *arg) {
         return;
     }
 
-    if (match == TAILQ_LAST(&owindows, owindows_head)) {
+    if (match != TAILQ_LAST(&owindows, owindows_head)) {
         DLOG("More than one container matched the swap command, only using the first one.");
     }
 

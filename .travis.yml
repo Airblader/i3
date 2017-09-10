@@ -1,5 +1,8 @@
 sudo: false
 dist: trusty
+# TODO: remove “group” once trusty kernel is no longer affected by
+# https://github.com/google/sanitizers/issues/837
+group: deprecated-2017Q3
 services:
   - docker
 language: c
@@ -39,7 +42,6 @@ script:
   - ./travis/skip-pkg.sh || docker run -v $PWD:/usr/src/i3/ -w /usr/src/i3 ${BASENAME_UBUNTU} ./travis/debian-build.sh deb/ubuntu-amd64/DIST
   - ./travis/skip-pkg.sh || docker run -v $PWD:/usr/src/i3/ -w /usr/src/i3 ${BASENAME_386} linux32 ./travis/debian-build.sh deb/debian-i386/DIST
   - ./travis/skip-pkg.sh || docker run -v $PWD:/usr/src/i3/ -w /usr/src/i3 ${BASENAME_UBUNTU_386} linux32 ./travis/debian-build.sh deb/ubuntu-i386/DIST
-  - ./travis/skip-pkg.sh || docker run -v $PWD:/usr/src/i3/ -w /usr/src/i3 ${BASENAME} ./travis/clang-analyze.sh
   - ./travis/skip-pkg.sh || docker run -v $PWD:/usr/src/i3/ -w /usr/src/i3 ${BASENAME} ./travis/docs.sh
   - ./travis/skip-pkg.sh || travis/prep-bintray.sh
 
