@@ -106,8 +106,8 @@ static void draw_text_pango(const char *text, size_t text_len,
         pango_layout_set_text(layout, text, text_len);
 
     /* Do the drawing */
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     cairo_set_source_rgba(cr, pango_font_red, pango_font_green, pango_font_blue, pango_font_alpha);
-    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
     pango_cairo_update_layout(cr, layout);
     pango_layout_get_pixel_size(layout, NULL, &height);
     /* Center the piece of text vertically if its height is smaller than the
