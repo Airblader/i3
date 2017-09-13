@@ -835,17 +835,17 @@ sub launch_with_config {
 
     my ($fh, $tmpfile) = tempfile("i3-cfg-for-$ENV{TESTNAME}-XXXXX", UNLINK => 1);
 
+    say $fh "ipc-socket $tmp_socket_path"
+        unless $args{dont_add_socket_path};
+
     if ($config ne '-default') {
-        say $fh $config;
+        print $fh $config;
     } else {
         open(my $conf_fh, '<', '@abs_top_srcdir@/testcases/i3-test.config')
             or $tester->BAIL_OUT("could not open default config: $!");
         local $/;
         say $fh scalar <$conf_fh>;
     }
-
-    say $fh "ipc-socket $tmp_socket_path"
-        unless $args{dont_add_socket_path};
 
     close($fh);
 
@@ -864,6 +864,7 @@ sub launch_with_config {
         dont_create_temp_dir => $args{dont_create_temp_dir},
         validate_config => $args{validate_config},
         inject_randr15 => $args{inject_randr15},
+        inject_randr15_outputinfo => $args{inject_randr15_outputinfo},
     );
 
     # If we called i3 with -C, we wait for it to exit and then return as
