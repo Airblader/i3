@@ -760,6 +760,10 @@ title change. As i3 will get the title as soon as the application maps the
 window (mapping means actually displaying it on the screen), you’d need to have
 to match on 'Firefox' in this case.
 
+You can also assign a window to show up on a specific output. You can use RandR
+names such as +VGA1+ or names relative to the output with the currently focused
+workspace such as +left+ and +down+.
+
 Assignments are processed by i3 in the order in which they appear in the config
 file. The first one which matches the window wins and later assignments are not
 considered.
@@ -767,6 +771,7 @@ considered.
 *Syntax*:
 ------------------------------------------------------------
 assign <criteria> [→] [workspace] [number] <workspace>
+assign <criteria> [→] output left|right|up|down|primary|<output>
 ------------------------------------------------------------
 
 *Examples*:
@@ -791,9 +796,20 @@ assign [class="^URxvt$"] → number "2: work"
 
 # Start urxvt -name irssi
 assign [class="^URxvt$" instance="^irssi$"] → 3
+
+# Assign urxvt to the output right of the current one
+assign [class="^URxvt$"] → output right
+
+# Assign urxvt to the primary output
+assign [class="^URxvt$"] → output primary
 ----------------------
 
-Note that the arrow is not required, it just looks good :-). If you decide to
+Note that you might not have a primary output configured yet. To do so, run:
+-------------------------
+xrandr --output <output> --primary
+-------------------------
+
+Also, the arrow is not required, it just looks good :-). If you decide to
 use it, it has to be a UTF-8 encoded arrow, not `->` or something like that.
 
 To get the class and instance, you can use +xprop+. After clicking on the
@@ -808,7 +824,7 @@ The first part of the WM_CLASS is the instance ("irssi" in this example), the
 second part is the class ("URxvt" in this example).
 
 Should you have any problems with assignments, make sure to check the i3
-logfile first (see http://i3wm.org/docs/debugging.html). It includes more
+logfile first (see https://i3wm.org/docs/debugging.html). It includes more
 details about the matching process and the window’s actual class, instance and
 title when starting up.
 
@@ -1062,7 +1078,7 @@ force_focus_wrapping yes
 
 === Forcing Xinerama
 
-As explained in-depth in <http://i3wm.org/docs/multi-monitor.html>, some X11
+As explained in-depth in <https://i3wm.org/docs/multi-monitor.html>, some X11
 video drivers (especially the nVidia binary driver) only provide support for
 Xinerama instead of RandR. In such a situation, i3 must be told to use the
 inferior Xinerama API explicitly and therefore don’t provide support for
@@ -2255,7 +2271,6 @@ bindsym $mod+x move container to output VGA1
 bindsym $mod+x move container to output primary
 --------------------------------------------------------
 
--------------------------------
 Note that you might not have a primary output configured yet. To do so, run:
 -------------------------
 xrandr --output <output> --primary
@@ -2471,7 +2486,7 @@ bindsym $mod+u border none
 [[shmlog]]
 === Enabling shared memory logging
 
-As described in http://i3wm.org/docs/debugging.html, i3 can log to a shared
+As described in https://i3wm.org/docs/debugging.html, i3 can log to a shared
 memory buffer, which you can dump using +i3-dump-log+. The +shmlog+ command
 allows you to enable or disable the shared memory logging at runtime.
 

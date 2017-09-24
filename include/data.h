@@ -568,7 +568,8 @@ struct Assignment {
         A_COMMAND = (1 << 0),
         A_TO_WORKSPACE = (1 << 1),
         A_NO_FOCUS = (1 << 2),
-        A_TO_WORKSPACE_NUMBER = (1 << 3)
+        A_TO_WORKSPACE_NUMBER = (1 << 3),
+        A_TO_OUTPUT = (1 << 4)
     } type;
 
     /** the criteria to check if a window matches */
@@ -578,6 +579,7 @@ struct Assignment {
     union {
         char *command;
         char *workspace;
+        char *output;
     } dest;
 
     TAILQ_ENTRY(Assignment)
