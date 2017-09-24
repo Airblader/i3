@@ -98,10 +98,10 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
          * The spec isn’t explicit on whether the aspect ratio hints should be
          * respected during fullscreen mode. Other WMs such as Openbox don’t do
          * that, and this post suggests that this is the correct way to do it:
-         * http://mail.gnome.org/archives/wm-spec-list/2003-May/msg00007.html
+         * https://mail.gnome.org/archives/wm-spec-list/2003-May/msg00007.html
          *
          * Ignoring aspect ratio during fullscreen was necessary to fix MPlayer
-         * subtitle rendering, see http://bugs.i3wm.org/594 */
+         * subtitle rendering, see https://bugs.i3wm.org/594 */
         if (!render_fullscreen && con->window->aspect_ratio > 0.0) {
             DLOG("aspect_ratio = %f, current width/height are %d/%d\n",
                  con->window->aspect_ratio, inset->width, inset->height);
@@ -126,7 +126,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
          * windows up until commit 0db93d9 here. However, since all terminal
          * emulators cope with ignoring the size hints in a better way than we
          * can (by providing their fake-transparency or background color), this
-         * code was removed. See also http://bugs.i3wm.org/540 */
+         * code was removed. See also https://bugs.i3wm.org/540 */
 
         DLOG("child will be at %dx%d with size %dx%d\n", inset->x, inset->y, inset->width, inset->height);
     }
@@ -145,7 +145,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
          * global fullscreen containers, we cannot abort rendering here yet,
          * because the floating windows (with popup_during_fullscreen smart)
          * have not yet been rendered (see the CT_ROOT code path below). See
-         * also http://bugs.i3wm.org/1393 */
+         * also https://bugs.i3wm.org/1393 */
         if (con->type != CT_ROOT) {
             return;
         }

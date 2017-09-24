@@ -2,13 +2,13 @@
 # vim:ts=4:sw=4:expandtab
 #
 # Please read the following documents before working on tests:
-# • http://build.i3wm.org/docs/testsuite.html
+# • https://build.i3wm.org/docs/testsuite.html
 #   (or docs/testsuite)
 #
-# • http://build.i3wm.org/docs/lib-i3test.html
+# • https://build.i3wm.org/docs/lib-i3test.html
 #   (alternatively: perldoc ./testcases/lib/i3test.pm)
 #
-# • http://build.i3wm.org/docs/ipc.html
+# • https://build.i3wm.org/docs/ipc.html
 #   (or docs/ipc)
 #
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
@@ -18,9 +18,7 @@
 # the appropriate output.
 # Ticket: #1211
 # Bug still in: 4.9.1-108-g037cb31
-use i3test i3_autostart => 0;
-
-my $config = <<EOT;
+use i3test i3_config => <<EOT;
 # i3 config file (v4)
 font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 
@@ -29,8 +27,6 @@ fake-outputs 1024x768+0+0,1024x768+1024+0
 workspace left output fake-0
 workspace right output fake-1
 EOT
-
-my $pid = launch_with_config($config);
 
 #####################################################################
 # Verify that 'move position center' on a floating window does not
@@ -57,7 +53,5 @@ sync_with_i3;
 
 is(scalar @{get_ws('left')->{floating_nodes}}, 0, 'no floating nodes on left ws');
 is(scalar @{get_ws('right')->{floating_nodes}}, 1, 'one floating node on right ws');
-
-exit_gracefully($pid);
 
 done_testing;

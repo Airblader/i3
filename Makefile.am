@@ -65,6 +65,19 @@ TESTS = testcases/complete-run.pl
 EXTRA_DIST = \
 	$(dist_docs_toc_DATA:.html=) \
 	$(dist_docs_notoc_DATA:.html=) \
+	AnyEvent-I3/Changes \
+	AnyEvent-I3/MANIFEST \
+	AnyEvent-I3/MANIFEST.SKIP \
+	AnyEvent-I3/Makefile.PL \
+	AnyEvent-I3/README \
+	AnyEvent-I3/lib/AnyEvent/I3.pm \
+	AnyEvent-I3/t/00-load.t \
+	AnyEvent-I3/t/01-workspaces.t \
+	AnyEvent-I3/t/02-sugar.t \
+	AnyEvent-I3/t/boilerplate.t \
+	AnyEvent-I3/t/manifest.t \
+	AnyEvent-I3/t/pod-coverage.t \
+	AnyEvent-I3/t/pod.t \
 	docs/asciidoc-git.conf \
 	docs/bigpicture.png \
 	docs/i3-pod2html \
@@ -100,7 +113,7 @@ EXTRA_DIST = \
 	I3_VERSION \
 	LICENSE \
 	PACKAGE-MAINTAINER \
-	RELEASE-NOTES-4.14 \
+	RELEASE-NOTES-4.14.1 \
 	generate-command-parser.pl \
 	parser-specs/commands.spec \
 	parser-specs/config.spec \

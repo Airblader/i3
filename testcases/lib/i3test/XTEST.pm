@@ -5,7 +5,8 @@ use strict;
 use warnings;
 use v5.10;
 
-use i3test i3_autostart => 0;
+use Test::More;
+use i3test::Util qw(get_socket_path);
 use lib qw(@abs_top_srcdir@/AnyEvent-I3/blib/lib);
 use AnyEvent::I3;
 use ExtUtils::PkgConfig;
@@ -96,7 +97,7 @@ bool inlinec_connect() {
 bool set_xkb_group(int group) {
     xcb_generic_error_t *err = NULL;
     // Needs libxcb ≥ 1.11 so that we have the following bug fix:
-    // http://cgit.freedesktop.org/xcb/proto/commit/src/xkb.xml?id=8d7ee5b6ba4cf343f7df70372a3e1f85b82aeed7
+    // https://cgit.freedesktop.org/xcb/proto/commit/src/xkb.xml?id=8d7ee5b6ba4cf343f7df70372a3e1f85b82aeed7
     xcb_void_cookie_t cookie = xcb_xkb_latch_lock_state_checked(
         conn,
         XCB_XKB_ID_USE_CORE_KBD, /* deviceSpec */

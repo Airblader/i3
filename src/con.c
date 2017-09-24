@@ -73,6 +73,30 @@ Con *con_new(Con *parent, i3Window *window) {
     return new;
 }
 
+/*
+ * Frees the specified container.
+ *
+ */
+void con_free(Con *con) {
+    free(con->name);
+    FREE(con->deco_render_params);
+    TAILQ_REMOVE(&all_cons, con, all_cons);
+    while (!TAILQ_EMPTY(&(con->swallow_head))) {
+        Match *match = TAILQ_FIRST(&(con->swallow_head));
+        TAILQ_REMOVE(&(con->swallow_head), match, matches);
+        match_free(match);
+        free(match);
+    }
+    while (!TAILQ_EMPTY(&(con->marks_head))) {
+        mark_t *mark = TAILQ_FIRST(&(con->marks_head));
+        TAILQ_REMOVE(&(con->marks_head), mark, marks);
+        FREE(mark->name);
+        FREE(mark);
+    }
+    free(con);
+    DLOG("con %p freed\n", con);
+}
+
 static void _con_attach(Con *con, Con *parent, Con *previous, bool ignore_focus) {
     con->parent = parent;
     Con *loop;
@@ -218,6 +242,13 @@ void con_focus(Con *con) {
         con_update_parents_urgency(con);
         workspace_update_urgent_flag(con_get_workspace(con));
         ipc_send_window_event("urgent", con);
+    }
+
+    /* Focusing a container with a floating parent should raise it to the top. Since
+     * con_focus is called recursively for each parent we don't need to use
+     * con_inside_floating(). */
+    if (con->type == CT_FLOATING_CON) {
+        floating_raise_con(con);
     }
 }
 
@@ -379,7 +410,7 @@ Con *con_get_workspace(Con *con) {
 }
 
 /*
- * Searches parenst of the given 'con' until it reaches one with the specified
+ * Searches parents of the given 'con' until it reaches one with the specified
  * 'orientation'. Aborts when it comes across a floating_con.
  *
  */
@@ -555,6 +586,31 @@ Con *con_by_window_id(xcb_window_t window) {
     if (con->window != NULL && con->window->id == window)
         return con;
     return NULL;
+}
+
+/*
+ * Returns the container with the given container ID or NULL if no such
+ * container exists.
+ *
+ */
+Con *con_by_con_id(long target) {
+    Con *con;
+    TAILQ_FOREACH(con, &all_cons, all_cons) {
+        if (con == (Con *)target) {
+            return con;
+        }
+    }
+
+    return NULL;
+}
+
+/*
+ * Returns true if the given container (still) exists.
+ * This can be used, e.g., to make sure a container hasn't been closed in the meantime.
+ *
+ */
+bool con_exists(Con *con) {
+    return con_by_con_id((long)con) != NULL;
 }
 
 /*
@@ -1248,7 +1304,7 @@ void con_move_to_output(Con *con, Output *output) {
     Con *ws = NULL;
     GREP_FIRST(ws, output_get_content(output->con), workspace_is_visible(child));
     assert(ws != NULL);
-    DLOG("Moving con %p to output %s\n", con, output->name);
+    DLOG("Moving con %p to output %s\n", con, output_primary_name(output));
     con_move_to_workspace(con, ws, false, false, false);
 }
 
@@ -1802,7 +1858,9 @@ void con_toggle_layout(Con *con, const char *toggle_mode) {
             }
         }
 
-        con_set_layout(con, new_layout);
+        if (new_layout != L_DEFAULT) {
+            con_set_layout(con, new_layout);
+        }
     } else if (strcasecmp(toggle_mode, "all") == 0 || strcasecmp(toggle_mode, "default") == 0) {
         if (parent->layout == L_STACKED)
             con_set_layout(con, L_TABBED);

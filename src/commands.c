@@ -773,13 +773,25 @@ void cmd_append_layout(I3_CMD, const char *cpath) {
     /* Make sure we allow paths like '~/.i3/layout.json' */
     path = resolve_tilde(path);
 
-    json_content_t content = json_determine_content(path);
+    char *buf = NULL;
+    ssize_t len;
+    if ((len = slurp(path, &buf)) < 0) {
+        /* slurp already logged an error. */
+        goto out;
+    }
+
+    if (!json_validate(buf, len)) {
+        ELOG("Could not parse \"%s\" as JSON, not loading.\n", path);
+        yerror("Could not parse \"%s\" as JSON.", path);
+        goto out;
+    }
+
+    json_content_t content = json_determine_content(buf, len);
     LOG("JSON content = %d\n", content);
     if (content == JSON_CONTENT_UNKNOWN) {
         ELOG("Could not determine the contents of \"%s\", not loading.\n", path);
         yerror("Could not determine the contents of \"%s\".", path);
-        free(path);
-        return;
+        goto out;
     }
 
     Con *parent = focused;
@@ -795,7 +807,7 @@ void cmd_append_layout(I3_CMD, const char *cpath) {
     }
     DLOG("Appending to parent=%p instead of focused=%p\n", parent, focused);
     char *errormsg = NULL;
-    tree_append_json(parent, path, &errormsg);
+    tree_append_json(parent, buf, len, &errormsg);
     if (errormsg != NULL) {
         yerror(errormsg);
         free(errormsg);
@@ -820,8 +832,10 @@ void cmd_append_layout(I3_CMD, const char *cpath) {
     if (content == JSON_CONTENT_WORKSPACE)
         ipc_send_workspace_event("restored", parent, NULL);
 
-    free(path);
     cmd_output->needs_tree_render = true;
+out:
+    free(path);
+    free(buf);
 }
 
 /*
@@ -1841,7 +1855,7 @@ void cmd_swap(I3_CMD, const char *mode, const char *arg) {
             return;
         }
 
-        con = (Con *)target;
+        con = con_by_con_id(target);
     } else if (strcmp(mode, "mark") == 0) {
         con = con_by_mark(arg);
     } else {
@@ -1854,7 +1868,7 @@ void cmd_swap(I3_CMD, const char *mode, const char *arg) {
         return;
     }
 
-    if (match == TAILQ_LAST(&owindows, owindows_head)) {
+    if (match != TAILQ_LAST(&owindows, owindows_head)) {
         DLOG("More than one container matched the swap command, only using the first one.");
     }
 

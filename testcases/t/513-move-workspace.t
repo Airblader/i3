@@ -2,34 +2,26 @@
 # vim:ts=4:sw=4:expandtab
 #
 # Please read the following documents before working on tests:
-# • http://build.i3wm.org/docs/testsuite.html
+# • https://build.i3wm.org/docs/testsuite.html
 #   (or docs/testsuite)
 #
-# • http://build.i3wm.org/docs/lib-i3test.html
+# • https://build.i3wm.org/docs/lib-i3test.html
 #   (alternatively: perldoc ./testcases/lib/i3test.pm)
 #
-# • http://build.i3wm.org/docs/ipc.html
+# • https://build.i3wm.org/docs/ipc.html
 #   (or docs/ipc)
 #
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
 #   (unless you are already familiar with Perl)
 #
 # Tests whether moving workspaces between outputs works correctly.
-use i3test i3_autostart => 0;
-use List::Util qw(first);
-
-# Ensure the pointer is at (0, 0) so that we really start on the first
-# (the left) workspace.
-$x->root->warp_pointer(0, 0);
-
-my $config = <<EOT;
+use i3test i3_config => <<EOT;
 # i3 config file (v4)
 font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 
 fake-outputs 1024x768+0+0,1024x768+1024+0
 EOT
-
-my $pid = launch_with_config($config);
+use List::Util qw(first);
 
 sub workspaces_per_screen {
     my $i3 = i3(get_socket_path());
@@ -91,7 +83,5 @@ cmd '[id="' . $win1->id . '"] focus';
 
 ($nodes, $focus) = get_ws_content('5');
 is($nodes->[1]->{window}, $win1->id, 'window 1 on workspace 5 after moving');
-
-exit_gracefully($pid);
 
 done_testing;

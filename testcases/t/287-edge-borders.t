@@ -2,13 +2,13 @@
 # vim:ts=4:sw=4:expandtab
 #
 # Please read the following documents before working on tests:
-# • http://build.i3wm.org/docs/testsuite.html
+# • https://build.i3wm.org/docs/testsuite.html
 #   (or docs/testsuite)
 #
-# • http://build.i3wm.org/docs/lib-i3test.html
+# • https://build.i3wm.org/docs/lib-i3test.html
 #   (alternatively: perldoc ./testcases/lib/i3test.pm)
 #
-# • http://build.i3wm.org/docs/ipc.html
+# • https://build.i3wm.org/docs/ipc.html
 #   (or docs/ipc)
 #
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
@@ -146,6 +146,10 @@ my $tilewindow3 = open_window;
 ok(@{get_ws_content($tmp)} == 2, 'after split & new window, two containers');
 
 $wscontent = get_ws($tmp);
+
+# Ensure i3’s X11 requests are processed before our inquiry via
+# $tilewindow->rect:
+sync_with_i3;
 
 @tiled = @{$wscontent->{nodes}};
 ok(@tiled == 2, 'two tiled container opened in another container');

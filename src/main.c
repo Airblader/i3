@@ -418,7 +418,7 @@ int main(int argc, char *argv[]) {
         if (connect(sockfd, (const struct sockaddr *)&addr, sizeof(struct sockaddr_un)) < 0)
             err(EXIT_FAILURE, "Could not connect to i3");
 
-        if (ipc_send_message(sockfd, strlen(payload), I3_IPC_MESSAGE_TYPE_COMMAND,
+        if (ipc_send_message(sockfd, strlen(payload), I3_IPC_MESSAGE_TYPE_RUN_COMMAND,
                              (uint8_t *)payload) == -1)
             err(EXIT_FAILURE, "IPC: write()");
         FREE(payload);
@@ -432,8 +432,8 @@ int main(int argc, char *argv[]) {
                 err(EXIT_FAILURE, "IPC: read()");
             return 1;
         }
-        if (reply_type != I3_IPC_MESSAGE_TYPE_COMMAND)
-            errx(EXIT_FAILURE, "IPC: received reply of type %d but expected %d (COMMAND)", reply_type, I3_IPC_MESSAGE_TYPE_COMMAND);
+        if (reply_type != I3_IPC_REPLY_TYPE_COMMAND)
+            errx(EXIT_FAILURE, "IPC: received reply of type %d but expected %d (COMMAND)", reply_type, I3_IPC_REPLY_TYPE_COMMAND);
         printf("%.*s\n", reply_length, reply);
         FREE(reply);
         return 0;
@@ -602,7 +602,7 @@ int main(int argc, char *argv[]) {
         xcb_xkb_per_client_flags_reply_t *pcf_reply;
         /* The last three parameters are unset because they are only relevant
          * when using a feature called “automatic reset of boolean controls”:
-         * http://www.x.org/releases/X11R7.7/doc/kbproto/xkbproto.html#Automatic_Reset_of_Boolean_Controls
+         * https://www.x.org/releases/X11R7.7/doc/kbproto/xkbproto.html#Automatic_Reset_of_Boolean_Controls
          * */
         pcf_reply = xcb_xkb_per_client_flags_reply(
             conn,
@@ -687,7 +687,7 @@ int main(int argc, char *argv[]) {
         TAILQ_FOREACH(con, &(croot->nodes_head), nodes) {
             Output *output;
             TAILQ_FOREACH(output, &outputs, outputs) {
-                if (output->active || strcmp(con->name, output->name) != 0)
+                if (output->active || strcmp(con->name, output_primary_name(output)) != 0)
                     continue;
 
                 /* This will correctly correlate the output with its content

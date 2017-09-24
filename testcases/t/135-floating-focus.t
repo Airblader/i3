@@ -2,13 +2,13 @@
 # vim:ts=4:sw=4:expandtab
 #
 # Please read the following documents before working on tests:
-# • http://build.i3wm.org/docs/testsuite.html
+# • https://build.i3wm.org/docs/testsuite.html
 #   (or docs/testsuite)
 #
-# • http://build.i3wm.org/docs/lib-i3test.html
+# • https://build.i3wm.org/docs/lib-i3test.html
 #   (alternatively: perldoc ./testcases/lib/i3test.pm)
 #
-# • http://build.i3wm.org/docs/ipc.html
+# • https://build.i3wm.org/docs/ipc.html
 #   (or docs/ipc)
 #
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
@@ -215,5 +215,29 @@ is(get_ws($tmp)->{focused}, 1, 'workspace is focused');
 cmd 'focus child';
 
 is($x->input_focus, $floating->id, 'floating window focused');
+
+#############################################################################
+# 8: verify that focusing a floating window raises it to the top.
+# This test can't verify that the floating container is visually on top, just
+# that it is placed on the tail of the floating_head.
+# See issue: 2572
+#############################################################################
+
+$tmp = fresh_workspace;
+
+$first = open_floating_window;
+$second = open_floating_window;
+
+is($x->input_focus, $second->id, 'second floating window focused');
+my $ws = get_ws($tmp);
+is($ws->{floating_nodes}->[1]->{nodes}->[0]->{window}, $second->id, 'second on top');
+is($ws->{floating_nodes}->[0]->{nodes}->[0]->{window}, $first->id, 'first behind');
+
+cmd '[id=' . $first->id . '] focus';
+
+is($x->input_focus, $first->id, 'first floating window focused');
+$ws = get_ws($tmp);
+is($ws->{floating_nodes}->[1]->{nodes}->[0]->{window}, $first->id, 'first on top');
+is($ws->{floating_nodes}->[0]->{nodes}->[0]->{window}, $second->id, 'second behind');
 
 done_testing;

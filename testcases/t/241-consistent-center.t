@@ -2,13 +2,13 @@
 # vim:ts=4:sw=4:expandtab
 #
 # Please read the following documents before working on tests:
-# • http://build.i3wm.org/docs/testsuite.html
+# • https://build.i3wm.org/docs/testsuite.html
 #   (or docs/testsuite)
 #
-# • http://build.i3wm.org/docs/lib-i3test.html
+# • https://build.i3wm.org/docs/lib-i3test.html
 #   (alternatively: perldoc ./testcases/lib/i3test.pm)
 #
-# • http://build.i3wm.org/docs/ipc.html
+# • https://build.i3wm.org/docs/ipc.html
 #   (or docs/ipc)
 #
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
@@ -18,17 +18,13 @@
 # Decorations are disabled to avoid floating_enable's logic which shifts
 # windows upwards dependent on their decoration height.
 #
-use i3test i3_autostart => 0;
-
-my $config = <<EOT;
+use i3test i3_config => <<EOT;
 # i3 config file (v4)
 font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 
 new_window none
 new_float none
 EOT
-
-my $pid = launch_with_config($config);
 
 #####################################################################
 # Open a floating window, verifying that its initial position is
@@ -100,7 +96,5 @@ sync_with_i3;
 my $child = $fourth->rect;
 is($new->{x}, $child->{x}, 'x coordinates match');
 is($new->{y}, $child->{y}, 'y coordinates match');
-
-exit_gracefully($pid);
 
 done_testing;

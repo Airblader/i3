@@ -87,6 +87,7 @@ use base 'Exporter';
 
 our @EXPORT = qw(i3);
 
+use constant TYPE_RUN_COMMAND => 0;
 use constant TYPE_COMMAND => 0;
 use constant TYPE_GET_WORKSPACES => 1;
 use constant TYPE_SUBSCRIBE => 2;
@@ -99,7 +100,7 @@ use constant TYPE_GET_BINDING_MODES => 8;
 use constant TYPE_GET_CONFIG => 9;
 
 our %EXPORT_TAGS = ( 'all' => [
-    qw(i3 TYPE_COMMAND TYPE_GET_WORKSPACES TYPE_SUBSCRIBE TYPE_GET_OUTPUTS
+    qw(i3 TYPE_RUN_COMMAND TYPE_COMMAND TYPE_GET_WORKSPACES TYPE_SUBSCRIBE TYPE_GET_OUTPUTS
        TYPE_GET_TREE TYPE_GET_MARKS TYPE_GET_BAR_CONFIG TYPE_GET_VERSION
        TYPE_GET_BINDING_MODES TYPE_GET_CONFIG)
 ] );
@@ -321,7 +322,7 @@ Sends a message of the specified C<type> to i3, possibly containing the data
 structure C<content> (or C<content>, encoded as utf8, if C<content> is a
 scalar), if specified.
 
-    my $reply = $i3->message(TYPE_COMMAND, "reload")->recv;
+    my $reply = $i3->message(TYPE_RUN_COMMAND, "reload")->recv;
     if ($reply->{success}) {
         say "Configuration successfully reloaded";
     }
@@ -531,7 +532,7 @@ sub command {
 
     $self->_ensure_connection;
 
-    $self->message(TYPE_COMMAND, $content)
+    $self->message(TYPE_RUN_COMMAND, $content)
 }
 
 =head1 AUTHOR
@@ -542,7 +543,7 @@ Michael Stapelberg, C<< <michael at i3wm.org> >>
 
 Please report any bugs or feature requests to C<bug-anyevent-i3 at
 rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=AnyEvent-I3>.  I will be
+L<https://rt.cpan.org/NoAuth/ReportBug.html?Queue=AnyEvent-I3>.  I will be
 notified, and then you'll automatically be notified of progress on your bug as
 I make changes.
 
@@ -558,11 +559,11 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=AnyEvent-I3>
+L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=AnyEvent-I3>
 
 =item * The i3 window manager website
 
-L<http://i3wm.org>
+L<https://i3wm.org>
 
 =back
 
@@ -578,7 +579,7 @@ This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
-See http://dev.perl.org/licenses/ for more information.
+See https://dev.perl.org/licenses/ for more information.
 
 
 =cut

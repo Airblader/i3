@@ -523,7 +523,7 @@ void handle_button(xcb_button_press_event_t *event) {
         if (binding->input_code != event->detail)
             continue;
 
-        i3_send_msg(I3_IPC_MESSAGE_TYPE_COMMAND, binding->command);
+        i3_send_msg(I3_IPC_MESSAGE_TYPE_RUN_COMMAND, binding->command);
         return;
     }
 
@@ -604,7 +604,7 @@ void handle_button(xcb_button_press_event_t *event) {
         buffer[outpos] = utf8_name[inpos];
     }
     buffer[outpos] = '"';
-    i3_send_msg(I3_IPC_MESSAGE_TYPE_COMMAND, buffer);
+    i3_send_msg(I3_IPC_MESSAGE_TYPE_RUN_COMMAND, buffer);
     free(buffer);
 }
 
@@ -860,7 +860,7 @@ static void handle_client_message(xcb_client_message_event_t *event) {
  * client to finish the protocol. After this event is received, there is no
  * further interaction with the tray client.
  *
- * See: http://standards.freedesktop.org/xembed-spec/xembed-spec-latest.html
+ * See: https://standards.freedesktop.org/xembed-spec/xembed-spec-latest.html
  *
  */
 static void handle_destroy_notify(xcb_destroy_notify_event_t *event) {

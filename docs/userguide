@@ -802,7 +802,7 @@ The first part of the WM_CLASS is the instance ("irssi" in this example), the
 second part is the class ("URxvt" in this example).
 
 Should you have any problems with assignments, make sure to check the i3
-logfile first (see http://i3wm.org/docs/debugging.html). It includes more
+logfile first (see https://i3wm.org/docs/debugging.html). It includes more
 details about the matching process and the window’s actual class, instance and
 title when starting up.
 
@@ -868,6 +868,18 @@ workspace <workspace> output <output>
 The 'output' is the name of the RandR output you attach your screen to. On a
 laptop, you might have VGA1 and LVDS1 as output names. You can see the
 available outputs by running +xrandr --current+.
+
+If your X server supports RandR 1.5 or newer, i3 will use RandR monitor objects
+instead of output objects. Run +xrandr --listmonitors+ to see a list. Usually,
+a monitor object contains exactly one output, and has the same name as the
+output; but should that not be the case, you may specify the name of either the
+monitor or the output in i3's configuration. For example, the Dell UP2414Q uses
+two scalers internally, so its output names might be “DP1” and “DP2”, but the
+monitor name is “Dell UP2414Q”.
+
+(Note that even if you specify the name of an output which doesn't span the
+entire monitor, i3 will still use the entire area of the containing monitor
+rather than that of just the output's.)
 
 If you use named workspaces, they must be quoted:
 
@@ -1044,7 +1056,7 @@ force_focus_wrapping yes
 
 === Forcing Xinerama
 
-As explained in-depth in <http://i3wm.org/docs/multi-monitor.html>, some X11
+As explained in-depth in <https://i3wm.org/docs/multi-monitor.html>, some X11
 video drivers (especially the nVidia binary driver) only provide support for
 Xinerama instead of RandR. In such a situation, i3 must be told to use the
 inferior Xinerama API explicitly and therefore don’t provide support for
@@ -1966,7 +1978,6 @@ bindsym $mod+x focus output HDMI-2
 bindsym $mod+x focus output primary
 -------------------------------------------------
 
--------------------------------
 Note that you might not have a primary output configured yet. To do so, run:
 -------------------------
 xrandr --output <output> --primary
@@ -2454,7 +2465,7 @@ bindsym $mod+u border none
 [[shmlog]]
 === Enabling shared memory logging
 
-As described in http://i3wm.org/docs/debugging.html, i3 can log to a shared
+As described in https://i3wm.org/docs/debugging.html, i3 can log to a shared
 memory buffer, which you can dump using +i3-dump-log+. The +shmlog+ command
 allows you to enable or disable the shared memory logging at runtime.
 

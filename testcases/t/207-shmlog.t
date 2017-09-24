@@ -2,19 +2,19 @@
 # vim:ts=4:sw=4:expandtab
 #
 # Please read the following documents before working on tests:
-# • http://build.i3wm.org/docs/testsuite.html
+# • https://build.i3wm.org/docs/testsuite.html
 #   (or docs/testsuite)
 #
-# • http://build.i3wm.org/docs/lib-i3test.html
+# • https://build.i3wm.org/docs/lib-i3test.html
 #   (alternatively: perldoc ./testcases/lib/i3test.pm)
 #
-# • http://build.i3wm.org/docs/ipc.html
+# • https://build.i3wm.org/docs/ipc.html
 #   (or docs/ipc)
 #
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
 #   (unless you are already familiar with Perl)
 #
-use i3test i3_autostart => 0;
+use i3test;
 use IPC::Run qw(run);
 use File::Temp;
 
@@ -22,14 +22,8 @@ use File::Temp;
 # 1: test that shared memory logging does not work yet
 ################################################################################
 
-my $config = <<EOT;
-# i3 config file (v4)
-font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
-EOT
-
-# NB: launch_with_config sets --shmlog-size=0 because the logfile gets
-# redirected via stdout redirection anyways.
-my $pid = launch_with_config($config);
+# NB: launch_with_config (called in i3test) sets --shmlog-size=0 because the
+# logfile gets redirected via stdout redirection anyways.
 
 my $stdout;
 my $stderr;
@@ -81,7 +75,5 @@ run [ 'i3-dump-log' ],
 
 like($stderr, qr#^i3-dump-log: ERROR: i3 is running, but SHM logging is not enabled\.#,
     'shm logging not enabled');
-
-exit_gracefully($pid);
 
 done_testing;

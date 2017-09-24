@@ -26,6 +26,12 @@ Con *con_new_skeleton(Con *parent, i3Window *window);
 Con *con_new(Con *parent, i3Window *window);
 
 /**
+ * Frees the specified container.
+ *
+ */
+void con_free(Con *con);
+
+/**
  * Sets input focus to the given container. Will be updated in X11 in the next
  * run of x_push_changes().
  *
@@ -96,7 +102,7 @@ Con *con_get_output(Con *con);
 Con *con_get_workspace(Con *con);
 
 /**
- * Searches parenst of the given 'con' until it reaches one with the specified
+ * Searches parents of the given 'con' until it reaches one with the specified
  * 'orientation'. Aborts when it comes across a floating_con.
  *
  */
@@ -151,6 +157,20 @@ bool con_has_parent(Con *con, Con *parent);
  *
  */
 Con *con_by_window_id(xcb_window_t window);
+
+/**
+ * Returns the container with the given container ID or NULL if no such
+ * container exists.
+ *
+ */
+Con *con_by_con_id(long target);
+
+/**
+ * Returns true if the given container (still) exists.
+ * This can be used, e.g., to make sure a container hasn't been closed in the meantime.
+ *
+ */
+bool con_exists(Con *con);
 
 /**
  * Returns the container with the given frame ID or NULL if no such container

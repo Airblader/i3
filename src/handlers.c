@@ -388,7 +388,7 @@ static void handle_configure_request(xcb_configure_request_event_t *event) {
             Con *current_output = con_get_output(con);
             Output *target = get_output_containing(x, y);
             if (target != NULL && current_output != target->con) {
-                DLOG("Dock client is requested to be moved to output %s, moving it there.\n", target->name);
+                DLOG("Dock client is requested to be moved to output %s, moving it there.\n", output_primary_name(target));
                 Match *match;
                 Con *nc = con_for_window(target->con, con->window, &match);
                 DLOG("Dock client will be moved to container %p.\n", nc);
@@ -847,7 +847,7 @@ static void handle_client_message(xcb_client_message_event_t *event) {
         /* This request is used by pagers and bars to change the current
          * desktop likely as a result of some user action. We interpret this as
          * a request to focus the given workspace. See
-         * http://standards.freedesktop.org/wm-spec/latest/ar01s03.html#idm140251368135008
+         * https://standards.freedesktop.org/wm-spec/latest/ar01s03.html#idm140251368135008
          * */
         DLOG("Request to change current desktop to index %d\n", event->data.data32[0]);
         Con *ws = ewmh_get_workspace_by_index(event->data.data32[0]);
@@ -895,7 +895,7 @@ static void handle_client_message(xcb_client_message_event_t *event) {
         /*
          * Pagers wanting to close a window MUST send a _NET_CLOSE_WINDOW
          * client message request to the root window.
-         * http://standards.freedesktop.org/wm-spec/wm-spec-latest.html#idm140200472668896
+         * https://standards.freedesktop.org/wm-spec/wm-spec-latest.html#idm140200472668896
          */
         Con *con = con_by_window_id(event->window);
         if (con) {
@@ -1221,7 +1221,9 @@ static void handle_focus_in(xcb_focus_in_event_t *event) {
         return;
     }
 
-    if (focused_id == event->event) {
+    /* Floating windows should be refocused to ensure that they are on top of
+     * other windows. */
+    if (focused_id == event->event && !con_inside_floating(con)) {
         DLOG("focus matches the currently focused window, not doing anything\n");
         return;
     }
@@ -1232,7 +1234,7 @@ static void handle_focus_in(xcb_focus_in_event_t *event) {
         return;
     }
 
-    DLOG("focus is different, updating decorations\n");
+    DLOG("focus is different / refocusing floating window: updating decorations\n");
 
     /* Get the currently focused workspace to check if the focus change also
      * involves changing workspaces. If so, we need to call workspace_show() to
@@ -1244,7 +1246,7 @@ static void handle_focus_in(xcb_focus_in_event_t *event) {
     con_focus(con);
     /* We update focused_id because we don’t need to set focus again */
     focused_id = event->event;
-    x_push_changes(croot);
+    tree_render();
     return;
 }
 

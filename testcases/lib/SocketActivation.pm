@@ -49,6 +49,11 @@ sub activate_i3 {
         die "could not fork()";
     }
     if ($pid == 0) {
+        # Start a process group so that in the parent, we can kill the entire
+        # process group and immediately kill i3bar and any other child
+        # processes.
+        setpgrp;
+
         $ENV{LISTEN_PID} = $$;
         $ENV{LISTEN_FDS} = 1;
         delete $ENV{DESKTOP_STARTUP_ID};
@@ -145,7 +150,12 @@ sub activate_i3 {
         if ($args{inject_randr15}) {
             # See comment in $args{strace} branch.
             $cmd = 'test.inject_randr15 --getmonitors_reply="' .
-                   $args{inject_randr15} . '" -- ' .
+                   $args{inject_randr15} . '" ' .
+                   ($args{inject_randr15_outputinfo}
+                    ? '--getoutputinfo_reply="' .
+                      $args{inject_randr15_outputinfo} . '" '
+                    : '') .
+                   '-- ' .
                    'sh -c "export LISTEN_PID=\$\$; ' . $cmd . '"';
         }
 

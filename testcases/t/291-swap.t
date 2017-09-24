@@ -2,13 +2,13 @@
 # vim:ts=4:sw=4:expandtab
 #
 # Please read the following documents before working on tests:
-# • http://build.i3wm.org/docs/testsuite.html
+# • https://build.i3wm.org/docs/testsuite.html
 #   (or docs/testsuite)
 #
-# • http://build.i3wm.org/docs/lib-i3test.html
+# • https://build.i3wm.org/docs/lib-i3test.html
 #   (alternatively: perldoc ./testcases/lib/i3test.pm)
 #
-# • http://build.i3wm.org/docs/ipc.html
+# • https://build.i3wm.org/docs/ipc.html
 #   (or docs/ipc)
 #
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
@@ -16,9 +16,7 @@
 #
 # Tests the swap command.
 # Ticket: #917
-use i3test i3_autostart => 0;
-
-my $config = <<EOT;
+use i3test i3_config => <<EOT;
 # i3 config file (v4)
 font font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 
@@ -26,11 +24,39 @@ for_window[class="mark_A"] mark A
 for_window[class="mark_B"] mark B
 EOT
 
-my ($pid);
 my ($ws, $ws1, $ws2, $ws3);
 my ($nodes, $expected_focus, $A, $B, $F);
 my ($result);
 my @urgent;
+
+###############################################################################
+# Invalid con_id should not crash i3
+# See issue #2895.
+###############################################################################
+
+$ws = fresh_workspace;
+
+open_window;
+cmd "swap container with con_id 1";
+
+does_i3_live;
+kill_all_windows;
+
+###############################################################################
+# Swap 2 windows in different workspaces using con_id
+###############################################################################
+
+$ws = fresh_workspace;
+open_window;
+$A = get_focused($ws);
+
+$ws = fresh_workspace;
+open_window;
+
+cmd "swap container with con_id $A";
+is(get_focused($ws), $A, 'A is now focused');
+
+kill_all_windows;
 
 ###############################################################################
 # Swap two containers next to each other.
@@ -41,7 +67,6 @@ my @urgent;
 # | A | B |    Focus Stacks:
 # +---+---+        H1: B, A
 ###############################################################################
-$pid = launch_with_config($config);
 $ws = fresh_workspace;
 
 $A = open_window(wm_class => 'mark_A');
@@ -55,7 +80,7 @@ is($nodes->[0]->{window}, $B->{id}, 'B is on the left');
 is($nodes->[1]->{window}, $A->{id}, 'A is on the right');
 is(get_focused($ws), $expected_focus, 'B is still focused');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swap two containers with different parents.
@@ -68,7 +93,6 @@ exit_gracefully($pid);
 # | Y | B |        V1: A, Y
 # +---+---+        V2: B, X
 ###############################################################################
-$pid = launch_with_config($config);
 $ws = fresh_workspace;
 
 $A = open_window(wm_class => 'mark_A');
@@ -88,7 +112,7 @@ is($nodes->[0]->{nodes}->[0]->{window}, $B->{id}, 'B is on the top left');
 is($nodes->[1]->{nodes}->[1]->{window}, $A->{id}, 'A is on the bottom right');
 is(get_focused($ws), $expected_focus, 'B is still focused');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swap two containers with different parents.
@@ -101,7 +125,6 @@ exit_gracefully($pid);
 # | Y | B |        V1: Y, A
 # +---+---+        V2: B, X
 ###############################################################################
-$pid = launch_with_config($config);
 $ws = fresh_workspace;
 
 $A = open_window(wm_class => 'mark_A');
@@ -121,7 +144,7 @@ is($nodes->[0]->{nodes}->[0]->{window}, $B->{id}, 'B is on the top left');
 is($nodes->[1]->{nodes}->[1]->{window}, $A->{id}, 'A is on the bottom right');
 is(get_focused($ws), $expected_focus, 'B is still focused');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swap two containers with one being on a different workspace.
@@ -139,8 +162,6 @@ exit_gracefully($pid);
 # | Y | B |    Focus Stacks:
 # +---+---+        H2: B, Y
 ###############################################################################
-$pid = launch_with_config($config);
-
 $ws1 = fresh_workspace;
 $A = open_window(wm_class => 'mark_A');
 $expected_focus = get_focused($ws1);
@@ -160,7 +181,7 @@ $nodes = get_ws_content($ws2);
 is($nodes->[1]->{window}, $A->{id}, 'A is on ws1:right');
 is(get_focused($ws2), $expected_focus, 'A is focused');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swap two non-focused containers within the same workspace.
@@ -171,7 +192,6 @@ exit_gracefully($pid);
 # | X | B |        V1: A, X
 # +---+---+        V2: F, B
 ###############################################################################
-$pid = launch_with_config($config);
 $ws = fresh_workspace;
 
 $A = open_window(wm_class => 'mark_A');
@@ -191,7 +211,7 @@ is($nodes->[0]->{nodes}->[0]->{window}, $B->{id}, 'B is on the top left');
 is($nodes->[1]->{nodes}->[1]->{window}, $A->{id}, 'A is on the bottom right');
 is(get_focused($ws), $expected_focus, 'F is still focused');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swap two non-focused containers which are both on different workspaces.
@@ -212,8 +232,6 @@ exit_gracefully($pid);
 # | F |
 # +---+
 ###############################################################################
-$pid = launch_with_config($config);
-
 $ws1 = fresh_workspace;
 $A = open_window(wm_class => 'mark_A');
 
@@ -234,7 +252,7 @@ is($nodes->[0]->{window}, $A->{id}, 'A is on the second workspace');
 
 is(get_focused($ws3), $expected_focus, 'F is still focused');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swap two non-focused containers with one being on a different workspace.
@@ -251,7 +269,6 @@ exit_gracefully($pid);
 # | B | F |    Focus Stacks:
 # +---+---+        H2: F, B
 ###############################################################################
-$pid = launch_with_config($config);
 
 $ws1 = fresh_workspace;
 $A = open_window(wm_class => 'mark_A');
@@ -270,7 +287,7 @@ $nodes = get_ws_content($ws2);
 is($nodes->[0]->{window}, $A->{id}, 'A is on the left of the second workspace');
 is(get_focused($ws2), $expected_focus, 'F is still focused');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # 1. A container cannot be swapped with its parent.
@@ -283,8 +300,6 @@ exit_gracefully($pid);
 # |   | B |
 # +---+---+
 ###############################################################################
-$pid = launch_with_config($config);
-
 $ws = fresh_workspace;
 open_window;
 open_window;
@@ -298,7 +313,7 @@ is($result->[0]->{success}, 0, 'B cannot be swappd with its parent');
 $result = cmd '[con_mark=A] swap container with mark B';
 is($result->[0]->{success}, 0, 'A cannot be swappd with one of its children');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swapping two containers preserves the geometry of the container they are
@@ -314,8 +329,6 @@ exit_gracefully($pid);
 # | B |   A   |
 # +---+-------+
 ###############################################################################
-$pid = launch_with_config($config);
-
 $ws = fresh_workspace;
 $A = open_window(wm_class => 'mark_A');
 $B = open_window(wm_class => 'mark_B');
@@ -332,7 +345,7 @@ $nodes = get_ws_content($ws);
 cmp_float($nodes->[0]->{percent}, 0.25, 'B has 25% width');
 cmp_float($nodes->[1]->{percent}, 0.75, 'A has 75% width');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swapping containers not sharing the same parent preserves the geometry of
@@ -356,7 +369,6 @@ exit_gracefully($pid);
 # |   |  X  |
 # +---+-----+
 ###############################################################################
-$pid = launch_with_config($config);
 $ws = fresh_workspace;
 
 $A = open_window(wm_class => 'mark_A');
@@ -379,12 +391,11 @@ $nodes = get_ws_content($ws);
 cmp_float($nodes->[0]->{nodes}->[0]->{percent}, 0.25, 'B has 25% height');
 cmp_float($nodes->[1]->{nodes}->[0]->{percent}, 0.75, 'A has 75% height');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 # Swapping containers moves the urgency hint correctly.
 ###############################################################################
-$pid = launch_with_config($config);
 
 $ws1 = fresh_workspace;
 $A = open_window(wm_class => 'mark_A');
@@ -405,7 +416,7 @@ is(get_ws($ws1)->{urgent}, 1, 'the first workspace is marked urgent');
 is(@urgent, 0, 'A is not marked urgent');
 is(get_ws($ws2)->{urgent}, 0, 'the second workspace is not marked urgent');
 
-exit_gracefully($pid);
+kill_all_windows;
 
 ###############################################################################
 
