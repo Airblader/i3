@@ -286,6 +286,7 @@ void draw_statusline(i3_output *output, uint32_t clip_left, bool use_focus_color
         color_t bg_color = bar_color;
 
         int full_render_width = render->width + render->x_offset + render->x_append;
+        bool is_border = !!block->border;
         if (block->border || block->background || block->urgent) {
             /* Let's determine the colors first. */
             color_t border_color = bar_color;
@@ -306,7 +307,6 @@ void draw_statusline(i3_output *output, uint32_t clip_left, bool use_focus_color
                                 bar_height - logical_px(2));
 
             /* Draw the background. */
-            bool is_border = !!block->border;
             draw_util_rectangle(&output->statusline_buffer, bg_color,
                                 x + is_border * logical_px(block->border_left),
                                 logical_px(1) + is_border * logical_px(block->border_top),
@@ -315,9 +315,9 @@ void draw_statusline(i3_output *output, uint32_t clip_left, bool use_focus_color
         }
 
         draw_util_text(text, &output->statusline_buffer, fg_color, colors.bar_bg,
-                       x + render->x_offset + logical_px(block->border_left),
+                       x + render->x_offset + is_border * logical_px(block->border_left),
                        bar_height / 2 - font.height / 2,
-                       render->width - logical_px(block->border_left - block->border_right));
+                       render->width - is_border * logical_px(block->border_left + block->border_right));
         x += full_render_width;
 
         /* If this is not the last block, draw a separator. */
