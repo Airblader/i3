@@ -166,7 +166,7 @@ state FOR_WINDOW_COMMAND:
   command = string
       -> call cfg_for_window($command)
 
-# assign <criteria> [→] workspace
+# assign <criteria> [→] [workspace | output] <name>
 state ASSIGN:
   '['
       -> call cfg_criteria_init(ASSIGN_WORKSPACE); CRITERIA
@@ -174,10 +174,22 @@ state ASSIGN:
 state ASSIGN_WORKSPACE:
   '→'
       ->
+  'output'
+      -> ASSIGN_OUTPUT
   'workspace'
       ->
+  'number'
+      -> ASSIGN_WORKSPACE_NUMBER
   workspace = string
-      -> call cfg_assign($workspace)
+      -> call cfg_assign($workspace, 0)
+
+state ASSIGN_OUTPUT:
+  output = string
+      -> call cfg_assign_output($output)
+
+state ASSIGN_WORKSPACE_NUMBER:
+  number = string
+      -> call cfg_assign($number, 1)
 
 # no_focus <criteria>
 state NO_FOCUS:
