@@ -2167,7 +2167,7 @@ void cmd_debuglog(I3_CMD, const char *argument) {
  */
 void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, const char *value) {
 #define CMD_GAPS(type, other)                                      \
-    int pixels = atoi(value);                                      \
+    int pixels = logical_px(atoi(value));                          \
     Con *workspace = con_get_workspace(focused);                   \
                                                                    \
     int current_value = config.gaps.type;                          \
