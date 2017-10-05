@@ -191,16 +191,17 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
 }
 
 CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
+    int pixels = logical_px(value);
     if (!strcmp(scope, "inner")) {
         if (workspace == NULL)
-            config.gaps.inner = value;
+            config.gaps.inner = pixels;
         else
-            create_gaps_assignment(workspace, true, value - config.gaps.inner);
+            create_gaps_assignment(workspace, true, pixels - config.gaps.inner);
     } else if (!strcmp(scope, "outer")) {
         if (workspace == NULL)
-            config.gaps.outer = value;
+            config.gaps.outer = pixels;
         else
-            create_gaps_assignment(workspace, false, value - config.gaps.outer);
+            create_gaps_assignment(workspace, false, pixels - config.gaps.outer);
     } else {
         ELOG("Invalid command, cannot process scope %s", scope);
     }
