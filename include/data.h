@@ -144,6 +144,15 @@ struct gaps_t {
 };
 
 /**
+ * Focus wrapping modes.
+ */
+typedef enum {
+    FOCUS_WRAPPING_OFF = 0,
+    FOCUS_WRAPPING_ON = 1,
+    FOCUS_WRAPPING_FORCE = 2
+} focus_wrapping_t;
+
+/**
  * Stores a rectangle, for example the size of a window, the child window etc.
  * It needs to be packed so that the compiler will not add any padding bytes.
  * (it is used in src/ewmh.c for example)
