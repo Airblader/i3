@@ -85,7 +85,8 @@ typedef enum { HEBM_NONE = ADJ_NONE,
                HEBM_VERTICAL = ADJ_LEFT_SCREEN_EDGE | ADJ_RIGHT_SCREEN_EDGE,
                HEBM_HORIZONTAL = ADJ_UPPER_SCREEN_EDGE | ADJ_LOWER_SCREEN_EDGE,
                HEBM_BOTH = HEBM_VERTICAL | HEBM_HORIZONTAL,
-               HEBM_SMART = (1 << 5) } hide_edge_borders_mode_t;
+               HEBM_SMART = (1 << 5),
+               HEBM_SMART_NO_GAPS = (1 << 6) } hide_edge_borders_mode_t;
 
 typedef enum { MM_REPLACE,
                MM_ADD } mark_mode_t;

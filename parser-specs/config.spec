@@ -150,10 +150,10 @@ state NEW_WINDOW_PIXELS_PX:
   end
       -> call cfg_new_window($windowtype, $border, &width)
 
-# hide_edge_borders <none|vertical|horizontal|both|smart>
+# hide_edge_borders <none|vertical|horizontal|both|smart|no_gaps>
 # also hide_edge_borders <bool> for compatibility
 state HIDE_EDGE_BORDERS:
-  hide_borders = 'none', 'vertical', 'horizontal', 'both', 'smart'
+  hide_borders = 'none', 'vertical', 'horizontal', 'both', 'smart_no_gaps', 'smart'
       -> call cfg_hide_edge_borders($hide_borders)
   hide_borders = '1', 'yes', 'true', 'on', 'enable', 'active'
       -> call cfg_hide_edge_borders($hide_borders)

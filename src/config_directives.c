@@ -283,7 +283,9 @@ CFGFUN(new_window, const char *windowtype, const char *border, const long width)
 }
 
 CFGFUN(hide_edge_borders, const char *borders) {
-    if (strcmp(borders, "smart") == 0)
+    if (strcmp(borders, "smart_no_gaps") == 0)
+        config.hide_edge_borders = HEBM_SMART_NO_GAPS;
+    else if (strcmp(borders, "smart") == 0)
         config.hide_edge_borders = HEBM_SMART;
     else if (strcmp(borders, "vertical") == 0)
         config.hide_edge_borders = HEBM_VERTICAL;
