@@ -74,10 +74,13 @@ state GAPS_WITH_SCOPE:
 
 # smart_borders true|false
 # smart_borders no_gaps
+# smart_borders solo_no_gaps
 state SMART_BORDERS:
   enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
       -> call cfg_smart_borders($enabled)
   enabled = 'no_gaps'
+      -> call cfg_smart_borders($enabled)
+  enabled = 'solo_no_gaps'
       -> call cfg_smart_borders($enabled)
 
 # smart_gaps on|off

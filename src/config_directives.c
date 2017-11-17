@@ -210,6 +210,8 @@ CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
 CFGFUN(smart_borders, const char *enable) {
     if (!strcmp(enable, "no_gaps"))
         config.smart_borders = NO_GAPS;
+    else if (!strcmp(enable, "solo_no_gaps"))
+        config.smart_borders = SOLO_NO_GAPS;
     else
         config.smart_borders = eval_boolstr(enable) ? ON : OFF;
 }
