@@ -130,7 +130,9 @@ Based on the patch from [i3-extras](https://github.com/ashinkarov/i3-extras), sm
 ```
 smart_borders on|no_gaps
 ```
+### Hide Edge Borders
 
+An additional option `smart_no_gaps` is available for `hide_edge_borders`. This will hide all borders on a container if it is the only container in the worskpace *and* the gap size to the edge is `0`. Otherwise all borders will be drawn normally.
 
 ## i3bar
 
