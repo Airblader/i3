@@ -125,10 +125,10 @@ This will disable all gaps (outer and inner) on the workspace whenever only one 
 
 ### Smart Borders
 
-Based on the patch from [i3-extras](https://github.com/ashinkarov/i3-extras), smart borders have been added in a configurable way. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with the command below. `on` will always activate it, while `no_gaps` will only activate it if the gap size to the edge of the screen is `0`.
+Based on the patch from [i3-extras](https://github.com/ashinkarov/i3-extras), smart borders have been added in a configurable way. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with the command below. `on` will always activate it, while `no_gaps` will only activate it if the gap size to the edge of the screen is `0`. `solo_no_gaps` combines these rules and only hides borders in workspaces with no gaps *and* only one container.
 
 ```
-smart_borders on|no_gaps
+smart_borders on|no_gaps|solo_no_gaps
 ```
 
 

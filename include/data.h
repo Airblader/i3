@@ -79,7 +79,8 @@ typedef enum { ADJ_NONE = 0,
 
 typedef enum { OFF,
                ON,
-               NO_GAPS } smart_borders_t;
+               NO_GAPS,
+               SOLO_NO_GAPS } smart_borders_t;
 
 typedef enum { HEBM_NONE = ADJ_NONE,
                HEBM_VERTICAL = ADJ_LEFT_SCREEN_EDGE | ADJ_RIGHT_SCREEN_EDGE,
