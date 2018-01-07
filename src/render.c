@@ -535,7 +535,7 @@ bool has_adjacent_container(Con *con, direction_t direction) {
 
     Con *first = con;
     Con *second = NULL;
-    bool found_neighbor = resize_find_tiling_participants(&first, &second, direction);
+    bool found_neighbor = resize_find_tiling_participants(&first, &second, direction, false);
     if (!found_neighbor)
         return false;
 
