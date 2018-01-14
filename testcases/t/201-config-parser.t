@@ -474,6 +474,7 @@ my $expected_all_tokens = "ERROR: CONFIG: Expected one of these tokens: <end>, '
         gaps
         smart_borders
         smart_gaps
+        force_tabbed_stacked_titlebar
         floating_minimum_size
         floating_maximum_size
         floating_modifier

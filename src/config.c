@@ -225,6 +225,7 @@ void load_configuration(xcb_connection_t *conn, const char *override_configpath,
 
     config.gaps.inner = 0;
     config.gaps.outer = 0;
+    config.force_tabbed_stacked_titlebar = true;
 
     /* Set default urgency reset delay to 500ms */
     if (config.workspace_urgency_timer == 0)

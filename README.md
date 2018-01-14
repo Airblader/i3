@@ -134,6 +134,10 @@ smart_borders on|no_gaps
 
 An additional option `smart_no_gaps` is available for `hide_edge_borders`. This will hide all borders on a container if it is the only container in the worskpace *and* the gap size to the edge is `0`. Otherwise all borders will be drawn normally.
 
+### Force tabbed/stacked titlebar
+
+A new command `force_tabbed_stacked_titlebar` which is active by default allows you to control the displaying of the titlebar above tabbed and stacked containers.
+
 ## i3bar
 
 ### Background & Color

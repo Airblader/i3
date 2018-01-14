@@ -27,6 +27,7 @@ state INITIAL:
   'gaps'                                   -> GAPS
   'smart_borders'                          -> SMART_BORDERS
   'smart_gaps'                             -> SMART_GAPS
+  'force_tabbed_stacked_titlebar'          -> FORCE_TABBED_STACKED_TITLEBAR
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
   'floating_modifier'                      -> FLOATING_MODIFIER
@@ -85,6 +86,12 @@ state SMART_BORDERS:
 state SMART_GAPS:
   enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
       -> call cfg_smart_gaps($enabled)
+
+state FORCE_TABBED_STACKED_TITLEBAR:
+  enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
+      -> call cfg_force_tabbed_stacked_titlebar($enabled)
+  enabled = '0', 'no', 'false', 'off', 'disabled', 'inactive'
+      -> call cfg_force_tabbed_stacked_titlebar($enabled)
 
 # floating_minimum_size <width> x <height>
 state FLOATING_MINIMUM_SIZE_WIDTH:

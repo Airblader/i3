@@ -218,6 +218,10 @@ CFGFUN(smart_gaps, const char *enable) {
     config.smart_gaps = eval_boolstr(enable);
 }
 
+CFGFUN(force_tabbed_stacked_titlebar, const char *enable) {
+    config.force_tabbed_stacked_titlebar = eval_boolstr(enable);
+}
+
 CFGFUN(floating_minimum_size, const long width, const long height) {
     config.floating_minimum_width = width;
     config.floating_minimum_height = height;

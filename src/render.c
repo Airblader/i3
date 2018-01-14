@@ -452,11 +452,18 @@ static void render_con_stacked(Con *con, Con *child, render_params *p, int i) {
     child->rect.height = p->rect.height;
 
     child->deco_rect.x = p->x - con->rect.x;
-    child->deco_rect.y = p->y - con->rect.y + (i * p->deco_height);
     child->deco_rect.width = child->rect.width;
-    child->deco_rect.height = p->deco_height;
 
-    if (p->children > 1 || (child->border_style != BS_PIXEL && child->border_style != BS_NONE)) {
+    if (config.force_tabbed_stacked_titlebar) {
+        child->deco_rect.y = p->y - con->rect.y + (i * p->deco_height);
+        child->deco_rect.height = p->deco_height;
+    } else {
+        child->deco_rect.y = p->y - con->rect.y;
+        child->deco_rect.height = (child->border_style == BS_PIXEL ? 1 : 0);
+    }
+
+    if (config.force_tabbed_stacked_titlebar && (p->children > 1 ||
+                                                 (child->border_style != BS_PIXEL && child->border_style != BS_NONE))) {
         child->rect.y += (p->deco_height * p->children);
         child->rect.height -= (p->deco_height * p->children);
     }
@@ -480,7 +487,8 @@ static void render_con_tabbed(Con *con, Con *child, render_params *p, int i) {
         child->deco_rect.width += (child->rect.width - (child->deco_rect.x + child->deco_rect.width));
     }
 
-    if (p->children > 1 || (child->border_style != BS_PIXEL && child->border_style != BS_NONE)) {
+    if (config.force_tabbed_stacked_titlebar && (p->children > 1 ||
+                                                 (child->border_style != BS_PIXEL && child->border_style != BS_NONE))) {
         child->rect.y += p->deco_height;
         child->rect.height -= p->deco_height;
         child->deco_rect.height = p->deco_height;

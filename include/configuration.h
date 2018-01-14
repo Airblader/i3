@@ -256,6 +256,9 @@ struct Config {
 
     /* Disable gaps if there is only one container on the workspace */
     bool smart_gaps;
+
+    /* Disable the titlebar of the tabbed or stacked container */
+    bool force_tabbed_stacked_titlebar;
 };
 
 /**

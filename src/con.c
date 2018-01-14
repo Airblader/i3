@@ -1748,11 +1748,21 @@ int con_border_style(Con *con) {
         return BS_NONE;
     }
 
-    if (con->parent->layout == L_STACKED)
-        return (con_num_children(con->parent) == 1 ? con->border_style : BS_NORMAL);
+    if (con->parent->layout == L_STACKED) {
+        if (config.force_tabbed_stacked_titlebar) {
+            return (con_num_children(con->parent) == 1 ? con->border_style : BS_NORMAL);
+        } else {
+            return BS_PIXEL;
+        }
+    }
 
-    if (con->parent->layout == L_TABBED && con->border_style != BS_NORMAL)
-        return (con_num_children(con->parent) == 1 ? con->border_style : BS_NORMAL);
+    if (con->parent->layout == L_TABBED) {
+        if (config.force_tabbed_stacked_titlebar) {
+            return (con_num_children(con->parent) == 1 ? con->border_style : BS_NORMAL);
+        } else {
+            return BS_PIXEL;
+        }
+    }
 
     if (con->parent->type == CT_DOCKAREA)
         return BS_NONE;
