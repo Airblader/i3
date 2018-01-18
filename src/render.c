@@ -70,7 +70,9 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
         }
         inset.height = 0;
         if (con->deco_rect.width != 0 && con->deco_rect.height != 0) {
-            con->deco_rect = rect_add(con->deco_rect, inset);
+            if (con_is_leaf(con)) {
+                con->deco_rect = rect_add(con->deco_rect, inset);
+            }
         }
 
         params.x = con->rect.x;
