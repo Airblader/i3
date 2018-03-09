@@ -79,14 +79,6 @@
     } while (0)
 
 /*
- * Returns true if a is definitely greater than b (using the given epsilon)
- *
- */
-static bool definitelyGreaterThan(float a, float b, float epsilon) {
-    return (a - b) > ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
-}
-
-/*
  * Checks whether we switched to a new workspace and returns false in that case,
  * signaling that further workspace switching should be done by the calling function
  * If not, calls workspace_back_and_forth() if workspace_auto_back_and_forth is set
@@ -269,14 +261,20 @@ void cmd_criteria_add(I3_CMD, const char *ctype, const char *cvalue) {
     match_parse_property(current_match, ctype, cvalue);
 }
 
+static void move_matches_to_workspace(Con *ws) {
+    owindow *current;
+    TAILQ_FOREACH(current, &owindows, owindows) {
+        DLOG("matching: %p / %s\n", current->con, current->con->name);
+        con_move_to_workspace(current->con, ws, true, false, false);
+    }
+}
+
 /*
  * Implementation of 'move [window|container] [to] workspace
  * next|prev|next_on_output|prev_on_output|current'.
  *
  */
 void cmd_move_con_to_workspace(I3_CMD, const char *which) {
-    owindow *current;
-
     DLOG("which=%s\n", which);
 
     /* We have nothing to move:
@@ -309,10 +307,7 @@ void cmd_move_con_to_workspace(I3_CMD, const char *which) {
         return;
     }
 
-    TAILQ_FOREACH(current, &owindows, owindows) {
-        DLOG("matching: %p / %s\n", current->con, current->con->name);
-        con_move_to_workspace(current->con, ws, true, false, false);
-    }
+    move_matches_to_workspace(ws);
 
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
@@ -324,11 +319,7 @@ void cmd_move_con_to_workspace(I3_CMD, const char *which) {
  *
  */
 void cmd_move_con_to_workspace_back_and_forth(I3_CMD) {
-    owindow *current;
-    Con *ws;
-
-    ws = workspace_back_and_forth_get();
-
+    Con *ws = workspace_back_and_forth_get();
     if (ws == NULL) {
         yerror("No workspace was previously active.");
         return;
@@ -336,10 +327,7 @@ void cmd_move_con_to_workspace_back_and_forth(I3_CMD) {
 
     HANDLE_EMPTY_MATCH;
 
-    TAILQ_FOREACH(current, &owindows, owindows) {
-        DLOG("matching: %p / %s\n", current->con, current->con->name);
-        con_move_to_workspace(current->con, ws, true, false, false);
-    }
+    move_matches_to_workspace(ws);
 
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
@@ -358,7 +346,6 @@ void cmd_move_con_to_workspace_name(I3_CMD, const char *name, const char *_no_au
     }
 
     const bool no_auto_back_and_forth = (_no_auto_back_and_forth != NULL);
-    owindow *current;
 
     /* We have nothing to move:
      *  when criteria was specified but didn't match any window or
@@ -382,10 +369,7 @@ void cmd_move_con_to_workspace_name(I3_CMD, const char *name, const char *_no_au
 
     HANDLE_EMPTY_MATCH;
 
-    TAILQ_FOREACH(current, &owindows, owindows) {
-        DLOG("matching: %p / %s\n", current->con, current->con->name);
-        con_move_to_workspace(current->con, ws, true, false, false);
-    }
+    move_matches_to_workspace(ws);
 
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
@@ -398,7 +382,6 @@ void cmd_move_con_to_workspace_name(I3_CMD, const char *name, const char *_no_au
  */
 void cmd_move_con_to_workspace_number(I3_CMD, const char *which, const char *_no_auto_back_and_forth) {
     const bool no_auto_back_and_forth = (_no_auto_back_and_forth != NULL);
-    owindow *current;
 
     /* We have nothing to move:
      *  when criteria was specified but didn't match any window or
@@ -412,7 +395,7 @@ void cmd_move_con_to_workspace_number(I3_CMD, const char *which, const char *_no
 
     LOG("should move window to workspace %s\n", which);
     /* get the workspace */
-    Con *output, *workspace = NULL;
+    Con *output, *ws = NULL;
 
     long parsed_num = ws_name_to_number(which);
 
@@ -423,22 +406,19 @@ void cmd_move_con_to_workspace_number(I3_CMD, const char *which, const char *_no
     }
 
     TAILQ_FOREACH(output, &(croot->nodes_head), nodes)
-    GREP_FIRST(workspace, output_get_content(output),
+    GREP_FIRST(ws, output_get_content(output),
                child->num == parsed_num);
 
-    if (!workspace) {
-        workspace = workspace_get(which, NULL);
+    if (!ws) {
+        ws = workspace_get(which, NULL);
     }
 
     if (!no_auto_back_and_forth)
-        workspace = maybe_auto_back_and_forth_workspace(workspace);
+        ws = maybe_auto_back_and_forth_workspace(ws);
 
     HANDLE_EMPTY_MATCH;
 
-    TAILQ_FOREACH(current, &owindows, owindows) {
-        DLOG("matching: %p / %s\n", current->con, current->con->name);
-        con_move_to_workspace(current->con, workspace, true, false, false);
-    }
+    move_matches_to_workspace(ws);
 
     cmd_output->needs_tree_render = true;
     // XXX: default reply for now, make this a better reply
@@ -525,8 +505,8 @@ static bool cmd_resize_tiling_direction(I3_CMD, Con *current, const char *way, c
     LOG("default percentage = %f\n", percentage);
 
     /* resize */
-    LOG("second->percent = %f\n", second->percent);
     LOG("first->percent before = %f\n", first->percent);
+    LOG("second->percent before = %f\n", second->percent);
     if (first->percent == 0.0)
         first->percent = percentage;
     if (second->percent == 0.0)
@@ -535,12 +515,10 @@ static bool cmd_resize_tiling_direction(I3_CMD, Con *current, const char *way, c
     double new_second_percent = second->percent - ((double)ppt / 100.0);
     LOG("new_first_percent = %f\n", new_first_percent);
     LOG("new_second_percent = %f\n", new_second_percent);
-    /* Ensure that the new percentages are positive and greater than
-     * 0.05 to have a reasonable minimum size. */
-    if (definitelyGreaterThan(new_first_percent, 0.05, DBL_EPSILON) &&
-        definitelyGreaterThan(new_second_percent, 0.05, DBL_EPSILON)) {
-        first->percent += ((double)ppt / 100.0);
-        second->percent -= ((double)ppt / 100.0);
+    /* Ensure that the new percentages are positive. */
+    if (new_first_percent > 0.0 && new_second_percent > 0.0) {
+        first->percent = new_first_percent;
+        second->percent = new_second_percent;
         LOG("first->percent after = %f\n", first->percent);
         LOG("second->percent after = %f\n", second->percent);
     } else {
@@ -580,24 +558,23 @@ static bool cmd_resize_tiling_width_height(I3_CMD, Con *current, const char *way
     double subtract_percent = ((double)ppt / 100.0) / (children - 1);
     LOG("new_current_percent = %f\n", new_current_percent);
     LOG("subtract_percent = %f\n", subtract_percent);
-    /* Ensure that the new percentages are positive and greater than
-     * 0.05 to have a reasonable minimum size. */
+    /* Ensure that the new percentages are positive. */
     TAILQ_FOREACH(child, &(current->parent->nodes_head), nodes) {
         if (child == current)
             continue;
-        if (!definitelyGreaterThan(child->percent - subtract_percent, 0.05, DBL_EPSILON)) {
+        if (child->percent - subtract_percent <= 0.0) {
             LOG("Not resizing, already at minimum size (child %p would end up with a size of %.f\n", child, child->percent - subtract_percent);
             ysuccess(false);
             return false;
         }
     }
-    if (!definitelyGreaterThan(new_current_percent, 0.05, DBL_EPSILON)) {
+    if (new_current_percent <= 0.0) {
         LOG("Not resizing, already at minimum size\n");
         ysuccess(false);
         return false;
     }
 
-    current->percent += ((double)ppt / 100.0);
+    current->percent = new_current_percent;
     LOG("current->percent after = %f\n", current->percent);
 
     TAILQ_FOREACH(child, &(current->parent->nodes_head), nodes) {
