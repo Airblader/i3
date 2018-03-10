@@ -191,16 +191,17 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
 }
 
 CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
+    int pixels = logical_px(value);
     if (!strcmp(scope, "inner")) {
         if (workspace == NULL)
-            config.gaps.inner = value;
+            config.gaps.inner = pixels;
         else
-            create_gaps_assignment(workspace, true, value - config.gaps.inner);
+            create_gaps_assignment(workspace, true, pixels - config.gaps.inner);
     } else if (!strcmp(scope, "outer")) {
         if (workspace == NULL)
-            config.gaps.outer = value;
+            config.gaps.outer = pixels;
         else
-            create_gaps_assignment(workspace, false, value - config.gaps.outer);
+            create_gaps_assignment(workspace, false, pixels - config.gaps.outer);
     } else {
         ELOG("Invalid command, cannot process scope %s", scope);
     }
@@ -250,7 +251,7 @@ CFGFUN(workspace_layout, const char *layout) {
         config.default_layout = L_TABBED;
 }
 
-CFGFUN(new_window, const char *windowtype, const char *border, const long width) {
+CFGFUN(default_border, const char *windowtype, const char *border, const long width) {
     int border_style;
     int border_width;
 
@@ -268,7 +269,8 @@ CFGFUN(new_window, const char *windowtype, const char *border, const long width)
         border_width = width;
     }
 
-    if (strcmp(windowtype, "new_window") == 0) {
+    if ((strcmp(windowtype, "default_border") == 0) ||
+        (strcmp(windowtype, "new_window") == 0)) {
         DLOG("default tiled border style = %d and border width = %d (%d physical px)\n",
              border_style, border_width, logical_px(border_width));
         config.default_border = border_style;
@@ -282,7 +284,9 @@ CFGFUN(new_window, const char *windowtype, const char *border, const long width)
 }
 
 CFGFUN(hide_edge_borders, const char *borders) {
-    if (strcmp(borders, "smart") == 0)
+    if (strcmp(borders, "smart_no_gaps") == 0)
+        config.hide_edge_borders = HEBM_SMART_NO_GAPS;
+    else if (strcmp(borders, "smart") == 0)
         config.hide_edge_borders = HEBM_SMART;
     else if (strcmp(borders, "vertical") == 0)
         config.hide_edge_borders = HEBM_VERTICAL;
@@ -317,8 +321,27 @@ CFGFUN(disable_randr15, const char *value) {
     config.disable_randr15 = eval_boolstr(value);
 }
 
+CFGFUN(focus_wrapping, const char *value) {
+    if (strcmp(value, "force") == 0) {
+        config.focus_wrapping = FOCUS_WRAPPING_FORCE;
+    } else if (eval_boolstr(value)) {
+        config.focus_wrapping = FOCUS_WRAPPING_ON;
+    } else {
+        config.focus_wrapping = FOCUS_WRAPPING_OFF;
+    }
+}
+
 CFGFUN(force_focus_wrapping, const char *value) {
-    config.force_focus_wrapping = eval_boolstr(value);
+    /* Legacy syntax. */
+    if (eval_boolstr(value)) {
+        config.focus_wrapping = FOCUS_WRAPPING_FORCE;
+    } else {
+        /* For "force_focus_wrapping off", don't enable or disable
+         * focus wrapping, just ensure it's not forced. */
+        if (config.focus_wrapping == FOCUS_WRAPPING_FORCE) {
+            config.focus_wrapping = FOCUS_WRAPPING_ON;
+        }
+    }
 }
 
 CFGFUN(workspace_back_and_forth, const char *value) {
@@ -541,7 +564,7 @@ CFGFUN(bar_modifier, const char *modifier) {
         current_bar->modifier = M_NONE;
 }
 
-static void bar_configure_binding(const char *button, const char *command) {
+static void bar_configure_binding(const char *button, const char *release, const char *command) {
     if (strncasecmp(button, "button", strlen("button")) != 0) {
         ELOG("Bindings for a bar can only be mouse bindings, not \"%s\", ignoring.\n", button);
         return;
@@ -552,16 +575,18 @@ static void bar_configure_binding(const char *button, const char *command) {
         ELOG("Button \"%s\" does not seem to be in format 'buttonX'.\n", button);
         return;
     }
+    const bool release_bool = release != NULL;
 
     struct Barbinding *current;
     TAILQ_FOREACH(current, &(current_bar->bar_bindings), bindings) {
-        if (current->input_code == input_code) {
+        if (current->input_code == input_code && current->release == release_bool) {
             ELOG("command for button %s was already specified, ignoring.\n", button);
             return;
         }
     }
 
     struct Barbinding *new_binding = scalloc(1, sizeof(struct Barbinding));
+    new_binding->release = release_bool;
     new_binding->input_code = input_code;
     new_binding->command = sstrdup(command);
     TAILQ_INSERT_TAIL(&(current_bar->bar_bindings), new_binding, bindings);
@@ -569,16 +594,16 @@ static void bar_configure_binding(const char *button, const char *command) {
 
 CFGFUN(bar_wheel_up_cmd, const char *command) {
     ELOG("'wheel_up_cmd' is deprecated. Please us 'bindsym button4 %s' instead.\n", command);
-    bar_configure_binding("button4", command);
+    bar_configure_binding("button4", NULL, command);
 }
 
 CFGFUN(bar_wheel_down_cmd, const char *command) {
     ELOG("'wheel_down_cmd' is deprecated. Please us 'bindsym button5 %s' instead.\n", command);
-    bar_configure_binding("button5", command);
+    bar_configure_binding("button5", NULL, command);
 }
 
-CFGFUN(bar_bindsym, const char *button, const char *command) {
-    bar_configure_binding(button, command);
+CFGFUN(bar_bindsym, const char *button, const char *release, const char *command) {
+    bar_configure_binding(button, release, command);
 }
 
 CFGFUN(bar_position, const char *position) {

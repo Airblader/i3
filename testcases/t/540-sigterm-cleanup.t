@@ -14,24 +14,22 @@
 # • http://onyxneon.com/books/modern_perl/modern_perl_a4.pdf
 #   (unless you are already familiar with Perl)
 #
-# Verifies that mouse bindings work on the root window if
-# --whole-window is set.
-# Ticket: #2115
-use i3test i3_config => <<EOT;
+# Tests that the socket file is cleaned up properly after gracefully
+# shutting down i3 via SIGTERM.
+# Ticket: #3049
+use i3test i3_autostart => 0;
+
+my $config = <<EOT;
 # i3 config file (v4)
 font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
-
-workspace_auto_back_and_forth no
-bindsym --whole-window button4 workspace special
 EOT
-use i3test::XTEST;
 
-fresh_workspace;
+my $pid = launch_with_config($config, dont_add_socket_path => 1);
+my $socket = get_socket_path();
+ok(-S $socket, "socket $socket exists");
 
-xtest_button_press(4, 50, 50);
-xtest_button_release(4, 50, 50);
-xtest_sync_with_i3;
+exit_forcefully($pid, 'TERM');
 
-is(focused_ws(), 'special', 'the binding was triggered');
+ok(!-e $socket, "socket $socket no longer exists");
 
 done_testing;

@@ -186,7 +186,5 @@ int main(int argc, char **argv) {
     clean_xcb();
     ev_default_destroy();
 
-    free_workspaces();
-
     return 0;
 }

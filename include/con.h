@@ -39,6 +39,12 @@ void con_free(Con *con);
 void con_focus(Con *con);
 
 /**
+ * Sets input focus to the given container and raises it to the top.
+ *
+ */
+void con_activate(Con *con);
+
+/**
  * Closes the given container.
  *
  */
@@ -221,6 +227,22 @@ void con_unmark(Con *con, const char *name);
  *
  */
 Con *con_for_window(Con *con, i3Window *window, Match **store_match);
+
+/**
+ * Iterate over the container's focus stack and return an array with the
+ * containers inside it, ordered from higher focus order to lowest.
+ *
+ */
+Con **get_focus_order(Con *con);
+
+/**
+ * Clear the container's focus stack and re-add it using the provided container
+ * array. The function doesn't check if the provided array contains the same
+ * containers with the previous focus stack but will not add floating containers
+ * in the new focus stack if container is not a workspace.
+ *
+ */
+void set_focus_order(Con *con, Con **focus_order);
 
 /**
  * Returns the number of children of this container.
