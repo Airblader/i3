@@ -361,7 +361,7 @@ static void workspace_reassign_sticky(Con *con) {
 
 /*
  * Callback to reset the urgent flag of the given con to false. May be started by
- * _workspace_show to avoid urgency hints being lost by switching to a workspace
+ * workspace_show to avoid urgency hints being lost by switching to a workspace
  * focusing the con.
  *
  */
@@ -381,7 +381,11 @@ static void workspace_defer_update_urgent_hint_cb(EV_P_ ev_timer *w, int revents
     }
 }
 
-static void _workspace_show(Con *workspace) {
+/*
+ * Switches to the given workspace
+ *
+ */
+void workspace_show(Con *workspace) {
     Con *current, *old = NULL;
     Con *old_focus = focused;
 
@@ -414,10 +418,8 @@ static void _workspace_show(Con *workspace) {
      * focused) are skipped, see bug #868. */
     if (current && !con_is_internal(current)) {
         FREE(previous_workspace_name);
-        if (current) {
-            previous_workspace_name = sstrdup(current->name);
-            DLOG("Setting previous_workspace_name = %s\n", previous_workspace_name);
-        }
+        previous_workspace_name = sstrdup(current->name);
+        DLOG("Setting previous_workspace_name = %s\n", previous_workspace_name);
     }
 
     workspace_reassign_sticky(workspace);
@@ -509,21 +511,13 @@ static void _workspace_show(Con *workspace) {
 }
 
 /*
- * Switches to the given workspace
- *
- */
-void workspace_show(Con *workspace) {
-    _workspace_show(workspace);
-}
-
-/*
  * Looks up the workspace by name and switches to it.
  *
  */
 void workspace_show_by_name(const char *num) {
     Con *workspace;
     workspace = workspace_get(num, NULL);
-    _workspace_show(workspace);
+    workspace_show(workspace);
 }
 
 /*

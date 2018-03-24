@@ -2047,10 +2047,13 @@ Use the +move+ command to move a container.
 # defaults to 10 pixels.
 move <left|right|down|up> [<px> px]
 
-# Moves the container either to a specific location
-# or to the center of the screen. If 'absolute' is
-# used, it is moved to the center of all outputs.
-move [absolute] position <pos_x> [px] <pos_y> [px]
+# Moves the container to the specified pos_x and pos_y
+# coordinates on the screen.
+move position <pos_x> [px] <pos_y> [px]
+
+# Moves the container to the center of the screen.
+# If 'absolute' is used, it is moved to the center of
+# all outputs.
 move [absolute] position center
 
 # Moves the container to the current position of the
@@ -2275,8 +2278,7 @@ See <<move_to_outputs>> for how to move a container/workspace to a different
 RandR output.
 
 [[move_to_outputs]]
-[[_moving_containers_workspaces_to_randr_outputs]]
-=== Moving containers/workspaces to RandR outputs
+=== [[_moving_containers_workspaces_to_randr_outputs]]Moving containers/workspaces to RandR outputs
 
 To move a container to another RandR output (addressed by names like +LVDS1+ or
 +VGA1+) or to a RandR output identified by a specific direction (like +left+,
