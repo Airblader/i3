@@ -1140,7 +1140,13 @@ static bool _con_move_to_con(Con *con, Con *target, bool behind_focused, bool fi
 
     /* 1: save the container which is going to be focused after the current
      * container is moved away */
-    Con *focus_next = con_next_focused(con);
+    Con *focus_next = NULL;
+    if (!ignore_focus && source_ws == current_ws) {
+        focus_next = con_descend_focused(source_ws);
+        if (focus_next == con || con_has_parent(focus_next, con)) {
+            focus_next = con_next_focused(con);
+        }
+    }
 
     /* 2: we go up one level, but only when target is a normal container */
     if (target->type != CT_WORKSPACE) {
@@ -1170,20 +1176,6 @@ static bool _con_move_to_con(Con *con, Con *target, bool behind_focused, bool fi
             floating_fix_coordinates(con, &(source_output->rect), &(dest_output->rect));
         } else
             DLOG("Not fixing coordinates, fix_coordinates flag = %d\n", fix_coordinates);
-
-        /* If moving to a visible workspace, call show so it can be considered
-         * focused. Must do before attaching because workspace_show checks to see
-         * if focused container is in its area. */
-        if (!ignore_focus && workspace_is_visible(target_ws)) {
-            workspace_show(target_ws);
-
-            /* Don’t warp if told so (when dragging floating windows with the
-             * mouse for example) */
-            if (dont_warp)
-                x_set_warp_to(NULL);
-            else
-                x_set_warp_to(&(con->rect));
-        }
     }
 
     /* If moving a fullscreen container and the destination already has a
@@ -1222,15 +1214,11 @@ static bool _con_move_to_con(Con *con, Con *target, bool behind_focused, bool fi
 
         /* Restore focus if the output's focused workspace has changed. */
         if (con_get_workspace(focused) != old_focus)
-            con_activate(old_focus);
+            con_focus(old_focus);
     }
 
     /* 7: when moving to another workspace, we leave the focus on the current
      * workspace. (see also #809) */
-
-    /* Descend focus stack in case focus_next is a workspace which can
-     * occur if we move to the same workspace.  Also show current workspace
-     * to ensure it is focused. */
     if (!ignore_focus) {
         workspace_show(current_ws);
         if (dont_warp) {
@@ -1241,7 +1229,7 @@ static bool _con_move_to_con(Con *con, Con *target, bool behind_focused, bool fi
 
     /* Set focus only if con was on current workspace before moving.
      * Otherwise we would give focus to some window on different workspace. */
-    if (!ignore_focus && source_ws == current_ws)
+    if (focus_next)
         con_activate(con_descend_focused(focus_next));
 
     /* 8. If anything within the container is associated with a startup sequence,
@@ -1943,7 +1931,6 @@ void con_toggle_layout(Con *con, const char *toggle_mode) {
              * now let's activate the current layout (next in list) */
             if (current_layout_found) {
                 new_layout = layout;
-                free(tm_dup);
                 break;
             }
 
@@ -1951,6 +1938,7 @@ void con_toggle_layout(Con *con, const char *toggle_mode) {
                 current_layout_found = true;
             }
         }
+        free(tm_dup);
 
         if (new_layout != L_DEFAULT) {
             con_set_layout(con, new_layout);
