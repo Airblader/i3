@@ -1611,6 +1611,12 @@ Con *con_descend_direction(Con *con, direction_t direction) {
     return con_descend_direction(most, direction);
 }
 
+bool has_outer_gaps(gaps_t gaps) {
+    return gaps.outer > 0 ||
+           gaps.horizontal > 0 ||
+           gaps.vertical > 0;
+}
+
 /*
  * Returns a "relative" Rect which contains the amount of pixels that need to
  * be added to the original Rect to get the final position (obviously the
@@ -1619,9 +1625,9 @@ Con *con_descend_direction(Con *con, direction_t direction) {
  */
 Rect con_border_style_rect(Con *con) {
     if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) ||
-        (config.smart_borders == NO_GAPS && calculate_effective_gaps(con).outer == 0) ||
+        (config.smart_borders == NO_GAPS && !has_outer_gaps(calculate_effective_gaps(con))) ||
         (config.hide_edge_borders == HEBM_SMART && con_num_visible_children(con_get_workspace(con)) <= 1) ||
-        (config.hide_edge_borders == HEBM_SMART_NO_GAPS && con_num_visible_children(con_get_workspace(con)) <= 1 && calculate_effective_gaps(con).outer == 0)) {
+        (config.hide_edge_borders == HEBM_SMART_NO_GAPS && con_num_visible_children(con_get_workspace(con)) <= 1 && !has_outer_gaps(calculate_effective_gaps(con)))) {
         if (!con_is_floating(con))
             return (Rect){0, 0, 0, 0};
     }
@@ -2267,11 +2273,13 @@ char *con_get_tree_representation(Con *con) {
 gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
     if (workspace == NULL || (config.smart_gaps && con_num_visible_children(workspace) <= 1))
-        return (gaps_t){0, 0};
+        return (gaps_t){0, 0, 0, 0};
 
     gaps_t gaps = {
         .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
-        .outer = workspace->gaps.outer + config.gaps.outer};
+        .outer = workspace->gaps.outer + config.gaps.outer,
+        .horizontal = workspace->gaps.horizontal + config.gaps.horizontal,
+        .vertical = workspace->gaps.vertical + config.gaps.vertical};
 
     /* Outer gaps are added on top of inner gaps. */
     gaps.outer += 2 * gaps.inner;

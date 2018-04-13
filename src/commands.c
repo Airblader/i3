@@ -2175,11 +2175,11 @@ void cmd_debuglog(I3_CMD, const char *argument) {
 }
 
 /**
- * Implementation of 'gaps inner|outer current|all set|plus|minus <px>'
+ * Implementation of 'gaps inner|outer|horizontal|vertical current|all set|plus|minus <px>'
  *
  */
 void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, const char *value) {
-#define CMD_GAPS(type, other)                                      \
+#define CMD_GAPS(type)                                             \
     int pixels = logical_px(atoi(value));                          \
     Con *workspace = con_get_workspace(focused);                   \
                                                                    \
@@ -2222,9 +2222,13 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
     }
 
     if (!strcmp(type, "inner")) {
-        CMD_GAPS(inner, outer);
+        CMD_GAPS(inner);
     } else if (!strcmp(type, "outer")) {
-        CMD_GAPS(outer, inner);
+        CMD_GAPS(outer);
+    } else if (!strcmp(type, "horizontal")) {
+        CMD_GAPS(horizontal);
+    } else if (!strcmp(type, "vertical")) {
+        CMD_GAPS(vertical);
     } else {
         ELOG("Invalid type %s when changing gaps", type);
         ysuccess(false);

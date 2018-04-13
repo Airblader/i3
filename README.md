@@ -29,19 +29,21 @@ Please refer to the [wiki](https://github.com/Airblader/i3/wiki/Compiling-&-Inst
 
 Note: Gaps will only work correctly if you disable window titlebars entirely. Unfortunately this is necessary due to the way i3 creates such bars on windows. You can disable them via `for_window [class="^.*"] border pixel 0` in your config. You can also use any non-zero value as long as you only use pixel-style borders.
 
-Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that inner gaps (the gaps between adjacent containers) and outer gaps (gaps between the edge of the screen and a container) are the same. But I didn't stop there: these gaps are called "inner" gaps. This fork also allows setting "outer" gaps which inset all containers independently.
+Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that inner gaps (the gaps between adjacent containers) and outer gaps (gaps between the edge of the screen and a container) are the same. But I didn't stop there: these gaps are called "inner" gaps. This fork also allows setting "outer," "horizontal," and "vertical" gaps which inset all containers independently.
 
 In your i3 config, you can set a global gap size as shown below. This is the default value that will be used for all workspaces:
 
 ```
 gaps inner <px>
 gaps outer <px>
+gaps horizontal <px>
+gaps vertical <px>
 ```
 
 Additionally, you can issue commands with the following syntax. This is useful, for example, to bind keys to changing the gap size:
 
 ```
-gaps inner|outer current|all set|plus|minus <px>
+gaps inner|outer|horizontal|vertical current|all set|plus|minus <px>
 
 # Examples
 gaps inner all set 20
@@ -50,17 +52,19 @@ gaps outer current plus 5
 
 Here are the individual parts explained:
 
-* `inner|outer` specifies whether you want to modify inner gaps (gaps between adjacent containers) or outer gaps (gaps between the edge of a screen and a container).
+* `inner|outer|horizontal|vertical` specifies whether you want to modify inner gaps (gaps between adjacent containers), outer gaps (gaps between the edge of a screen and a container), horizontal gaps (gaps between the left and right edges of a screen and a container), or vertical gaps (gaps between the top and bottom edges of a screen and a container).
 * `current|all` determines whether you want to modify the setting for the current workspace only or for all workspaces.
 * `set|plus|minus` allows you to either set a new, fixed value or make a relative change (in-/decrement).
 
-Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will eliminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen.
+Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will eliminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen. Horizontal and vertical gaps are *also in addition* to outer gaps. For example, assuming a workspace has two containers, no inner gaps, a small outer gap, and a large horizontal gap, the two containers will not touch the edge of screen and they will be centered with a large space on the left and right sides of the screen.
 
 Additionally, gaps can be specified on a per-workspace level by using the syntax known from assigning a workspace to a certain output:
 
 ```
 workspace <ws> gaps inner <px>
 workspace <ws> gaps outer <px>
+workspace <ws> gaps horizontal <px>
+workspace <ws> gaps vertical <px>
 ```
 
 It is important that these commands are specified after the global default since they are meant to override it.
@@ -71,21 +75,37 @@ workspace 1 gaps inner 0
 workspace "www" gaps inner 0
 ```
 
-Here is one possible idea on how you can use this feature within your i3 config. Simply press `$mod+Shift+g` to enter the gaps mode. Then choose between `o` and `i` for modifying outer / inner gaps. In this mode, you can press one of `+` / `-` (in-/decrement for current workspace) or `0` (remove gaps for current workspace). If you also press `Shift` with these keys, the change will be global for all workspaces.
+Here is one possible idea on how you can use this feature within your i3 config. Simply press `$mod+Shift+g` to enter the gaps mode. Then choose between `o`, `i`, `h`, or `v` for modifying outer / inner / horizontal / vertical gaps. In this mode, you can press one of `+` / `-` (in-/decrement for current workspace) or `0` (remove gaps for current workspace). If you also press `Shift` with these keys, the change will be global for all workspaces.
 
 ```
-set $mode_gaps Gaps: (o) outer, (i) inner
+set $mode_gaps Gaps: (o) outer, (i) inner, (h) horizontal, (v) vertical
 set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
 set $mode_gaps_inner Inner Gaps: +|-|0 (local), Shift + +|-|0 (global)
+set $mode_gaps_horiz Horizontal Gaps: +|-|0 (local), Shift + +|-|0 (global)
+set $mode_gaps_verti Vertical Gaps: +|-|0 (local), Shift + +|-|0 (global)
 bindsym $mod+Shift+g mode "$mode_gaps"
 
 mode "$mode_gaps" {
         bindsym o      mode "$mode_gaps_outer"
         bindsym i      mode "$mode_gaps_inner"
+        bindsym h      mode "$mode_gaps_horiz"
+        bindsym v      mode "$mode_gaps_verti"
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
 
+mode "$mode_gaps_outer" {
+        bindsym plus  gaps outer current plus 5
+        bindsym minus gaps outer current minus 5
+        bindsym 0     gaps outer current set 0
+
+        bindsym Shift+plus  gaps outer all plus 5
+        bindsym Shift+minus gaps outer all minus 5
+        bindsym Shift+0     gaps outer all set 0
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+}
 mode "$mode_gaps_inner" {
         bindsym plus  gaps inner current plus 5
         bindsym minus gaps inner current minus 5
@@ -98,14 +118,26 @@ mode "$mode_gaps_inner" {
         bindsym Return mode "default"
         bindsym Escape mode "default"
 }
-mode "$mode_gaps_outer" {
-        bindsym plus  gaps outer current plus 5
-        bindsym minus gaps outer current minus 5
-        bindsym 0     gaps outer current set 0
+mode "$mode_gaps_horiz" {
+        bindsym plus  gaps horizontal current plus 5
+        bindsym minus gaps horizontal current minus 5
+        bindsym 0     gaps horizontal current set 0
 
-        bindsym Shift+plus  gaps outer all plus 5
-        bindsym Shift+minus gaps outer all minus 5
-        bindsym Shift+0     gaps outer all set 0
+        bindsym Shift+plus  gaps horizontal all plus 5
+        bindsym Shift+minus gaps horizontal all minus 5
+        bindsym Shift+0     gaps horizontal all set 0
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+}
+mode "$mode_gaps_verti" {
+        bindsym plus  gaps vertical current plus 5
+        bindsym minus gaps vertical current minus 5
+        bindsym 0     gaps vertical current set 0
+
+        bindsym Shift+plus  gaps vertical all plus 5
+        bindsym Shift+minus gaps vertical all minus 5
+        bindsym Shift+0     gaps vertical all set 0
 
         bindsym Return mode "default"
         bindsym Escape mode "default"
@@ -120,7 +152,7 @@ If you want gaps to only be used if there is more than one container on the work
 smart_gaps on
 ```
 
-This will disable all gaps (outer and inner) on the workspace whenever only one container is on the current workspace.
+This will disable all gaps (outer, inner, horizontal, vertical) on the workspace whenever only one container is on the current workspace.
 
 
 ### Smart Borders

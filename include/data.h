@@ -142,6 +142,8 @@ typedef enum {
 struct gaps_t {
     int inner;
     int outer;
+    int horizontal;
+    int vertical;
 };
 
 /**

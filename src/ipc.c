@@ -160,6 +160,10 @@ static void dump_gaps(yajl_gen gen, const char *name, gaps_t gaps) {
     y(integer, gaps.inner);
     ystr("outer");
     y(integer, gaps.outer);
+    ystr("horizontal");
+    y(integer, gaps.horizontal);
+    ystr("vertical");
+    y(integer, gaps.vertical);
     y(map_close);
 }
 
