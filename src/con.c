@@ -1305,7 +1305,7 @@ bool con_move_to_mark(Con *con, const char *mark) {
         return true;
     }
 
-    if (con->type == CT_WORKSPACE) {
+    if (target->type == CT_WORKSPACE) {
         DLOG("target container is a workspace, simply moving the container there.\n");
         con_move_to_workspace(con, target, true, false, false);
         return true;
@@ -1413,20 +1413,16 @@ orientation_t con_orientation(Con *con) {
             return HORIZ;
 
         case L_DEFAULT:
-            DLOG("Someone called con_orientation() on a con with L_DEFAULT, this is a bug in the code.\n");
+            ELOG("Someone called con_orientation() on a con with L_DEFAULT, this is a bug in the code.\n");
             assert(false);
-            return HORIZ;
 
         case L_DOCKAREA:
         case L_OUTPUT:
-            DLOG("con_orientation() called on dockarea/output (%d) container %p\n", con->layout, con);
-            assert(false);
-            return HORIZ;
-
-        default:
-            DLOG("con_orientation() ran into default\n");
+            ELOG("con_orientation() called on dockarea/output (%d) container %p\n", con->layout, con);
             assert(false);
     }
+    /* should not be reached */
+    assert(false);
 }
 
 /*
