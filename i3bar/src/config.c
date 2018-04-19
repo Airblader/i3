@@ -119,6 +119,7 @@ static int config_string_cb(void *params_, const unsigned char *val, size_t _len
         return 1;
     }
 
+    /* Kept for backwards compatibility. */
     if (!strcmp(cur_key, "modifier")) {
         DLOG("modifier = %.*s\n", len, val);
         if (len == strlen("none") && !strncmp((const char *)val, "none", strlen("none"))) {
@@ -304,8 +305,10 @@ static int config_boolean_cb(void *params_, int val) {
     }
 
     if (!strcmp(cur_key, "verbose")) {
-        DLOG("verbose = %d\n", val);
-        config.verbose = val;
+        if (!config.verbose) {
+            DLOG("verbose = %d\n", val);
+            config.verbose = val;
+        }
         return 1;
     }
 
@@ -339,6 +342,12 @@ static int config_integer_cb(void *params_, long long val) {
     if (!strcmp(cur_key, "tray_padding")) {
         DLOG("tray_padding = %lld\n", val);
         config.tray_padding = val;
+        return 1;
+    }
+
+    if (!strcmp(cur_key, "modifier")) {
+        DLOG("modifier = %lld\n", val);
+        config.modifier = (uint32_t)val;
         return 1;
     }
 
