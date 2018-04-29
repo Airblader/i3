@@ -2223,7 +2223,6 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
         workspace->gaps.type = current_value - config.gaps.type;   \
     }
 
-
     if (!strcmp(type, "inner")) {
         CMD_GAPS(inner);
     } else {
