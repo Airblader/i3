@@ -94,9 +94,9 @@ state BORDER:
   border_style = '1pixel'
     -> call cmd_border($border_style, 1)
 
-# gaps inner|outer [current] [plus|minus] <px>
+# gaps inner|outer|horizontal|vertical|top|right|bottom|left [current] [set|plus|minus] <px>
 state GAPS:
-  type = 'inner', 'outer'
+  type = 'inner', 'outer', 'horizontal', 'vertical', 'top', 'right', 'bottom', 'left'
       -> GAPS_WITH_TYPE
 
 state GAPS_WITH_TYPE:

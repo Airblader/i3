@@ -485,8 +485,14 @@ static int json_int(void *ctx, long long val) {
     if (parsing_gaps) {
         if (strcasecmp(last_key, "inner") == 0)
             json_node->gaps.inner = val;
-        else if (strcasecmp(last_key, "outer") == 0)
-            json_node->gaps.outer = val;
+        else if (strcasecmp(last_key, "top") == 0)
+            json_node->gaps.top = val;
+        else if (strcasecmp(last_key, "right") == 0)
+            json_node->gaps.right = val;
+        else if (strcasecmp(last_key, "bottom") == 0)
+            json_node->gaps.bottom = val;
+        else if (strcasecmp(last_key, "left") == 0)
+            json_node->gaps.left = val;
     }
 
     return 1;

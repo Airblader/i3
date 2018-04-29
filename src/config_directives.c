@@ -164,16 +164,36 @@ CFGFUN(for_window, const char *command) {
     TAILQ_INSERT_TAIL(&assignments, assignment, assignments);
 }
 
-void create_gaps_assignment(const char *workspace, bool inner, const long value) {
+void create_gaps_assignment(const char *workspace, const char *scope, gaps_t gaps) {
     DLOG("Setting gaps for workspace %s", workspace);
 
     struct Workspace_Assignment *assignment;
     TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
         if (strcasecmp(assignment->name, workspace) == 0) {
-            if (inner)
-                assignment->gaps.inner = value;
-            else
-                assignment->gaps.outer = value;
+            if (!strcmp(scope, "inner"))
+                assignment->gaps.inner = gaps.inner;
+            else if (!strcmp(scope, "outer")) {
+                assignment->gaps.top = gaps.top;
+                assignment->gaps.right = gaps.right;
+                assignment->gaps.bottom = gaps.bottom;
+                assignment->gaps.left = gaps.left;
+            } else if (!strcmp(scope, "vertical")) {
+                assignment->gaps.top = gaps.top;
+                assignment->gaps.bottom = gaps.bottom;
+            } else if (!strcmp(scope, "horizontal")) {
+                assignment->gaps.right = gaps.right;
+                assignment->gaps.left = gaps.left;
+            } else if (!strcmp(scope, "top"))
+                assignment->gaps.top = gaps.top;
+            else if (!strcmp(scope, "right"))
+                assignment->gaps.right = gaps.right;
+            else if (!strcmp(scope, "bottom"))
+                assignment->gaps.bottom = gaps.bottom;
+            else if (!strcmp(scope, "left"))
+                assignment->gaps.left = gaps.left;
+            else {
+                ELOG("Invalid command, cannot process scope %s", scope);
+            }
 
             return;
         }
@@ -183,25 +203,102 @@ void create_gaps_assignment(const char *workspace, bool inner, const long value)
     assignment = scalloc(1, sizeof(struct Workspace_Assignment));
     assignment->name = sstrdup(workspace);
     assignment->output = NULL;
-    if (inner)
-        assignment->gaps.inner = value;
-    else
-        assignment->gaps.outer = value;
+    if (!strcmp(scope, "inner"))
+        assignment->gaps.inner = gaps.inner;
+    else if (!strcmp(scope, "outer")) {
+        assignment->gaps.top = gaps.top;
+        assignment->gaps.right = gaps.right;
+        assignment->gaps.bottom = gaps.bottom;
+        assignment->gaps.left = gaps.left;
+    } else if (!strcmp(scope, "vertical")) {
+        assignment->gaps.top = gaps.top;
+        assignment->gaps.bottom = gaps.bottom;
+    } else if (!strcmp(scope, "horizontal")) {
+        assignment->gaps.right = gaps.right;
+        assignment->gaps.left = gaps.left;
+    } else if (!strcmp(scope, "top"))
+        assignment->gaps.top = gaps.top;
+    else if (!strcmp(scope, "right"))
+        assignment->gaps.right = gaps.right;
+    else if (!strcmp(scope, "bottom"))
+        assignment->gaps.bottom = gaps.bottom;
+    else if (!strcmp(scope, "left"))
+        assignment->gaps.left = gaps.left;
+    else {
+        ELOG("Invalid command, cannot process scope %s", scope);
+    }
     TAILQ_INSERT_TAIL(&ws_assignments, assignment, ws_assignments);
 }
 
 CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
     int pixels = logical_px(value);
+    gaps_t gaps = (gaps_t){0, 0, 0, 0, 0};
     if (!strcmp(scope, "inner")) {
         if (workspace == NULL)
             config.gaps.inner = pixels;
-        else
-            create_gaps_assignment(workspace, true, pixels - config.gaps.inner);
+        else {
+            gaps.inner = pixels - config.gaps.inner;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
     } else if (!strcmp(scope, "outer")) {
+        if (workspace == NULL) {
+            config.gaps.top = pixels;
+            config.gaps.right = pixels;
+            config.gaps.bottom = pixels;
+            config.gaps.left = pixels;
+        } else {
+            gaps.top = pixels - config.gaps.top;
+            gaps.right = pixels - config.gaps.right;
+            gaps.bottom = pixels - config.gaps.bottom;
+            gaps.left = pixels - config.gaps.left;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "vertical")) {
+        if (workspace == NULL) {
+            config.gaps.top = pixels;
+            config.gaps.bottom = pixels;
+        } else {
+            gaps.top = pixels - config.gaps.top;
+            gaps.bottom = pixels - config.gaps.bottom;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "horizontal")) {
+        if (workspace == NULL) {
+            config.gaps.right = pixels;
+            config.gaps.left = pixels;
+        } else {
+            gaps.right = pixels - config.gaps.right;
+            gaps.left = pixels - config.gaps.left;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "top")) {
         if (workspace == NULL)
-            config.gaps.outer = pixels;
-        else
-            create_gaps_assignment(workspace, false, pixels - config.gaps.outer);
+            config.gaps.top = pixels;
+        else {
+            gaps.top = pixels - config.gaps.top;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "right")) {
+        if (workspace == NULL)
+            config.gaps.right = pixels;
+        else {
+            gaps.right = pixels - config.gaps.right;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "bottom")) {
+        if (workspace == NULL)
+            config.gaps.bottom = pixels;
+        else {
+            gaps.bottom = pixels - config.gaps.bottom;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "left")) {
+        if (workspace == NULL)
+            config.gaps.left = pixels;
+        else {
+            gaps.left = pixels - config.gaps.left;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
     } else {
         ELOG("Invalid command, cannot process scope %s", scope);
     }

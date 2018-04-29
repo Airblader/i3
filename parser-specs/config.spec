@@ -64,9 +64,9 @@ state IGNORE_LINE:
   line
       -> INITIAL
 
-# gaps inner|outer <px>
+# gaps inner|outer|horizontal|vertical|top|right|bottom|left <px>
 state GAPS:
-  scope = 'inner', 'outer'
+  scope = 'inner', 'outer', 'horizontal', 'vertical', 'top', 'right', 'bottom', 'left'
       -> GAPS_WITH_SCOPE
 
 state GAPS_WITH_SCOPE:
