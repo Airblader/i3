@@ -2090,5 +2090,4 @@ void set_current_mode(struct mode *current) {
     I3STRING_FREE(binding.name);
     binding = *current;
     activated_mode = binding.name != NULL;
-    return;
 }
