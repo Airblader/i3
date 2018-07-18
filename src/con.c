@@ -1097,7 +1097,7 @@ static bool _con_move_to_con(Con *con, Con *target, bool behind_focused, bool fi
 
     /* Prevent moving if this would violate the fullscreen focus restrictions. */
     Con *target_ws = con_get_workspace(target);
-    if (!con_fullscreen_permits_focusing(target_ws)) {
+    if (!ignore_focus && !con_fullscreen_permits_focusing(target_ws)) {
         LOG("Cannot move out of a fullscreen container.\n");
         return false;
     }
@@ -1305,7 +1305,7 @@ bool con_move_to_mark(Con *con, const char *mark) {
         return true;
     }
 
-    if (con->type == CT_WORKSPACE) {
+    if (target->type == CT_WORKSPACE) {
         DLOG("target container is a workspace, simply moving the container there.\n");
         con_move_to_workspace(con, target, true, false, false);
         return true;
@@ -1413,20 +1413,16 @@ orientation_t con_orientation(Con *con) {
             return HORIZ;
 
         case L_DEFAULT:
-            DLOG("Someone called con_orientation() on a con with L_DEFAULT, this is a bug in the code.\n");
+            ELOG("Someone called con_orientation() on a con with L_DEFAULT, this is a bug in the code.\n");
             assert(false);
-            return HORIZ;
 
         case L_DOCKAREA:
         case L_OUTPUT:
-            DLOG("con_orientation() called on dockarea/output (%d) container %p\n", con->layout, con);
-            assert(false);
-            return HORIZ;
-
-        default:
-            DLOG("con_orientation() ran into default\n");
+            ELOG("con_orientation() called on dockarea/output (%d) container %p\n", con->layout, con);
             assert(false);
     }
+    /* should not be reached */
+    assert(false);
 }
 
 /*
@@ -2416,6 +2412,10 @@ bool con_swap(Con *first, Con *second) {
 
     /* Move first to second. */
     result &= _con_move_to_con(first, second, false, false, false, true, false);
+    /* If swapping the containers didn't work we don't need to mess with the focus. */
+    if (!result) {
+        goto swap_end;
+    }
 
     /* If we moved the container holding the focused window to another
      * workspace we need to ensure the visible workspace has the focused
@@ -2428,8 +2428,6 @@ bool con_swap(Con *first, Con *second) {
 
     /* Move second to where first has been originally. */
     result &= _con_move_to_con(second, fake, false, false, false, true, false);
-
-    /* If swapping the containers didn't work we don't need to mess with the focus. */
     if (!result) {
         goto swap_end;
     }

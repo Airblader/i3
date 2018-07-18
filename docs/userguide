@@ -888,7 +888,7 @@ the second screen and so on).
 
 *Syntax*:
 -------------------------------------
-workspace <workspace> output <output>
+workspace <workspace> output <output1> [output2]…
 -------------------------------------
 
 The 'output' is the name of the RandR output you attach your screen to. On a
@@ -907,12 +907,15 @@ monitor name is “Dell UP2414Q”.
 entire monitor, i3 will still use the entire area of the containing monitor
 rather than that of just the output's.)
 
+You can specify multiple outputs. The first available will be used.
+
 If you use named workspaces, they must be quoted:
 
 *Examples*:
 ---------------------------
 workspace 1 output LVDS1
-workspace 5 output VGA1
+workspace 2 output primary
+workspace 5 output VGA1 LVDS1
 workspace "2: vim" output VGA1
 ---------------------------
 
@@ -1118,6 +1121,7 @@ force_xinerama yes
 Also note that your output names are not descriptive (like +HDMI1+) when using
 Xinerama, instead they are counted up, starting at 0: +xinerama-0+, +xinerama-1+, …
 
+[[workspace_auto_back_and_forth]]
 === Automatic back-and-forth when switching to the current workspace
 
 This configuration directive enables automatic +workspace back_and_forth+ (see
@@ -2138,8 +2142,8 @@ for_window [instance=notepad] sticky enable
 
 To change to a specific workspace, use the +workspace+ command, followed by the
 number or name of the workspace. Pass the optional flag
-+--no-auto-back-and-forth+ to disable <<back_and_forth>> for this specific call
-only.
++--no-auto-back-and-forth+ to disable <<workspace_auto_back_and_forth>> for this
+specific call only.
 
 To move containers to specific workspaces, use +move container to workspace+.
 
@@ -2337,7 +2341,9 @@ If you want to resize containers/windows using your keyboard, you can use the
 *Syntax*:
 -------------------------------------------------------
 resize grow|shrink <direction> [<px> px [or <ppt> ppt]]
-resize set <width> [px | ppt] <height> [px | ppt]
+resize set [width] <width> [px | ppt]
+resize set height <height> [px | ppt]
+resize set [width] <width> [px | ppt] [height] <height> [px | ppt]
 -------------------------------------------------------
 
 Direction can either be one of +up+, +down+, +left+ or +right+. Or you can be
@@ -2493,7 +2499,9 @@ To change the border of the current client, you can use +border normal+ to use t
 border (including window title), +border pixel 1+ to use a 1-pixel border (no window title)
 and +border none+ to make the client borderless.
 
-There is also +border toggle+ which will toggle the different border styles.
+There is also +border toggle+ which will toggle the different border styles. The
+optional pixel argument can be used to specify the border width when switching
+to the normal and pixel styles.
 
 Note that "pixel" refers to logical pixel. On HiDPI displays, a logical pixel
 may be represented by multiple physical pixels, so +pixel 1+ might not
@@ -2501,8 +2509,8 @@ necessarily translate into a single pixel row wide border.
 
 *Syntax*:
 -----------------------------------------------
-border normal|pixel [<n>]
-border none|toggle
+border normal|pixel|toggle [<n>]
+border none
 
 # legacy syntax, equivalent to "border pixel 1"
 border 1pixel

@@ -644,12 +644,12 @@ void cmd_resize_set(I3_CMD, long cwidth, const char *mode_width, long cheight, c
         if ((floating_con = con_inside_floating(current->con))) {
             Con *output = con_get_output(floating_con);
             if (cwidth == 0) {
-                cwidth = output->rect.width;
+                cwidth = floating_con->rect.width;
             } else if (mode_width && strcmp(mode_width, "ppt") == 0) {
                 cwidth = output->rect.width * ((double)cwidth / 100.0);
             }
             if (cheight == 0) {
-                cheight = output->rect.height;
+                cheight = floating_con->rect.height;
             } else if (mode_height && strcmp(mode_height, "ppt") == 0) {
                 cheight = output->rect.height * ((double)cheight / 100.0);
             }
@@ -686,7 +686,7 @@ void cmd_resize_set(I3_CMD, long cwidth, const char *mode_width, long cheight, c
                 }
             }
 
-            if (cheight > 0 && mode_width && strcmp(mode_width, "ppt") == 0) {
+            if (cheight > 0 && mode_height && strcmp(mode_height, "ppt") == 0) {
                 /* get the appropriate current container (skip stacked/tabbed cons) */
                 Con *target = current->con;
                 Con *dummy;
@@ -718,6 +718,26 @@ void cmd_resize_set(I3_CMD, long cwidth, const char *mode_width, long cheight, c
     ysuccess(success);
 }
 
+static int border_width_from_style(border_style_t border_style, long border_width, Con *con) {
+    if (border_style == BS_NONE) {
+        return 0;
+    }
+    if (border_width >= 0) {
+        return logical_px(border_width);
+    }
+
+    const bool is_floating = con_inside_floating(con) != NULL;
+    /* Load the configured defaults. */
+    if (is_floating && border_style == config.default_floating_border) {
+        return config.default_floating_border_width;
+    } else if (!is_floating && border_style == config.default_border) {
+        return config.default_border_width;
+    } else {
+        /* Use some hardcoded values. */
+        return logical_px(border_style == BS_NORMAL ? 2 : 1);
+    }
+}
+
 /*
  * Implementation of 'border normal|pixel [<n>]', 'border none|1pixel|toggle'.
  *
@@ -730,36 +750,24 @@ void cmd_border(I3_CMD, const char *border_style_str, long border_width) {
 
     TAILQ_FOREACH(current, &owindows, owindows) {
         DLOG("matching: %p / %s\n", current->con, current->con->name);
-        int border_style = current->con->border_style;
-        int con_border_width = border_width;
 
+        border_style_t border_style;
         if (strcmp(border_style_str, "toggle") == 0) {
-            border_style++;
-            border_style %= 3;
-            if (border_style == BS_NORMAL)
-                con_border_width = 2;
-            else if (border_style == BS_NONE)
-                con_border_width = 0;
-            else if (border_style == BS_PIXEL)
-                con_border_width = 1;
+            border_style = (current->con->border_style + 1) % 3;
+        } else if (strcmp(border_style_str, "normal") == 0) {
+            border_style = BS_NORMAL;
+        } else if (strcmp(border_style_str, "pixel") == 0) {
+            border_style = BS_PIXEL;
+        } else if (strcmp(border_style_str, "none") == 0) {
+            border_style = BS_NONE;
         } else {
-            if (strcmp(border_style_str, "normal") == 0) {
-                border_style = BS_NORMAL;
-            } else if (strcmp(border_style_str, "pixel") == 0) {
-                border_style = BS_PIXEL;
-            } else if (strcmp(border_style_str, "1pixel") == 0) {
-                border_style = BS_PIXEL;
-                con_border_width = 1;
-            } else if (strcmp(border_style_str, "none") == 0) {
-                border_style = BS_NONE;
-            } else {
-                ELOG("BUG: called with border_style=%s\n", border_style_str);
-                ysuccess(false);
-                return;
-            }
+            ELOG("BUG: called with border_style=%s\n", border_style_str);
+            ysuccess(false);
+            return;
         }
 
-        con_set_border_style(current->con, border_style, logical_px(con_border_width));
+        const int con_border_width = border_width_from_style(border_style, border_width, current->con);
+        con_set_border_style(current->con, border_style, con_border_width);
     }
 
     cmd_output->needs_tree_render = true;
@@ -1128,7 +1136,21 @@ void cmd_move_workspace_to_output(I3_CMD, const char *name) {
             continue;
         }
 
-        bool success = workspace_move_to_output(ws, name);
+        Output *current_output = get_output_for_con(ws);
+        if (current_output == NULL) {
+            ELOG("Cannot get current output. This is a bug in i3.\n");
+            ysuccess(false);
+            return;
+        }
+
+        Output *target_output = get_output_from_string(current_output, name);
+        if (!target_output) {
+            ELOG("Could not get output from string \"%s\"\n", name);
+            ysuccess(false);
+            return;
+        }
+
+        bool success = workspace_move_to_output(ws, target_output);
         if (!success) {
             ELOG("Failed to move workspace to output.\n");
             ysuccess(false);
@@ -1811,19 +1833,20 @@ void cmd_move_scratchpad(I3_CMD) {
 void cmd_scratchpad_show(I3_CMD) {
     DLOG("should show scratchpad window\n");
     owindow *current;
+    bool result = false;
 
     if (match_is_empty(current_match)) {
-        scratchpad_show(NULL);
+        result = scratchpad_show(NULL);
     } else {
         TAILQ_FOREACH(current, &owindows, owindows) {
             DLOG("matching: %p / %s\n", current->con, current->con->name);
-            scratchpad_show(current->con);
+            result |= scratchpad_show(current->con);
         }
     }
 
     cmd_output->needs_tree_render = true;
-    // XXX: default reply for now, make this a better reply
-    ysuccess(true);
+
+    ysuccess(result);
 }
 
 /*
@@ -1977,6 +2000,7 @@ void cmd_rename_workspace(I3_CMD, const char *old_name, const char *new_name) {
 
     /* By re-attaching, the sort order will be correct afterwards. */
     Con *previously_focused = focused;
+    Con *previously_focused_content = focused->type == CT_WORKSPACE ? focused->parent : NULL;
     Con *parent = workspace->parent;
     con_detach(workspace);
     con_attach(workspace, parent, false);
@@ -1990,16 +2014,36 @@ void cmd_rename_workspace(I3_CMD, const char *old_name, const char *new_name) {
             continue;
         }
 
-        workspace_move_to_output(workspace, assignment->output);
-
-        if (previously_focused)
-            workspace_show(con_get_workspace(previously_focused));
+        Output *target_output = get_output_by_name(assignment->output, true);
+        if (!target_output) {
+            LOG("Could not get output named \"%s\"\n", assignment->output);
+            continue;
+        }
+        if (!output_triggers_assignment(target_output, assignment)) {
+            continue;
+        }
+        workspace_move_to_output(workspace, target_output);
 
         break;
     }
 
-    /* Restore the previous focus since con_attach messes with the focus. */
-    con_activate(previously_focused);
+    bool can_restore_focus = previously_focused != NULL;
+    /* NB: If previously_focused is a workspace we can't work directly with it
+     * since it might have been cleaned up by workspace_show() already,
+     * depending on the focus order/number of other workspaces on the output.
+     * Instead, we loop through the available workspaces and only focus
+     * previously_focused if we still find it. */
+    if (previously_focused_content) {
+        Con *workspace = NULL;
+        GREP_FIRST(workspace, previously_focused_content, child == previously_focused);
+        can_restore_focus &= (workspace != NULL);
+    }
+
+    if (can_restore_focus) {
+        /* Restore the previous focus since con_attach messes with the focus. */
+        workspace_show(con_get_workspace(previously_focused));
+        con_focus(previously_focused);
+    }
 
     cmd_output->needs_tree_render = true;
     ysuccess(true);
@@ -2136,21 +2180,22 @@ void cmd_shmlog(I3_CMD, const char *argument) {
     else if (!strcmp(argument, "off"))
         shmlog_size = 0;
     else {
+        long new_size = 0;
+        if (!parse_long(argument, &new_size, 0)) {
+            yerror("Failed to parse %s into a shmlog size.\n", argument);
+            return;
+        }
         /* If shm logging now, restart logging with the new size. */
         if (shmlog_size > 0) {
             shmlog_size = 0;
             LOG("Restarting shm logging...\n");
             init_logging();
         }
-        shmlog_size = atoi(argument);
-        /* Make a weakly attempt at ensuring the argument is valid. */
-        if (shmlog_size <= 0)
-            shmlog_size = default_shmlog_size;
+        shmlog_size = (int)new_size;
     }
     LOG("%s shm logging\n", shmlog_size > 0 ? "Enabling" : "Disabling");
     init_logging();
     update_shmlog_atom();
-    // XXX: default reply for now, make this a better reply
     ysuccess(true);
 }
 

@@ -424,9 +424,9 @@ void init_ws_for_output(Output *output, Con *content) {
     /* go through all assignments and move the existing workspaces to this output */
     struct Workspace_Assignment *assignment;
     TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
-        if (assignment->output == NULL || strcmp(assignment->output, output_primary_name(output)) != 0)
+        if (!output_triggers_assignment(output, assignment)) {
             continue;
-
+        }
         Con *workspace = get_existing_workspace_by_name(assignment->name);
         if (workspace == NULL)
             continue;
@@ -501,8 +501,9 @@ void init_ws_for_output(Output *output, Con *content) {
 
     /* otherwise, we create the first assigned ws for this output */
     TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
-        if (assignment->output == NULL || strcmp(assignment->output, output_primary_name(output)) != 0)
+        if (!output_triggers_assignment(output, assignment)) {
             continue;
+        }
 
         LOG("Initializing first assigned workspace \"%s\" for output \"%s\"\n",
             assignment->name, assignment->output);
@@ -856,8 +857,9 @@ void randr_query_outputs(void) {
     /* If there's no randr output, enable the output covering the root window. */
     if (any_randr_output_active()) {
         DLOG("Active RandR output found. Disabling root output.\n");
-        if (root_output->active)
+        if (root_output && root_output->active) {
             root_output->to_be_disabled = true;
+        }
     } else {
         DLOG("No active RandR output found. Enabling root output.\n");
         root_output->active = true;

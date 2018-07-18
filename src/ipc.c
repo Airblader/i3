@@ -290,10 +290,6 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
         case CT_DOCKAREA:
             ystr("dockarea");
             break;
-        default:
-            DLOG("About to dump unknown container type=%d. This is a bug.\n", con->type);
-            assert(false);
-            break;
     }
 
     /* provided for backwards compatibility only. */
@@ -684,32 +680,7 @@ static void dump_bar_config(yajl_gen gen, Barconfig *config) {
     }
 
     ystr("modifier");
-    switch (config->modifier) {
-        case M_NONE:
-            ystr("none");
-            break;
-        case M_CONTROL:
-            ystr("ctrl");
-            break;
-        case M_SHIFT:
-            ystr("shift");
-            break;
-        case M_MOD1:
-            ystr("Mod1");
-            break;
-        case M_MOD2:
-            ystr("Mod2");
-            break;
-        case M_MOD3:
-            ystr("Mod3");
-            break;
-        case M_MOD5:
-            ystr("Mod5");
-            break;
-        default:
-            ystr("Mod4");
-            break;
-    }
+    y(integer, config->modifier);
 
     dump_bar_bindings(gen, config);
 
@@ -1184,6 +1155,9 @@ IPC_HANDLER(send_tick) {
     yajl_gen gen = ygenalloc();
 
     y(map_open);
+
+    ystr("first");
+    y(bool, false);
 
     ystr("payload");
     yajl_gen_string(gen, (unsigned char *)message, message_size);
