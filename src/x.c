@@ -549,6 +549,23 @@ void x_draw_decoration(Con *con) {
         }
     }
 
+    int32_t os = config.outline_size;
+    if (con->window != NULL) {
+        /* top area */
+        draw_util_rectangle(&(con->frame_buffer), config.client.outline,
+                            0, 0, r->width, os);
+        /* bottom area */
+        draw_util_rectangle(&(con->frame_buffer), config.client.outline,
+                            0, r->height - os, r->width, os);
+        /* left area */
+        draw_util_rectangle(&(con->frame_buffer), config.client.outline,
+                            0, 0, os, r->height);
+        /* right area */
+        draw_util_rectangle(&(con->frame_buffer), config.client.outline,
+                            r->width - os, 0, os, r->height);
+    }
+
+
     /* if this is a borderless/1pixel window, we don’t need to render the
      * decoration. */
     if (p->border_style != BS_NORMAL)

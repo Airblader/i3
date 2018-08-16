@@ -218,6 +218,10 @@ CFGFUN(smart_gaps, const char *enable) {
     config.smart_gaps = eval_boolstr(enable);
 }
 
+CFGFUN(outline, const long size) {
+    config.outline_size = size;
+}
+
 CFGFUN(floating_minimum_size, const long width, const long height) {
     config.floating_minimum_width = width;
     config.floating_minimum_height = height;
@@ -428,8 +432,10 @@ CFGFUN(popup_during_fullscreen, const char *value) {
 }
 
 CFGFUN(color_single, const char *colorclass, const char *color) {
-    /* used for client.background only currently */
-    config.client.background = draw_util_hex_to_color(color);
+    if (strcmp(colorclass, "client.background") == 0)
+        config.client.background = draw_util_hex_to_color(color);
+    else if (strcmp(colorclass, "client.outline") == 0)
+        config.client.outline = draw_util_hex_to_color(color);
 }
 
 CFGFUN(color, const char *colorclass, const char *border, const char *background, const char *text, const char *indicator, const char *child_border) {

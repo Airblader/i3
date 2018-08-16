@@ -213,6 +213,8 @@ void load_configuration(xcb_connection_t *conn, const char *override_configpath,
     } while (0)
 
     config.client.background = draw_util_hex_to_color("#000000");
+    config.client.outline = draw_util_hex_to_color("#000000");
+
     INIT_COLOR(config.client.focused, "#4c7899", "#285577", "#ffffff", "#2e9ef4");
     INIT_COLOR(config.client.focused_inactive, "#333333", "#5f676a", "#ffffff", "#484e50");
     INIT_COLOR(config.client.unfocused, "#333333", "#222222", "#888888", "#292d2e");

@@ -217,9 +217,13 @@ struct Config {
     int32_t floating_minimum_width;
     int32_t floating_minimum_height;
 
+    /** Outline size **/
+    int32_t outline_size;
+
     /* Color codes are stored here */
     struct config_client {
         color_t background;
+        color_t outline;
         struct Colortriple focused;
         struct Colortriple focused_inactive;
         struct Colortriple unfocused;
