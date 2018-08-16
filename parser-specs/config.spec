@@ -27,6 +27,7 @@ state INITIAL:
   'gaps'                                   -> GAPS
   'smart_borders'                          -> SMART_BORDERS
   'smart_gaps'                             -> SMART_GAPS
+  'outline'                                -> OUTLINE
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
   'floating_modifier'                      -> FLOATING_MODIFIER
@@ -57,6 +58,8 @@ state INITIAL:
   exectype = 'exec_always', 'exec'         -> EXEC
   colorclass = 'client.background'
       -> COLOR_SINGLE
+  colorclass = 'client.outline'
+      -> COLOR_SINGLE
   colorclass = 'client.focused_inactive', 'client.focused', 'client.unfocused', 'client.urgent', 'client.placeholder'
       -> COLOR_BORDER
 
@@ -86,6 +89,10 @@ state SMART_BORDERS:
 state SMART_GAPS:
   enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
       -> call cfg_smart_gaps($enabled)
+
+state OUTLINE:
+  size = number
+    -> call cfg_outline(&size)
 
 # floating_minimum_size <width> x <height>
 state FLOATING_MINIMUM_SIZE_WIDTH:
