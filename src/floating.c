@@ -537,8 +537,10 @@ void floating_drag_window(Con *con, const xcb_button_press_event_t *event) {
     }
 
     /* If the user cancelled, undo the changes. */
-    if (drag_result == DRAG_REVERT)
+    if (drag_result == DRAG_REVERT) {
         floating_reposition(con, initial_rect);
+        return;
+    }
 
     /* If this is a scratchpad window, don't auto center it from now on. */
     if (con->scratchpad_state == SCRATCHPAD_FRESH)
@@ -742,9 +744,14 @@ static bool drain_drag_events(EV_P, struct drag_x11_cb *dragloop) {
             free(event);
 
         if (dragloop->result != DRAGGING) {
-            free(last_motion_notify);
             ev_break(EV_A_ EVBREAK_ONE);
-            return true;
+            if (dragloop->result == DRAG_SUCCESS) {
+                /* Ensure motion notify events are handled. */
+                break;
+            } else {
+                free(last_motion_notify);
+                return true;
+            }
         }
     }
 
@@ -766,7 +773,7 @@ static bool drain_drag_events(EV_P, struct drag_x11_cb *dragloop) {
     FREE(last_motion_notify);
 
     xcb_flush(conn);
-    return false;
+    return dragloop->result != DRAGGING;
 }
 
 static void xcb_drag_prepare_cb(EV_P_ ev_prepare *w, int revents) {
@@ -784,8 +791,7 @@ static void xcb_drag_prepare_cb(EV_P_ ev_prepare *w, int revents) {
  * rect of the client, the event and the new coordinates (x, y).
  *
  */
-drag_result_t drag_pointer(Con *con, const xcb_button_press_event_t *event, xcb_window_t
-                                                                                confine_to,
+drag_result_t drag_pointer(Con *con, const xcb_button_press_event_t *event, xcb_window_t confine_to,
                            border_t border, int cursor, callback_t callback, const void *extra) {
     xcb_cursor_t xcursor = (cursor && xcursor_supported) ? xcursor_get_cursor(cursor) : XCB_NONE;
 
