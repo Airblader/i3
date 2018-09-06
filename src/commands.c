@@ -694,13 +694,15 @@ void cmd_resize_set(I3_CMD, long cwidth, const char *mode_width, long cheight, c
                 continue;
             }
 
-            if (cwidth > 0 && mode_width) {
+            if (cwidth > 0) {
+                bool is_ppt = mode_width && strcmp(mode_width, "ppt") == 0;
                 success &= resize_set_tiling(current_match, cmd_output, current->con,
-                                             HORIZ, strcmp(mode_width, "ppt") == 0, cwidth);
+                                             HORIZ, is_ppt, cwidth);
             }
-            if (cheight > 0 && mode_height) {
+            if (cheight > 0) {
+                bool is_ppt = mode_height && strcmp(mode_height, "ppt") == 0;
                 success &= resize_set_tiling(current_match, cmd_output, current->con,
-                                             VERT, strcmp(mode_height, "ppt") == 0, cheight);
+                                             VERT, is_ppt, cheight);
             }
         }
     }
@@ -2002,6 +2004,7 @@ void cmd_rename_workspace(I3_CMD, const char *old_name, const char *new_name) {
     Con *parent = workspace->parent;
     con_detach(workspace);
     con_attach(workspace, parent, false);
+    ipc_send_workspace_event("rename", workspace, NULL);
 
     /* Move the workspace to the correct output if it has an assignment */
     struct Workspace_Assignment *assignment = NULL;
@@ -2046,7 +2049,6 @@ void cmd_rename_workspace(I3_CMD, const char *old_name, const char *new_name) {
     cmd_output->needs_tree_render = true;
     ysuccess(true);
 
-    ipc_send_workspace_event("rename", workspace, NULL);
     ewmh_update_desktop_names();
     ewmh_update_desktop_viewport();
     ewmh_update_current_desktop();
