@@ -1,5 +1,8 @@
 <!--
 PLEASE HELP US PROCESS GITHUB ISSUES FASTER BY PROVIDING THE FOLLOWING INFORMATION.
+
+IMPORTANT NOTE: If your issue is not specific to any feature provided by i3-gaps but
+                to i3 in general, please open the issue upstream against i3/i3.
 -->
 
 ## I'm submitting a…

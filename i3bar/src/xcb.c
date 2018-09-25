@@ -501,13 +501,12 @@ void handle_button(xcb_button_press_event_t *event) {
         /* If the child asked for click events,
          * check if a status block has been clicked. */
         int tray_width = get_tray_width(walk->trayclients);
-        int block_x = 0, last_block_x;
-        int offset = walk->rect.w - walk->statusline_width - tray_width - logical_px(sb_hoff_px);
+        int last_block_x = 0;
+        int offset = walk->rect.w - walk->statusline_width - tray_width - logical_px((tray_width > 0) * sb_hoff_px);
         int32_t statusline_x = x - offset;
 
         if (statusline_x >= 0 && statusline_x < walk->statusline_width) {
             struct status_block *block;
-            int sep_offset_remainder = 0;
 
             TAILQ_FOREACH(block, &statusline_head, blocks) {
                 i3String *text = block->full_text;
@@ -520,16 +519,14 @@ void handle_button(xcb_button_press_event_t *event) {
                 if (i3string_get_num_bytes(text) == 0)
                     continue;
 
-                last_block_x = block_x;
-                block_x += render->width + render->x_offset + render->x_append + get_sep_offset(block) + sep_offset_remainder;
-
-                if (statusline_x <= block_x && statusline_x >= last_block_x) {
+                const int relative_x = statusline_x - last_block_x;
+                if (relative_x >= 0 && (uint32_t)relative_x <= render->width) {
                     send_block_clicked(event->detail, block->name, block->instance,
-                                       event->root_x, event->root_y, statusline_x - last_block_x, event->event_y, block_x - last_block_x, bar_height);
+                                       event->root_x, event->root_y, relative_x, event->event_y, render->width, bar_height);
                     return;
                 }
 
-                sep_offset_remainder = block->sep_block_width - get_sep_offset(block);
+                last_block_x += render->width + render->x_append + render->x_offset + block->sep_block_width;
             }
         }
     }
@@ -2028,7 +2025,8 @@ void draw_bars(bool unhide) {
             DLOG("Printing statusline!\n");
 
             int tray_width = get_tray_width(outputs_walk->trayclients);
-            uint32_t max_statusline_width = outputs_walk->rect.w - workspace_width - tray_width - 2 * logical_px(sb_hoff_px);
+            uint32_t hoff = logical_px(((workspace_width > 0) + (tray_width > 0)) * sb_hoff_px);
+            uint32_t max_statusline_width = outputs_walk->rect.w - workspace_width - tray_width - hoff;
             uint32_t clip_left = 0;
             uint32_t statusline_width = full_statusline_width;
             bool use_short_text = false;
@@ -2042,7 +2040,7 @@ void draw_bars(bool unhide) {
             }
 
             int16_t visible_statusline_width = MIN(statusline_width, max_statusline_width);
-            int x_dest = outputs_walk->rect.w - tray_width - logical_px(sb_hoff_px) - visible_statusline_width;
+            int x_dest = outputs_walk->rect.w - tray_width - logical_px((tray_width > 0) * sb_hoff_px) - visible_statusline_width;
 
             draw_statusline(outputs_walk, clip_left, use_focus_colors, use_short_text);
             draw_util_copy_surface(&outputs_walk->statusline_buffer, &outputs_walk->buffer, 0, 0,

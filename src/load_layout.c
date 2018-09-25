@@ -628,6 +628,17 @@ void tree_append_json(Con *con, const char *buf, const size_t len, char **errorm
     yajl_config(hand, yajl_allow_comments, true);
     /* Allow multiple values, i.e. multiple nodes to attach */
     yajl_config(hand, yajl_allow_multiple_values, true);
+    /* We don't need to validate that the input is valid UTF8 here.
+     * tree_append_json is called in two cases:
+     * 1. With the append_layout command. json_validate is called first and will
+     *    fail on invalid UTF8 characters so we don't need to recheck.
+     * 2. With an in-place restart. The rest of the codebase should be
+     *    responsible for producing valid UTF8 JSON output. If not,
+     *    tree_append_json will just preserve invalid UTF8 strings in the tree
+     *    instead of failing to parse the layout file which could lead to
+     *    problems like in #3156.
+     * Either way, disabling UTF8 validation slightly speeds up yajl. */
+    yajl_config(hand, yajl_dont_validate_strings, true);
     json_node = con;
     to_focus = NULL;
     parsing_gaps = false;
@@ -650,6 +661,9 @@ void tree_append_json(Con *con, const char *buf, const size_t len, char **errorm
         while (incomplete-- > 0) {
             Con *parent = json_node->parent;
             DLOG("freeing incomplete container %p\n", json_node);
+            if (json_node == to_focus) {
+                to_focus = NULL;
+            }
             con_free(json_node);
             json_node = parent;
         }

@@ -378,9 +378,7 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
 
     /* handle fullscreen containers */
     Con *ws = con_get_workspace(nc);
-    Con *fs = (ws ? con_get_fullscreen_con(ws, CF_OUTPUT) : NULL);
-    if (fs == NULL)
-        fs = con_get_fullscreen_con(croot, CF_GLOBAL);
+    Con *fs = con_get_fullscreen_covering_ws(ws);
 
     if (xcb_reply_contains_atom(state_reply, A__NET_WM_STATE_FULLSCREEN)) {
         /* If this window is already fullscreen (after restarting!), skip
@@ -520,6 +518,12 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
         DLOG("Window specifies minimum size %d x %d\n", wm_size_hints.min_width, wm_size_hints.min_height);
         nc->window->min_width = wm_size_hints.min_width;
         nc->window->min_height = wm_size_hints.min_height;
+    }
+
+    if (wm_size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MAX_SIZE) {
+        DLOG("Window specifies maximum size %d x %d\n", wm_size_hints.max_width, wm_size_hints.max_height);
+        nc->window->max_width = wm_size_hints.max_width;
+        nc->window->max_height = wm_size_hints.max_height;
     }
 
     /* Store the requested geometry. The width/height gets raised to at least

@@ -286,14 +286,14 @@ void con_close(Con *con, kill_window_t kill_window) {
         for (child = TAILQ_FIRST(&(con->focus_head)); child;) {
             nextchild = TAILQ_NEXT(child, focused);
             DLOG("killing child = %p.\n", child);
-            tree_close_internal(child, kill_window, false, false);
+            tree_close_internal(child, kill_window, false);
             child = nextchild;
         }
 
         return;
     }
 
-    tree_close_internal(con, kill_window, false, false);
+    tree_close_internal(con, kill_window, false);
 }
 
 /*
@@ -507,6 +507,23 @@ Con *con_get_fullscreen_con(Con *con, fullscreen_mode_t fullscreen_mode) {
     }
 
     return NULL;
+}
+
+/*
+ * Returns the fullscreen node that covers the given workspace if it exists.
+ * This is either a CF_GLOBAL fullscreen container anywhere or a CF_OUTPUT
+ * fullscreen container in the workspace.
+ *
+ */
+Con *con_get_fullscreen_covering_ws(Con *ws) {
+    if (!ws) {
+        return NULL;
+    }
+    Con *fs = con_get_fullscreen_con(croot, CF_GLOBAL);
+    if (!fs) {
+        return con_get_fullscreen_con(ws, CF_OUTPUT);
+    }
+    return fs;
 }
 
 /**
@@ -1154,13 +1171,13 @@ static bool _con_move_to_con(Con *con, Con *target, bool behind_focused, bool fi
         target = target->parent;
     }
 
-    /* 3: if the target container is floating, we get the workspace instead.
-     * Only tiling windows need to get inserted next to the current container.
-     * */
-    Con *floatingcon = con_inside_floating(target);
-    if (floatingcon != NULL) {
+    /* 3: if the original target is the direct child of a floating container, we
+     * can't move con next to it - floating containers have only one child - so
+     * we get the workspace instead. */
+    if (target->type == CT_FLOATING_CON) {
         DLOG("floatingcon, going up even further\n");
-        target = floatingcon->parent;
+        orig_target = target;
+        target = target->parent;
     }
 
     if (con->type == CT_FLOATING_CON) {
@@ -1437,6 +1454,9 @@ Con *con_next_focused(Con *con) {
         DLOG("selecting workspace for dock client\n");
         return con_descend_focused(output_get_content(con->parent->parent));
     }
+    if (con_is_floating(con)) {
+        con = con->parent;
+    }
 
     /* if 'con' is not the first entry in the focus stack, use the first one as
      * it’s currently focused already */
@@ -1709,8 +1729,7 @@ adjacent_t con_adjacent_borders(Con *con) {
  *
  */
 int con_border_style(Con *con) {
-    Con *fs = con_get_fullscreen_con(con->parent, CF_OUTPUT);
-    if (fs == con) {
+    if (con->fullscreen_mode == CF_OUTPUT || con->fullscreen_mode == CF_GLOBAL) {
         DLOG("this one is fullscreen! overriding BS_NONE\n");
         return BS_NONE;
     }
@@ -1970,7 +1989,7 @@ static void con_on_remove_child(Con *con) {
         if (TAILQ_EMPTY(&(con->focus_head)) && !workspace_is_visible(con)) {
             LOG("Closing old workspace (%p / %s), it is empty\n", con, con->name);
             yajl_gen gen = ipc_marshal_workspace_event("empty", con, NULL);
-            tree_close_internal(con, DONT_KILL_WINDOW, false, false);
+            tree_close_internal(con, DONT_KILL_WINDOW, false);
 
             const unsigned char *payload;
             ylength length;
@@ -1991,7 +2010,7 @@ static void con_on_remove_child(Con *con) {
     int children = con_num_children(con);
     if (children == 0) {
         DLOG("Container empty, closing\n");
-        tree_close_internal(con, DONT_KILL_WINDOW, false, false);
+        tree_close_internal(con, DONT_KILL_WINDOW, false);
         return;
     }
 }

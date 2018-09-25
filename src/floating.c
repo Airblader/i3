@@ -96,6 +96,18 @@ void floating_check_size(Con *floating_con) {
             floating_con->rect.height += border_rect.height;
         }
 
+        if (focused_con->window->max_width) {
+            floating_con->rect.width -= border_rect.width;
+            floating_con->rect.width = min(floating_con->rect.width, focused_con->window->max_width);
+            floating_con->rect.width += border_rect.width;
+        }
+
+        if (focused_con->window->max_height) {
+            floating_con->rect.height -= border_rect.height;
+            floating_con->rect.height = min(floating_con->rect.height, focused_con->window->max_height);
+            floating_con->rect.height += border_rect.height;
+        }
+
         if (focused_con->window->height_increment &&
             floating_con->rect.height >= focused_con->window->base_height + border_rect.height) {
             floating_con->rect.height -= focused_con->window->base_height + border_rect.height;
@@ -246,7 +258,7 @@ void floating_enable(Con *con, bool automatic) {
         Con *parent = con->parent;
         /* clear the pointer before calling tree_close_internal in which the memory is freed */
         con->parent = NULL;
-        tree_close_internal(parent, DONT_KILL_WINDOW, false, false);
+        tree_close_internal(parent, DONT_KILL_WINDOW, false);
     }
 
     char *name;
@@ -366,13 +378,17 @@ void floating_disable(Con *con, bool automatic) {
     }
 
     Con *ws = con_get_workspace(con);
+    if (con_is_internal(ws)) {
+        LOG("Can't disable floating for container in internal workspace.\n");
+        return;
+    }
     Con *tiling_focused = con_descend_tiling_focused(ws);
 
     if (tiling_focused->type == CT_WORKSPACE) {
         Con *parent = con->parent;
         con_detach(con);
         con->parent = NULL;
-        tree_close_internal(parent, DONT_KILL_WINDOW, true, false);
+        tree_close_internal(parent, DONT_KILL_WINDOW, true);
         con_attach(con, tiling_focused, false);
         con->percent = 0.0;
         con_fix_percent(con->parent);
@@ -537,8 +553,10 @@ void floating_drag_window(Con *con, const xcb_button_press_event_t *event) {
     }
 
     /* If the user cancelled, undo the changes. */
-    if (drag_result == DRAG_REVERT)
+    if (drag_result == DRAG_REVERT) {
         floating_reposition(con, initial_rect);
+        return;
+    }
 
     /* If this is a scratchpad window, don't auto center it from now on. */
     if (con->scratchpad_state == SCRATCHPAD_FRESH)
@@ -742,9 +760,14 @@ static bool drain_drag_events(EV_P, struct drag_x11_cb *dragloop) {
             free(event);
 
         if (dragloop->result != DRAGGING) {
-            free(last_motion_notify);
             ev_break(EV_A_ EVBREAK_ONE);
-            return true;
+            if (dragloop->result == DRAG_SUCCESS) {
+                /* Ensure motion notify events are handled. */
+                break;
+            } else {
+                free(last_motion_notify);
+                return true;
+            }
         }
     }
 
@@ -766,7 +789,7 @@ static bool drain_drag_events(EV_P, struct drag_x11_cb *dragloop) {
     FREE(last_motion_notify);
 
     xcb_flush(conn);
-    return false;
+    return dragloop->result != DRAGGING;
 }
 
 static void xcb_drag_prepare_cb(EV_P_ ev_prepare *w, int revents) {
@@ -784,8 +807,7 @@ static void xcb_drag_prepare_cb(EV_P_ ev_prepare *w, int revents) {
  * rect of the client, the event and the new coordinates (x, y).
  *
  */
-drag_result_t drag_pointer(Con *con, const xcb_button_press_event_t *event, xcb_window_t
-                                                                                confine_to,
+drag_result_t drag_pointer(Con *con, const xcb_button_press_event_t *event, xcb_window_t confine_to,
                            border_t border, int cursor, callback_t callback, const void *extra) {
     xcb_cursor_t xcursor = (cursor && xcursor_supported) ? xcursor_get_cursor(cursor) : XCB_NONE;
 

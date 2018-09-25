@@ -517,7 +517,7 @@ void init_ws_for_output(Output *output, Con *content) {
     Con *ws = create_workspace_on_output(output, content);
 
     /* TODO: Set focus in main.c */
-    con_activate(ws);
+    con_focus(ws);
 }
 
 /*
@@ -946,7 +946,9 @@ void randr_query_outputs(void) {
             continue;
 
         DLOG("Focusing primary output %s\n", output_primary_name(output));
-        con_activate(con_descend_focused(output->con));
+        Con *content = output_get_content(output->con);
+        Con *ws = TAILQ_FIRST(&(content)->focus_head);
+        workspace_show(ws);
     }
 
     /* render_layout flushes */
@@ -991,7 +993,7 @@ void randr_disable_output(Output *output) {
             if (current != next && TAILQ_EMPTY(&(current->focus_head))) {
                 /* the workspace is empty and not focused, get rid of it */
                 DLOG("Getting rid of current = %p / %s (empty, unfocused)\n", current, current->name);
-                tree_close_internal(current, DONT_KILL_WINDOW, false, false);
+                tree_close_internal(current, DONT_KILL_WINDOW, false);
                 continue;
             }
             DLOG("Detaching current = %p / %s\n", current, current->name);
@@ -1037,7 +1039,7 @@ void randr_disable_output(Output *output) {
         Con *con = output->con;
         /* clear the pointer before calling tree_close_internal in which the memory is freed */
         output->con = NULL;
-        tree_close_internal(con, DONT_KILL_WINDOW, true, false);
+        tree_close_internal(con, DONT_KILL_WINDOW, true);
         DLOG("Done. Should be fine now\n");
     }
 
