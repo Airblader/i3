@@ -2288,6 +2288,12 @@ gaps_t calculate_effective_gaps(Con *con) {
     if (workspace == NULL || (config.smart_gaps && con_num_visible_children(workspace) <= 1))
         return (gaps_t){0, 0};
 
+    // if all visible children are in one tabbed container, disable gaps
+    if (config.smart_gaps && con_num_children(workspace) == 1 &&
+        (TAILQ_FIRST(&(workspace->nodes_head))->layout == L_TABBED ||
+         TAILQ_FIRST(&(workspace->nodes_head))->layout == L_STACKED))
+        return (gaps_t){0, 0};
+
     gaps_t gaps = {
         .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
         .outer = workspace->gaps.outer + config.gaps.outer};
