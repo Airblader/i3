@@ -312,7 +312,7 @@ bool con_has_managed_window(Con *con) {
     return (con != NULL && con->window != NULL && con->window->id != XCB_WINDOW_NONE && con_get_workspace(con) != NULL);
 }
 
-/**
+/*
  * Returns true if this node has regular or floating children.
  *
  */
@@ -526,7 +526,7 @@ Con *con_get_fullscreen_covering_ws(Con *ws) {
     return fs;
 }
 
-/**
+/*
  * Returns true if the container is internal, such as __i3_scratch
  *
  */
@@ -896,7 +896,7 @@ int con_num_children(Con *con) {
     return children;
 }
 
-/**
+/*
  * Returns the number of visible non-floating children of this container.
  * For example, if the container contains a hsplit which has two children,
  * this will return 2 instead of 1.
@@ -933,6 +933,10 @@ int con_num_windows(Con *con) {
     int num = 0;
     Con *current = NULL;
     TAILQ_FOREACH(current, &(con->nodes_head), nodes) {
+        num += con_num_windows(current);
+    }
+
+    TAILQ_FOREACH(current, &(con->floating_head), floating_windows) {
         num += con_num_windows(current);
     }
 
@@ -2290,6 +2294,12 @@ gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
     if (workspace == NULL || (config.smart_gaps && con_num_visible_children(workspace) <= 1))
         return (gaps_t){0, 0, 0, 0, 0};
+
+    // if all visible children are in one tabbed container, disable gaps
+    if (config.smart_gaps && con_num_children(workspace) == 1 &&
+        (TAILQ_FIRST(&(workspace->nodes_head))->layout == L_TABBED ||
+         TAILQ_FIRST(&(workspace->nodes_head))->layout == L_STACKED))
+        return (gaps_t){0, 0};
 
     gaps_t gaps = {
         .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
