@@ -164,7 +164,7 @@ CFGFUN(for_window, const char *command) {
     TAILQ_INSERT_TAIL(&assignments, assignment, assignments);
 }
 
-void create_gaps_assignment(const char *workspace, bool inner, const long value) {
+static void create_gaps_assignment(const char *workspace, bool inner, const long value) {
     DLOG("Setting gaps for workspace %s", workspace);
 
     struct Workspace_Assignment *assignment;
