@@ -525,7 +525,8 @@ static void handle_button(xcb_button_press_event_t *event) {
                 const int relative_x = statusline_x - last_block_x;
                 if (relative_x >= 0 && (uint32_t)relative_x <= render->width) {
                     send_block_clicked(event->detail, block->name, block->instance,
-                                       event->root_x, event->root_y, relative_x, event->event_y, render->width, bar_height);
+                                       event->root_x, event->root_y, relative_x, event->event_y, render->width, bar_height,
+                                       event->state);
                     return;
                 }
 
@@ -1068,13 +1069,16 @@ static void xcb_prep_cb(struct ev_loop *loop, ev_prepare *watcher, int revents) 
 
             xcb_xkb_state_notify_event_t *state = (xcb_xkb_state_notify_event_t *)event;
             const uint32_t mod = (config.modifier & 0xFFFF);
-            mod_pressed = (mod != 0 && (state->mods & mod) == mod);
-            if (state->xkbType == XCB_XKB_STATE_NOTIFY && config.modifier != XCB_NONE) {
-                if (mod_pressed) {
-                    activated_mode = false;
-                    unhide_bars();
-                } else if (!activated_mode) {
-                    hide_bars();
+            const bool new_mod_pressed = (mod != 0 && (state->mods & mod) == mod);
+            if (new_mod_pressed != mod_pressed) {
+                mod_pressed = new_mod_pressed;
+                if (state->xkbType == XCB_XKB_STATE_NOTIFY && config.modifier != XCB_NONE) {
+                    if (mod_pressed) {
+                        activated_mode = false;
+                        unhide_bars();
+                    } else if (!activated_mode) {
+                        hide_bars();
+                    }
                 }
             }
 
