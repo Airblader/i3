@@ -128,7 +128,7 @@ Con *workspace_get(const char *num, bool *created) {
 
     if (workspace == NULL) {
         LOG("Creating new workspace \"%s\"\n", num);
-        gaps_t gaps = (gaps_t){0, 0};
+        gaps_t gaps = (gaps_t){0, 0, 0, 0, 0};
 
         /* We set workspace->num to the number if this workspace’s name begins
          * with a positive number. Otherwise it’s a named ws and num will be
