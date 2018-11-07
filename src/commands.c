@@ -537,8 +537,8 @@ static bool cmd_resize_tiling_width_height(I3_CMD, Con *current, const char *dir
     if (ppt != 0.0) {
         new_current_percent = current->percent + ppt;
     } else {
-        new_current_percent = px_resize_to_percent(current, px);
-        ppt = new_current_percent - current->percent;
+        ppt = px_resize_to_percent(current, px);
+        new_current_percent = current->percent + ppt;
     }
     subtract_percent = ppt / (children - 1);
     if (ppt < 0.0 && new_current_percent < percent_for_1px(current)) {

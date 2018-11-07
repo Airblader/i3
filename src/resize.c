@@ -102,16 +102,15 @@ bool resize_find_tiling_participants(Con **current, Con **other, direction_t dir
 }
 
 /*
- * Calculate the given container's new percent given a change in pixels.
+ * Calculate and return the given container's percentage change given a change in pixels.
  *
  */
 double px_resize_to_percent(Con *con, int px_diff) {
     Con *parent = con->parent;
     const orientation_t o = con_orientation(parent);
     const int total = (o == HORIZ ? parent->rect.width : parent->rect.height);
-    /* deco_rect.height is subtracted from each child in render_con_split */
-    const int target = px_diff + (o == HORIZ ? con->rect.width : con->rect.height + con->deco_rect.height);
-    return ((double)target / (double)total);
+
+    return (double)px_diff / (double)total;
 }
 
 /*
@@ -145,8 +144,9 @@ bool resize_neighboring_cons(Con *first, Con *second, int px, int ppt) {
         new_first_percent = first->percent + ((double)ppt / 100.0);
         new_second_percent = second->percent - ((double)ppt / 100.0);
     } else {
-        new_first_percent = px_resize_to_percent(first, px);
-        new_second_percent = second->percent + first->percent - new_first_percent;
+        const double percent_change = px_resize_to_percent(first, px);
+        new_first_percent = first->percent + percent_change;
+        new_second_percent = second->percent - percent_change;
     }
     /* Ensure that no container will be less than 1 pixel in the resizing
      * direction. */
@@ -233,6 +233,11 @@ void resize_graphical_handler(Con *first, Con *second, orientation_t orientation
 
     int pixels = (new_position - initial_position);
     DLOG("Done, pixels = %d\n", pixels);
+
+    /* No change; no action needed. */
+    if (pixels == 0) {
+        return;
+    }
 
     /* if we got thus far, the containers must have valid percentages. */
     assert(first->percent > 0.0);

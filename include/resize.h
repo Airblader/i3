@@ -33,7 +33,7 @@ bool resize_neighboring_cons(Con *first, Con *second, int px, int ppt);
 double percent_for_1px(Con *con);
 
 /**
- * Calculate the given container's new percent given a change in pixels.
+ * Calculate and return the given container's percentage change given a change in pixels.
  *
  */
 double px_resize_to_percent(Con *con, int px_diff);
