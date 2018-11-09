@@ -2275,12 +2275,6 @@ gaps_t calculate_effective_gaps(Con *con) {
         gaps.left = workspace->gaps.left + config.gaps.left;
     }
 
-    /* Outer gaps are added on top of inner gaps. */
-    gaps.top += 2 * gaps.inner;
-    gaps.right += 2 * gaps.inner;
-    gaps.bottom += 2 * gaps.inner;
-    gaps.left += 2 * gaps.inner;
-
     return gaps;
 }
 

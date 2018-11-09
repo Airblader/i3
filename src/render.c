@@ -49,16 +49,27 @@ void render_con(Con *con, bool already_inset) {
     DLOG("Rendering node %p / %s / layout %d / children %d\n", con, con->name,
          con->layout, params.children);
 
+    if (con->type == CT_WORKSPACE) {
+        gaps_t gaps = calculate_effective_gaps(con);
+        Rect inset = {
+            gaps.left,
+            gaps.top,
+            -(gaps.left + gaps.right),
+            -(gaps.top + gaps.bottom)};
+        con->rect = rect_add(con->rect, inset);
+        params.rect = rect_add(params.rect, inset);
+        params.x += gaps.left;
+        params.y += gaps.top;
+    }
+
     bool should_inset = should_inset_con(con, params.children);
     if (!already_inset && should_inset) {
         gaps_t gaps = calculate_effective_gaps(con);
         Rect inset = (Rect){
-            has_adjacent_container(con, D_LEFT) ? gaps.inner : gaps.left,
-            has_adjacent_container(con, D_UP) ? gaps.inner : gaps.top,
-            has_adjacent_container(con, D_RIGHT) ? -gaps.inner : -gaps.right,
-            has_adjacent_container(con, D_DOWN) ? -gaps.inner : -gaps.bottom};
-        inset.width -= inset.x;
-        inset.height -= inset.y;
+            gaps.inner,
+            gaps.inner,
+            -2 * gaps.inner,
+            -2 * gaps.inner};
 
         if (con->fullscreen_mode == CF_NONE) {
             params.rect = rect_add(params.rect, inset);
