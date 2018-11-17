@@ -39,16 +39,15 @@ int render_deco_height(void) {
  * updated in X11.
  *
  */
-void render_con(Con *con, bool render_fullscreen, bool already_inset) {
+void render_con(Con *con, bool already_inset) {
     render_params params = {
         .rect = con->rect,
         .x = con->rect.x,
         .y = con->rect.y,
         .children = con_num_children(con)};
 
-    DLOG("Rendering %snode %p / %s / layout %d / children %d\n",
-         (render_fullscreen ? "fullscreen " : ""), con, con->name, con->layout,
-         params.children);
+    DLOG("Rendering node %p / %s / layout %d / children %d\n", con, con->name,
+         con->layout, params.children);
 
     bool should_inset = should_inset_con(con, params.children);
     if (!already_inset && should_inset) {
@@ -61,7 +60,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
         inset.width -= inset.x;
         inset.height -= inset.y;
 
-        if (!render_fullscreen) {
+        if (con->fullscreen_mode == CF_NONE) {
             params.rect = rect_add(params.rect, inset);
             con->rect = rect_add(con->rect, inset);
             if (con->window) {
@@ -86,41 +85,13 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
          * needs to be smaller */
         Rect *inset = &(con->window_rect);
         *inset = (Rect){0, 0, con->rect.width, con->rect.height};
-        if (!render_fullscreen)
+        if (con->fullscreen_mode == CF_NONE) {
             *inset = rect_add(*inset, con_border_style_rect(con));
+        }
 
         /* Obey x11 border */
         inset->width -= (2 * con->border_width);
         inset->height -= (2 * con->border_width);
-
-        /* Obey the aspect ratio, if any, unless we are in fullscreen mode.
-         *
-         * The spec isn’t explicit on whether the aspect ratio hints should be
-         * respected during fullscreen mode. Other WMs such as Openbox don’t do
-         * that, and this post suggests that this is the correct way to do it:
-         * https://mail.gnome.org/archives/wm-spec-list/2003-May/msg00007.html
-         *
-         * Ignoring aspect ratio during fullscreen was necessary to fix MPlayer
-         * subtitle rendering, see https://bugs.i3wm.org/594 */
-        if (!render_fullscreen && con->window->aspect_ratio > 0.0) {
-            DLOG("aspect_ratio = %f, current width/height are %d/%d\n",
-                 con->window->aspect_ratio, inset->width, inset->height);
-            double new_height = inset->height + 1;
-            int new_width = inset->width;
-
-            while (new_height > inset->height) {
-                new_height = (1.0 / con->window->aspect_ratio) * new_width;
-
-                if (new_height > inset->height)
-                    new_width--;
-            }
-            /* Center the window */
-            inset->y += ceil(inset->height / 2) - floor((new_height + .5) / 2);
-            inset->x += ceil(inset->width / 2) - floor(new_width / 2);
-
-            inset->height = new_height + .5;
-            inset->width = new_width;
-        }
 
         /* NB: We used to respect resize increment size hints for tiling
          * windows up until commit 0db93d9 here. However, since all terminal
@@ -139,7 +110,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
     if (fullscreen) {
         fullscreen->rect = params.rect;
         x_raise_con(fullscreen);
-        render_con(fullscreen, true, false);
+        render_con(fullscreen, false);
         /* Fullscreen containers are either global (underneath the CT_ROOT
          * container) or per-output (underneath the CT_CONTENT container). For
          * global fullscreen containers, we cannot abort rendering here yet,
@@ -182,7 +153,7 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
             DLOG("child at (%d, %d) with (%d x %d)\n",
                  child->rect.x, child->rect.y, child->rect.width, child->rect.height);
             x_raise_con(child);
-            render_con(child, false, should_inset || already_inset);
+            render_con(child, should_inset || already_inset);
             i++;
         }
 
@@ -192,10 +163,10 @@ void render_con(Con *con, bool render_fullscreen, bool already_inset) {
             x_raise_con(child);
             if ((child = TAILQ_FIRST(&(con->focus_head)))) {
                 /* By rendering the stacked container again, we handle the case
-                 * that we have a non-leaf-container inside the stack. In that
-                 * case, the children of the non-leaf-container need to be raised
-                 * as well. */
-                render_con(child, false, true);
+             * that we have a non-leaf-container inside the stack. In that
+             * case, the children of the non-leaf-container need to be raised
+             * as well. */
+                render_con(child, true);
             }
 
             if (params.children != 1)
@@ -244,7 +215,7 @@ static void render_root(Con *con, Con *fullscreen) {
     Con *output;
     if (!fullscreen) {
         TAILQ_FOREACH(output, &(con->nodes_head), nodes) {
-            render_con(output, false, false);
+            render_con(output, false);
         }
     }
 
@@ -310,7 +281,7 @@ static void render_root(Con *con, Con *fullscreen) {
             DLOG("floating child at (%d,%d) with %d x %d\n",
                  child->rect.x, child->rect.y, child->rect.width, child->rect.height);
             x_raise_con(child);
-            render_con(child, false, true);
+            render_con(child, true);
         }
     }
 }
@@ -360,7 +331,7 @@ static void render_output(Con *con) {
     if (fullscreen) {
         fullscreen->rect = con->rect;
         x_raise_con(fullscreen);
-        render_con(fullscreen, true, false);
+        render_con(fullscreen, false);
         return;
     }
 
@@ -400,7 +371,7 @@ static void render_output(Con *con) {
         DLOG("child at (%d, %d) with (%d x %d)\n",
              child->rect.x, child->rect.y, child->rect.width, child->rect.height);
         x_raise_con(child);
-        render_con(child, false, child->type == CT_DOCKAREA);
+        render_con(child, child->type == CT_DOCKAREA);
     }
 }
 
