@@ -2199,7 +2199,7 @@ void cmd_debuglog(I3_CMD, const char *argument) {
 }
 
 /**
- * Implementation of 'gaps inner|outer|top|right|bottom|left|horizontal|vertical current|all set|plus|minus <px>'
+ * Implementation of 'gaps inner|outer|top|right|bottom|left|horizontal|vertical current|all set|plus|minus|toggle <px>'
  *
  */
 void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, const char *value) {
@@ -2219,6 +2219,9 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
             current_value -= pixels;                                   \
         else if (!strcmp(mode, "set")) {                               \
             current_value = pixels;                                    \
+            reset = true;                                              \
+        } else if (!strcmp(mode, "toggle")) {                          \
+            current_value = !current_value * pixels;                   \
             reset = true;                                              \
         } else {                                                       \
             ELOG("Invalid mode %s when changing gaps", mode);          \

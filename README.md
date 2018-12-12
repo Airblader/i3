@@ -47,12 +47,13 @@ gaps left <px>
 Additionally, you can issue commands with the following syntax. This is useful, for example, to bind keys to changing the gap size:
 
 ```
-gaps inner|outer|horizontal|vertical|top|right|bottom|left current|all set|plus|minus <px>
+gaps inner|outer|horizontal|vertical|top|right|bottom|left current|all set|plus|minus|toggle <px>
 
 # Examples
 gaps inner all set 20
 gaps outer current plus 5
 gaps horizontal current plus 40
+gaps outer current toggle 60
 ```
 
 Here are the individual parts explained:
