@@ -94,7 +94,7 @@ state BORDER:
   '1pixel'
     -> call cmd_border("pixel", 1)
 
-# gaps inner|outer|horizontal|vertical|top|right|bottom|left [current] [set|plus|minus] <px>
+# gaps inner|outer|horizontal|vertical|top|right|bottom|left [current] [set|plus|minus|toggle] <px>
 state GAPS:
   type = 'inner', 'outer', 'horizontal', 'vertical', 'top', 'right', 'bottom', 'left'
       -> GAPS_WITH_TYPE
@@ -104,7 +104,7 @@ state GAPS_WITH_TYPE:
       -> GAPS_WITH_SCOPE
 
 state GAPS_WITH_SCOPE:
-  mode = 'plus', 'minus', 'set'
+  mode = 'plus', 'minus', 'set', 'toggle'
       -> GAPS_WITH_MODE
 
 state GAPS_WITH_MODE:
