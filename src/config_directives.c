@@ -306,13 +306,16 @@ CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
 
 CFGFUN(smart_borders, const char *enable) {
     if (!strcmp(enable, "no_gaps"))
-        config.smart_borders = NO_GAPS;
+        config.smart_borders = SMART_BORDERS_NO_GAPS;
     else
-        config.smart_borders = eval_boolstr(enable) ? ON : OFF;
+        config.smart_borders = eval_boolstr(enable) ? SMART_BORDERS_ON : SMART_BORDERS_OFF;
 }
 
 CFGFUN(smart_gaps, const char *enable) {
-    config.smart_gaps = eval_boolstr(enable);
+    if (!strcmp(enable, "inverse_outer"))
+        config.smart_gaps = SMART_GAPS_INVERSE_OUTER;
+    else
+        config.smart_gaps = eval_boolstr(enable) ? SMART_GAPS_ON : SMART_GAPS_OFF;
 }
 
 CFGFUN(floating_minimum_size, const long width, const long height) {

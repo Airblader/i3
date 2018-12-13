@@ -87,6 +87,8 @@ state SMART_BORDERS:
 state SMART_GAPS:
   enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
       -> call cfg_smart_gaps($enabled)
+  enabled = 'inverse_outer'
+      -> call cfg_smart_gaps($enabled)
 
 # floating_minimum_size <width> x <height>
 state FLOATING_MINIMUM_SIZE_WIDTH:

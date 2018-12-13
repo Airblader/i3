@@ -220,6 +220,15 @@ smart_gaps on
 
 This will disable all gaps (outer, inner, horizontal, vertical, top, right, bottom, left) on the workspace whenever only one container is on the current workspace.
 
+There is another mode which does the opposite:
+
+```
+smart_gaps inverse_outer
+```
+
+This one will only show outer gaps if there is only one visible container.  
+This is useful if you have a large monitor and want to keep single windows centered on screen.  
+Inner gaps are always shown. You can compensate for that by picking sensible values for your outer gaps, negative sizes are accepted.
 
 ### Smart Borders
 
