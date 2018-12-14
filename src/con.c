@@ -1606,8 +1606,8 @@ static bool has_outer_gaps(gaps_t gaps) {
  *
  */
 Rect con_border_style_rect(Con *con) {
-    if ((config.smart_borders == ON && con_num_visible_children(con_get_workspace(con)) <= 1) ||
-        (config.smart_borders == NO_GAPS && !has_outer_gaps(calculate_effective_gaps(con))) ||
+    if ((config.smart_borders == SMART_BORDERS_ON && con_num_visible_children(con_get_workspace(con)) <= 1) ||
+        (config.smart_borders == SMART_BORDERS_NO_GAPS && !has_outer_gaps(calculate_effective_gaps(con))) ||
         (config.hide_edge_borders == HEBM_SMART && con_num_visible_children(con_get_workspace(con)) <= 1) ||
         (config.hide_edge_borders == HEBM_SMART_NO_GAPS && con_num_visible_children(con_get_workspace(con)) <= 1 && !has_outer_gaps(calculate_effective_gaps(con)))) {
         if (!con_is_floating(con))
@@ -2253,21 +2253,30 @@ char *con_get_tree_representation(Con *con) {
  */
 gaps_t calculate_effective_gaps(Con *con) {
     Con *workspace = con_get_workspace(con);
-    if (workspace == NULL || (config.smart_gaps && con_num_visible_children(workspace) <= 1))
+    if (workspace == NULL)
         return (gaps_t){0, 0, 0, 0, 0};
 
-    // if all visible children are in one tabbed container, disable gaps
-    if (config.smart_gaps && con_num_children(workspace) == 1 &&
-        (TAILQ_FIRST(&(workspace->nodes_head))->layout == L_TABBED ||
-         TAILQ_FIRST(&(workspace->nodes_head))->layout == L_STACKED))
+    bool one_child = con_num_visible_children(workspace) <= 1 ||
+                     (con_num_children(workspace) == 1 &&
+                      (TAILQ_FIRST(&(workspace->nodes_head))->layout == L_TABBED ||
+                       TAILQ_FIRST(&(workspace->nodes_head))->layout == L_STACKED));
+
+    if (config.smart_gaps == SMART_GAPS_ON && one_child)
         return (gaps_t){0, 0, 0, 0, 0};
 
     gaps_t gaps = {
         .inner = (workspace->gaps.inner + config.gaps.inner) / 2,
-        .top = workspace->gaps.top + config.gaps.top,
-        .right = workspace->gaps.right + config.gaps.right,
-        .bottom = workspace->gaps.bottom + config.gaps.bottom,
-        .left = workspace->gaps.left + config.gaps.left};
+        .top = 0,
+        .right = 0,
+        .bottom = 0,
+        .left = 0};
+
+    if (config.smart_gaps != SMART_GAPS_INVERSE_OUTER || one_child) {
+        gaps.top = workspace->gaps.top + config.gaps.top;
+        gaps.right = workspace->gaps.right + config.gaps.right;
+        gaps.bottom = workspace->gaps.bottom + config.gaps.bottom;
+        gaps.left = workspace->gaps.left + config.gaps.left;
+    }
 
     /* Outer gaps are added on top of inner gaps. */
     gaps.top += 2 * gaps.inner;

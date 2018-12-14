@@ -262,7 +262,7 @@ struct Config {
     smart_borders_t smart_borders;
 
     /* Disable gaps if there is only one container on the workspace */
-    bool smart_gaps;
+    smart_gaps_t smart_gaps;
 };
 
 /**
