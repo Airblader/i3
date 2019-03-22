@@ -305,13 +305,15 @@ state WORKSPACE:
 
 state WORKSPACE_COMMAND:
   'output'
-      -> WORKSPACE_OUTPUT_STR
+      -> WORKSPACE_OUTPUT_WORD
   'gaps'
       -> GAPS
 
-state WORKSPACE_OUTPUT_STR:
-  output = string
-      -> call cfg_workspace($workspace, $output)
+state WORKSPACE_OUTPUT_WORD:
+  output = word
+      -> call cfg_workspace($workspace, $output); WORKSPACE_OUTPUT_WORD
+  end
+      -> INITIAL
 
 # ipc-socket <path>
 state IPC_SOCKET:
