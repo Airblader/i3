@@ -65,7 +65,7 @@ gaps outer current toggle 60
 
 With `current` or `all` you can change gaps either for only the currently focused or all currently existing workspaces (note that this does not affect the global configuration itself).
 
-TODO: Example
+You can find an example configuration in the [wiki](https://github.com/Airblader/i3/wiki/Example-Configuration).
 
 ### Smart Gaps
 
