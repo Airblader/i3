@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+# © 2019 Cami Carballo <camigcarballo@gmail.com>
 
 # usage: ./script.py <percentage> <i3 config>
 import sys, os
