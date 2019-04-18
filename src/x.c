@@ -476,64 +476,40 @@ void x_shape_window(Con *con) {
   
   uint16_t w  = con->rect.width;
   uint16_t h  = con->rect.height;
-  uint16_t ow = w+2;
-  uint16_t oh = h+2;
   
-  xcb_pixmap_t bpid = xcb_generate_id(conn);
-  xcb_pixmap_t cpid = xcb_generate_id(conn);
+  xcb_pixmap_t pid = xcb_generate_id(conn);
   
-  xcb_create_pixmap(conn, 1, bpid, con->frame.id, ow, oh);
-  xcb_create_pixmap(conn, 1, cpid, con->frame.id, w, h);
+  xcb_create_pixmap(conn, 1, pid, con->frame.id, w, h);
   
   xcb_gcontext_t black = xcb_generate_id(conn);
   xcb_gcontext_t white = xcb_generate_id(conn);
   
-  xcb_create_gc(conn, black, bpid, XCB_GC_FOREGROUND, (uint32_t[]){0, 0});
-  xcb_create_gc(conn, white, bpid, XCB_GC_FOREGROUND, (uint32_t[]){1, 0});
+  xcb_create_gc(conn, black, pid, XCB_GC_FOREGROUND, (uint32_t[]){0, 0});
+  xcb_create_gc(conn, white, pid, XCB_GC_FOREGROUND, (uint32_t[]){1, 0});
   
-  int32_t rad, dia;
-  rad = 10;
-  dia = rad*2-1;
+  int32_t r = 10;
+  int32_t d = r * 2;
   
-  xcb_arc_t barcs[] = {
-                       { -1,     -1,     dia, dia, 0, 360 << 6 },
-                       { -1,     oh-dia, dia, dia, 0, 360 << 6 },
-                       { ow-dia, -1,     dia, dia, 0, 360 << 6 },
-                       { ow-dia, oh-dia, dia, dia, 0, 360 << 6 },
+  xcb_arc_t arcs[] = {
+                      { -1, -1, d, d, 0, 360 << 6 },
+                      { -1, h-d, d, d, 0, 360 << 6 },
+                      { w-d, -1, d, d, 0, 360 << 6 },
+                      { w-d, h-d, d, d, 0, 360 << 6 },
   };
-  xcb_rectangle_t brects[] = {
-                              { rad, 0, ow-dia, oh },
-                              { 0, rad, ow, oh-dia },
+  xcb_rectangle_t rects[] = {
+                             { r, 0, w-d, h },
+                             { 0, r, w, h-d },
   };
+
+  xcb_rectangle_t bounding = {0, 0, w, h};
+  xcb_poly_fill_rectangle(conn, pid, black, 1, &bounding);
+  xcb_poly_fill_rectangle(conn, pid, white, 2, rects);
+  xcb_poly_fill_arc(conn, pid, white, 4, arcs);
   
-  dia = rad*2-1;
+  xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, con->frame.id, 0, 0, pid);
+  xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_CLIP, con->frame.id, 0, 0, pid);
   
-  xcb_arc_t carcs[] = {
-                       { -1,    -1,    dia, dia, 0, 360 << 6 },
-                       { -1,    h-dia, dia, dia, 0, 360 << 6 },
-                       { w-dia, -1,    dia, dia, 0, 360 << 6 },
-                       { w-dia, h-dia, dia, dia, 0, 360 << 6 },
-  };
-  xcb_rectangle_t crects[] = {
-                              { rad, 0, w-dia, h },
-                              { 0, rad, w, h-dia },
-  };
-  
-  xcb_rectangle_t bounding = {0, 0, w+2, h+2};
-  xcb_poly_fill_rectangle(conn, bpid, black, 1, &bounding);
-  xcb_poly_fill_rectangle(conn, bpid, white, 2, brects);
-  xcb_poly_fill_arc(conn, bpid, white, 4, barcs);
-  
-  xcb_rectangle_t clipping = {0, 0, w, h};
-  xcb_poly_fill_rectangle(conn, cpid, black, 1, &clipping);
-  xcb_poly_fill_rectangle(conn, cpid, white, 2, crects);
-  xcb_poly_fill_arc(conn, cpid, white, 4, carcs);
-  
-  xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, con->frame.id, -bw, -bw, bpid);
-  xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_CLIP, con->frame.id, 0, 0, cpid);
-  
-  xcb_free_pixmap(conn, bpid);
-  xcb_free_pixmap(conn, cpid);
+  xcb_free_pixmap(conn, pid);
 }
 
 /*
