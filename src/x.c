@@ -494,7 +494,9 @@ void x_shape_window(Con *con) {
 
     xcb_rectangle_t bounding = {0, 0, w, h};
 
-    if (con->border_style == BS_NORMAL) {
+    if (con->border_style == BS_NORMAL ||
+        con->parent->layout == L_TABBED ||
+        con->parent->layout == L_STACKED) {
 
       xcb_arc_t arcs[] = {
                           { -1, h-d, d, d, 0, 360 << 6 },
