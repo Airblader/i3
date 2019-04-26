@@ -460,11 +460,7 @@ static size_t x_get_border_rectangles(Con *con, xcb_rectangle_t rectangles[4]) {
 }
 
 /*
- * Rounded Corners:
- *
- * https://www.cairographics.org/samples/rounded_rectangle/
- * https://github.com/jordansissel/experiments/blob/master/randomcode/cairo-xshape-example.c
- * https://github.com/Javyre/bspwm/commit/94ba788802ea1d5d0e4419f7b9a357574b1e1451
+ * Round window corners when possible
  *
  */
 void x_shape_window(Con *con) {
@@ -478,7 +474,7 @@ void x_shape_window(Con *con) {
     xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, con->frame.id, 0, 0, XCB_NONE);
     xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_CLIP, con->frame.id, 0, 0, XCB_NONE);
 
-  }else {
+  } else {
 
     uint16_t w  = con->rect.width;
     uint16_t h  = con->rect.height;
@@ -495,22 +491,44 @@ void x_shape_window(Con *con) {
     
     int32_t r = 13;
     int32_t d = r * 2;
-    
-    xcb_arc_t arcs[] = {
-                        { -1, -1, d, d, 0, 360 << 6 },
-                        { -1, h-d, d, d, 0, 360 << 6 },
-                        { w-d, -1, d, d, 0, 360 << 6 },
-                        { w-d, h-d, d, d, 0, 360 << 6 },
-    };
-    xcb_rectangle_t rects[] = {
-                               { r, 0, w-d, h },
-                               { 0, r, w, h-d },
-    };
-    
+
     xcb_rectangle_t bounding = {0, 0, w, h};
-    xcb_poly_fill_rectangle(conn, pid, black, 1, &bounding);
-    xcb_poly_fill_rectangle(conn, pid, white, 2, rects);
-    xcb_poly_fill_arc(conn, pid, white, 4, arcs);
+
+    if (con->border_style == BS_NORMAL) {
+
+      xcb_arc_t arcs[] = {
+                          { -1, h-d, d, d, 0, 360 << 6 },
+                          { w-d, h-d, d, d, 0, 360 << 6 }
+      };
+      
+      xcb_rectangle_t rects[] = {
+                                 { r, 0, w-d, h },
+                                 { 0, 0, w, h-r },
+      };
+      
+      xcb_poly_fill_rectangle(conn, pid, black, 1, &bounding);
+      xcb_poly_fill_rectangle(conn, pid, white, 2, rects);
+      xcb_poly_fill_arc(conn, pid, white, 2, arcs);
+
+    } else {
+
+      xcb_arc_t arcs[] = {
+                          { -1, -1, d, d, 0, 360 << 6 },
+                          { -1, h-d, d, d, 0, 360 << 6 },
+                          { w-d, -1, d, d, 0, 360 << 6 },
+                          { w-d, h-d, d, d, 0, 360 << 6 },
+      };
+      
+      xcb_rectangle_t rects[] = {
+                                 { r, 0, w-d, h },
+                                 { 0, r, w, h-d },
+      };
+      
+      xcb_poly_fill_rectangle(conn, pid, black, 1, &bounding);
+      xcb_poly_fill_rectangle(conn, pid, white, 2, rects);
+      xcb_poly_fill_arc(conn, pid, white, 4, arcs);
+
+    }
     
     xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, con->frame.id, 0, 0, pid);
     xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_CLIP, con->frame.id, 0, 0, pid);
