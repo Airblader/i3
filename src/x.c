@@ -479,14 +479,14 @@ void x_shape_title(Con *con){
     xcb_create_gc(conn, black, pid, XCB_GC_FOREGROUND, (uint32_t[]){0, 0});
     xcb_create_gc(conn, white, pid, XCB_GC_FOREGROUND, (uint32_t[]){1, 0});
 
-    int32_t r = 13;
+    int32_t r = 8;
     int32_t d = r * 2;
 
     xcb_rectangle_t bounding = {0, 0, w, h};
 
     xcb_arc_t arcs[] = {
-                        { 0, 0, d, d, 0, 360 << 6 },
-                        { w-d, 0, d, d, 0, 360 << 6 },
+                        { 0, 1, d, d, 0, 360 << 6 },
+                        { w-d-1, 1, d, d, 0, 360 << 6 },
     };
 
     xcb_rectangle_t rects[] = {
@@ -537,7 +537,7 @@ void x_shape_window(Con *con) {
     xcb_create_gc(conn, black, pid, XCB_GC_FOREGROUND, (uint32_t[]){0, 0});
     xcb_create_gc(conn, white, pid, XCB_GC_FOREGROUND, (uint32_t[]){1, 0});
 
-    int32_t r = 13;
+    int32_t r = 8;
     int32_t d = r * 2;
 
     xcb_rectangle_t bounding = {0, 0, w, h};
@@ -545,9 +545,9 @@ void x_shape_window(Con *con) {
 
     xcb_arc_t arcs[] = {
                         { 0, -dh, d, d, 0, 360 << 6 },
-                        { 0, h-d, d, d, 0, 360 << 6 },
-                        { w-d, -dh, d, d, 0, 360 << 6 },
-                        { w-d, h-d, d, d, 0, 360 << 6 },
+                        { 0, h-d-1, d, d, 0, 360 << 6 },
+                        { w-d-1, -dh, d, d, 0, 360 << 6 },
+                        { w-d-1, h-d-1, d, d, 0, 360 << 6 },
     };
 
     xcb_rectangle_t rects[] = {
