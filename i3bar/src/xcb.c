@@ -288,7 +288,7 @@ static void draw_statusline(i3_output *output, uint32_t clip_left, bool use_focu
         color_t bg_color = bar_color;
 
         int full_render_width = render->width + render->x_offset + render->x_append;
-        bool is_border = !!block->border;
+        int has_border = block->border ? 1 : 0;
         if (block->border || block->background || block->urgent) {
             /* Let's determine the colors first. */
             color_t border_color = bar_color;
@@ -310,16 +310,16 @@ static void draw_statusline(i3_output *output, uint32_t clip_left, bool use_focu
 
             /* Draw the background. */
             draw_util_rectangle(&output->statusline_buffer, bg_color,
-                                x + is_border * logical_px(block->border_left),
-                                logical_px(1) + is_border * logical_px(block->border_top),
-                                full_render_width - is_border * logical_px(block->border_right + block->border_left),
-                                bar_height - is_border * logical_px(block->border_bottom + block->border_top) - logical_px(2));
+                                x + has_border * logical_px(block->border_left),
+                                logical_px(1) + has_border * logical_px(block->border_top),
+                                full_render_width - has_border * logical_px(block->border_right + block->border_left),
+                                bar_height - has_border * logical_px(block->border_bottom + block->border_top) - logical_px(2));
         }
 
-        draw_util_text(text, &output->statusline_buffer, fg_color, colors.bar_bg,
-                       x + render->x_offset + is_border * logical_px(block->border_left),
+        draw_util_text(text, &output->statusline_buffer, fg_color, bg_color,
+                       x + render->x_offset + has_border * logical_px(block->border_left),
                        bar_height / 2 - font.height / 2,
-                       render->width - is_border * logical_px(block->border_left + block->border_right));
+                       render->width - has_border * logical_px(block->border_left + block->border_right));
         x += full_render_width;
 
         /* If this is not the last block, draw a separator. */
