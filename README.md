@@ -107,7 +107,3 @@ bar {
     height 25
 }
 ```
-
-### Borders
-
-You can define a border width of each block for each individual side by sending the `border_top`, `border_left`, `border_bottom` and `border_right` keys in the i3bar JSON protocol. Each value, if absent, defaults to `1`, and a value of `0` hides the border for the specified side.
