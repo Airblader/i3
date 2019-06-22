@@ -111,20 +111,3 @@ bar {
 ### Borders
 
 You can define a border width of each block for each individual side by sending the `border_top`, `border_left`, `border_bottom` and `border_right` keys in the i3bar JSON protocol. Each value, if absent, defaults to `1`, and a value of `0` hides the border for the specified side.
-
-### Transparency and RGBA Colors
-
-By starting i3bar with the `-t` flag, RGBA color mode will be activated. This allows the use of colors with an additional alpha channel. Please note that this has two major implications:
-
-* Due to technical constraints the background of tray icons will always be fully transparent.
-* We consider this feature unstable in the sense that issues will only be fixed if they do not require major changes as we prioritize the ability to stay up to date with upstream.
-
-To start i3bar with the `-t` flag, adapt your bar configuration:
-
-```
-bar {
-        i3bar_command i3bar -t
-}
-```
-
-You can now use RGBA colors, e.g. `#FFFFFF99` where the last two digits represent the alpha channel.
