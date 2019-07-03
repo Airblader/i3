@@ -479,7 +479,7 @@ void x_shape_title(Con *con){
     xcb_create_gc(conn, black, pid, XCB_GC_FOREGROUND, (uint32_t[]){0, 0});
     xcb_create_gc(conn, white, pid, XCB_GC_FOREGROUND, (uint32_t[]){1, 0});
 
-    int32_t r = 4;
+    int32_t r = con->border_radius;
     int32_t d = r * 2;
 
     xcb_rectangle_t bounding = {0, 0, w, h};
@@ -537,7 +537,7 @@ void x_shape_window(Con *con) {
     xcb_create_gc(conn, black, pid, XCB_GC_FOREGROUND, (uint32_t[]){0, 0});
     xcb_create_gc(conn, white, pid, XCB_GC_FOREGROUND, (uint32_t[]){1, 0});
 
-    int32_t r = 4;
+    int32_t r = con->border_radius;
     int32_t d = r * 2;
 
     xcb_rectangle_t bounding = {0, 0, w, h};

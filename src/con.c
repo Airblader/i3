@@ -1611,6 +1611,9 @@ Rect con_border_style_rect(Con *con) {
             return (Rect){0, 0, 0, 0};
     }
 
+    // Copy border_radius from config to con 
+    con->border_radius = config.border_radius;
+
     adjacent_t borders_to_hide = ADJ_NONE;
     int border_width = con->current_border_width;
     DLOG("The border width for con is set to: %d\n", con->current_border_width);

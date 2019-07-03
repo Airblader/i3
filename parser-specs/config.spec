@@ -27,6 +27,7 @@ state INITIAL:
   'gaps'                                   -> GAPS
   'smart_borders'                          -> SMART_BORDERS
   'smart_gaps'                             -> SMART_GAPS
+  'border_radius'                          -> BORDER_RADIUS
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
   'floating_modifier'                      -> FLOATING_MODIFIER
@@ -89,6 +90,11 @@ state SMART_GAPS:
       -> call cfg_smart_gaps($enabled)
   enabled = 'inverse_outer'
       -> call cfg_smart_gaps($enabled)
+
+# border_radius <radius>
+state BORDER_RADIUS:
+  radius = number
+      -> call cfg_border_radius(&radius)
 
 # floating_minimum_size <width> x <height>
 state FLOATING_MINIMUM_SIZE_WIDTH:
