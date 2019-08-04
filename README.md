@@ -3,181 +3,107 @@
 [![Forks](https://img.shields.io/github/forks/Airblader/i3.svg)](https://github.com/Airblader/i3/network)
 [![Stars](https://img.shields.io/github/stars/Airblader/i3.svg)](https://github.com/Airblader/i3/stargazers)
 
-# i3 - Unofficial Fork
+# i3-gaps
 
-This is a fork of [i3wm](http://www.i3wm.org), a tiling window manager for Linux. It includes a few additional features which you can read up on below.
+## What is i3-gaps?
 
-If you want to check out how you could use them, you could check out my [dotfiles repository](https://www.github.com/Airblader/dotfiles-manjaro).
-
-This fork, much like i3 itself, maintains two branches: The `gaps` branch is the equivalent of i3's stable `master` branch while `gaps-next` contains `gaps` and i3's `next`.
-
-
-# Installation
-
-Please refer to the [wiki](https://github.com/Airblader/i3/wiki/Compiling-&-Installing) to see how i3-gaps can be installed and for which distributions there are packages available.
-
-# Screenshot
+i3-gaps is a fork of [i3wm](https://www.i3wm.org), a tiling window manager for X11. It is kept up to date with upstream, adding a few additional features such as gaps between windows (see below for a complete list).
 
 ![i3](http://i.imgur.com/y8sZE6o.jpg)
 
+## How do I install i3-gaps?
 
-# New Features
+Please refer to the [wiki](https://github.com/Airblader/i3/wiki).
+
+## Where can I get help?
+
+For bug reports or feature requests regarding i3-gaps specifically, open an issue on [GitHub](https://www.github.com/Airblader/i3). If your issue is with core i3 functionality, please report it [upstream](https://www.github.com/i3/i3).
+
+For support & all other kinds of questions, you can ask your question on the official [subreddit /r/i3wm](https://www.reddit.com/r/i3wm).
+
+# Features
 
 ## i3
 
 ### gaps
 
-Note: Gaps will only work correctly if you disable window titlebars entirely. Unfortunately this is necessary due to the way i3 creates such bars on windows. You can disable them via `for_window [class="^.*"] border pixel 0` in your config. You can also use any non-zero value as long as you only use pixel-style borders.
-
-Based on the patches provided by o4dev and jeanbroid, i3 supports gaps between containers. I extended those patches further to make changing the gaps size easier during runtime and also to expose more functionality for binding it to keys. Additionally, the gaps patch was fixed such that inner gaps (the gaps between adjacent containers) and outer gaps (gaps between the edge of the screen and a container) are the same. But I didn't stop there: these gaps are called "inner" gaps. This fork also allows setting "outer" gaps which inset all containers independently.
-
-In your i3 config, you can set a global gap size as shown below. This is the default value that will be used for all workspaces:
+*Note:* In order to use gaps you need to disable window titlebars. This can be done by adding the following line to your config.
 
 ```
-gaps inner <px>
-gaps outer <px>
+# You can also use any non-zero value if you'd like to have a border
+for_window [class=".*"] border pixel 0
 ```
 
-Additionally, you can issue commands with the following syntax. This is useful, for example, to bind keys to changing the gap size:
+Gaps are the namesake feature of i3-gaps and add spacing between windows/containers. Gaps come in two flavors, inner and outer gaps wherein inner gaps are those between two adjacent containers (or a container and an edge) and outer gaps are an additional spacing along the screen edges. Gaps can be configured in your config either globally or per workspace, and can additionally be changed during runtime using commands (e.g., through `i3-msg`).
+
+*Note:* Outer gaps are added to the inner gaps, i.e., the gaps between a screen edge and a container will be the sum of outer and inner gaps.
+
+#### Configuration
+
+You can define gaps either globally or per workspace using the following syntax. Note that the gaps configurations should be ordered from least specific to most specific as some directives can overwrite others.
 
 ```
-gaps inner|outer current|all set|plus|minus <px>
+gaps [inner|outer|horizontal|vertical|top|left|bottom|right] <px>
+workspace <ws> gaps [inner|outer|horizontal|vertical|top|left|bottom|right] <px>
+```
+
+The `inner` and `outer` keywords are as explained above. With `top`, `left`, `bottom` and `right` you can specify outer gaps on specific sides, and `horizontal` and `vertical` are shortcuts for the respective sides. `<px>` stands for a numeric value in pixels and `<ws>` for either a workspace number or a workspace name.
+
+#### Commands
+
+Gaps can be modified at runtime with the following command syntax:
+
+```
+gaps inner|outer|horizontal|vertical|top|right|bottom|left current|all set|plus|minus|toggle <px>
 
 # Examples
 gaps inner all set 20
 gaps outer current plus 5
+gaps horizontal current plus 40
+gaps outer current toggle 60
 ```
 
-Here are the individual parts explained:
+With `current` or `all` you can change gaps either for only the currently focused or all currently existing workspaces (note that this does not affect the global configuration itself).
 
-* `inner|outer` specifies whether you want to modify inner gaps (gaps between adjacent containers) or outer gaps (gaps between the edge of a screen and a container).
-* `current|all` determines whether you want to modify the setting for the current workspace only or for all workspaces.
-* `set|plus|minus` allows you to either set a new, fixed value or make a relative change (in-/decrement).
-
-Note that outer gaps are an *addition* to inner gaps, so `gaps outer all set 0` will eliminate outer gaps, but if inner gaps are set, there will still be gaps on the edge of the screen.
-
-Additionally, gaps can be specified on a per-workspace level by using the syntax known from assigning a workspace to a certain output:
-
-```
-workspace <ws> gaps inner <px>
-workspace <ws> gaps outer <px>
-```
-
-It is important that these commands are specified after the global default since they are meant to override it.
-Note that multiple such assignments are allowed (and perhaps necessary).  The `ws` variable can either be a number or a name, so both of these are valid:
-
-```
-workspace 1 gaps inner 0
-workspace "www" gaps inner 0
-```
-
-Here is one possible idea on how you can use this feature within your i3 config. Simply press `$mod+Shift+g` to enter the gaps mode. Then choose between `o` and `i` for modifying outer / inner gaps. In this mode, you can press one of `+` / `-` (in-/decrement for current workspace) or `0` (remove gaps for current workspace). If you also press `Shift` with these keys, the change will be global for all workspaces.
-
-```
-set $mode_gaps Gaps: (o) outer, (i) inner
-set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
-set $mode_gaps_inner Inner Gaps: +|-|0 (local), Shift + +|-|0 (global)
-bindsym $mod+Shift+g mode "$mode_gaps"
-
-mode "$mode_gaps" {
-        bindsym o      mode "$mode_gaps_outer"
-        bindsym i      mode "$mode_gaps_inner"
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
-
-mode "$mode_gaps_inner" {
-        bindsym plus  gaps inner current plus 5
-        bindsym minus gaps inner current minus 5
-        bindsym 0     gaps inner current set 0
-
-        bindsym Shift+plus  gaps inner all plus 5
-        bindsym Shift+minus gaps inner all minus 5
-        bindsym Shift+0     gaps inner all set 0
-
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
-mode "$mode_gaps_outer" {
-        bindsym plus  gaps outer current plus 5
-        bindsym minus gaps outer current minus 5
-        bindsym 0     gaps outer current set 0
-
-        bindsym Shift+plus  gaps outer all plus 5
-        bindsym Shift+minus gaps outer all minus 5
-        bindsym Shift+0     gaps outer all set 0
-
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
-```
+You can find an example configuration in the [wiki](https://github.com/Airblader/i3/wiki/Example-Configuration).
 
 ### Smart Gaps
 
-If you want gaps to only be used if there is more than one container on the workspace, you can use
+Gaps can be automatically turned on/off on a workspace in certain scenarios using the following config directives:
 
 ```
+# Only enable gaps on a workspace when there is at least one container
 smart_gaps on
+
+# Only enable outer gaps when there is exactly one container
+smart_gaps inverse_outer
 ```
-
-This will disable all gaps (outer and inner) on the workspace whenever only one container is on the current workspace.
-
 
 ### Smart Borders
 
-Based on the patch from [i3-extras](https://github.com/ashinkarov/i3-extras), smart borders have been added in a configurable way. If activated, this patch will draw borders around a container only if it is not the only container in this workspace. It is disabled by default and can be activated with the command below. `on` will always activate it, while `no_gaps` will only activate it if the gap size to the edge of the screen is `0`.
+Smart borders will draw borders on windows only if there is more than one window in a workspace. This feature can also be enabled only if the gap size between window and screen edge is `0`.
 
 ```
-smart_borders on|no_gaps
-```
-### Hide Edge Borders
+# Activate smart borders (always)
+smart_borders on
 
-An additional option `smart_no_gaps` is available for `hide_edge_borders`. This will hide all borders on a container if it is the only container in the worskpace *and* the gap size to the edge is `0`. Otherwise all borders will be drawn normally.
+# Activate smart borders (only when there are effectively no gaps)
+smart_borders no_gaps
+```
+
+### Smart Edge Borders
+
+This extends i3's `hide_edge_borders` with a new option. When set, edge-specific borders of a container will be hidden if it's the only container on the workspace and the gaps to the screen edge is `0`.
 
 ## i3bar
 
-### Background & Color
-
-i3bar now supports setting a background and border color for the individual blocks. Additionally, the border width for each of the four sides can be specified (where a width of `0` hides that border). Simply pass the following values via JSON to i3bar:
-
-* `background` [color] sets the background color
-* `border` [color] sets the border color
-* `border_top`, `border_bottom`, `border_left`, `border_right` [int] width of the corresponding border (defaults to `1`)
-
-Example:
-
-```
-{ \
-  "full_text": "example", \
-  "color": "\#FFFFFF", \
-  "background": "\#222222", \
-  "border": "\#9FBC00", \
-  "border_bottom": 0 \
-}
-```
-
 ### Bar Height
 
-The height of any bar can be configured to have an arbitrary value. This is especially useful if you plan on using top/bottom borders on status blocks to make the bar taller. If the height is not set, it will be calculated as normal. To set it, use the `height` directive in the `bar` configuration block:
+The height of an i3bar instance can be specified explicitly by defining the `height` key in the bar configuration. If not set, the height will be calculated automatically depending on the font size.
 
 ```
 bar {
-        # height of the bar in pixels
-        height 25
-}
-```
-
-### Transparency / RGBA Colors
-
-As an experimental feature, i3-gaps allows you to use RGBA colors for i3bar which allows for transparency. Please note that this has two implications:
-
-* Due to technical constraints which can only be solved by a lot of effort, the background of tray icons will always be fully transparent, no matter what the background color of your i3bar is.
-* This is experimental and bugs will only be fixed if doing so doesn't involve a lot of effort / big changes. The ability to easily stay up to date with upstream has priority.
-
-In order to use this feature, run i3bar with the additional argument `-t`. This can be done in your i3 config as follows:
-
-```
-bar {
-        i3bar_command i3bar -t
+    # Height in pixels
+    height 25
 }
 ```

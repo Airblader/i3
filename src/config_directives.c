@@ -122,7 +122,7 @@ CFGFUN(mode_binding, const char *bindtype, const char *modifiers, const char *ke
 }
 
 CFGFUN(enter_mode, const char *pango_markup, const char *modename) {
-    if (strcasecmp(modename, DEFAULT_BINDING_MODE) == 0) {
+    if (strcmp(modename, DEFAULT_BINDING_MODE) == 0) {
         ELOG("You cannot use the name %s for your mode\n", DEFAULT_BINDING_MODE);
         return;
     }
@@ -164,16 +164,36 @@ CFGFUN(for_window, const char *command) {
     TAILQ_INSERT_TAIL(&assignments, assignment, assignments);
 }
 
-static void create_gaps_assignment(const char *workspace, bool inner, const long value) {
+static void create_gaps_assignment(const char *workspace, const char *scope, gaps_t gaps) {
     DLOG("Setting gaps for workspace %s", workspace);
 
     struct Workspace_Assignment *assignment;
     TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
         if (strcasecmp(assignment->name, workspace) == 0) {
-            if (inner)
-                assignment->gaps.inner = value;
-            else
-                assignment->gaps.outer = value;
+            if (!strcmp(scope, "inner")) {
+                assignment->gaps.inner = gaps.inner;
+            } else if (!strcmp(scope, "outer")) {
+                assignment->gaps.top = gaps.top;
+                assignment->gaps.right = gaps.right;
+                assignment->gaps.bottom = gaps.bottom;
+                assignment->gaps.left = gaps.left;
+            } else if (!strcmp(scope, "vertical")) {
+                assignment->gaps.top = gaps.top;
+                assignment->gaps.bottom = gaps.bottom;
+            } else if (!strcmp(scope, "horizontal")) {
+                assignment->gaps.right = gaps.right;
+                assignment->gaps.left = gaps.left;
+            } else if (!strcmp(scope, "top")) {
+                assignment->gaps.top = gaps.top;
+            } else if (!strcmp(scope, "right")) {
+                assignment->gaps.right = gaps.right;
+            } else if (!strcmp(scope, "bottom")) {
+                assignment->gaps.bottom = gaps.bottom;
+            } else if (!strcmp(scope, "left")) {
+                assignment->gaps.left = gaps.left;
+            } else {
+                ELOG("Invalid command, cannot process scope %s", scope);
+            }
 
             return;
         }
@@ -183,25 +203,102 @@ static void create_gaps_assignment(const char *workspace, bool inner, const long
     assignment = scalloc(1, sizeof(struct Workspace_Assignment));
     assignment->name = sstrdup(workspace);
     assignment->output = NULL;
-    if (inner)
-        assignment->gaps.inner = value;
-    else
-        assignment->gaps.outer = value;
+    if (!strcmp(scope, "inner")) {
+        assignment->gaps.inner = gaps.inner;
+    } else if (!strcmp(scope, "outer")) {
+        assignment->gaps.top = gaps.top;
+        assignment->gaps.right = gaps.right;
+        assignment->gaps.bottom = gaps.bottom;
+        assignment->gaps.left = gaps.left;
+    } else if (!strcmp(scope, "vertical")) {
+        assignment->gaps.top = gaps.top;
+        assignment->gaps.bottom = gaps.bottom;
+    } else if (!strcmp(scope, "horizontal")) {
+        assignment->gaps.right = gaps.right;
+        assignment->gaps.left = gaps.left;
+    } else if (!strcmp(scope, "top")) {
+        assignment->gaps.top = gaps.top;
+    } else if (!strcmp(scope, "right")) {
+        assignment->gaps.right = gaps.right;
+    } else if (!strcmp(scope, "bottom")) {
+        assignment->gaps.bottom = gaps.bottom;
+    } else if (!strcmp(scope, "left")) {
+        assignment->gaps.left = gaps.left;
+    } else {
+        ELOG("Invalid command, cannot process scope %s", scope);
+    }
     TAILQ_INSERT_TAIL(&ws_assignments, assignment, ws_assignments);
 }
 
 CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
     int pixels = logical_px(value);
+    gaps_t gaps = (gaps_t){0, 0, 0, 0, 0};
     if (!strcmp(scope, "inner")) {
         if (workspace == NULL)
             config.gaps.inner = pixels;
-        else
-            create_gaps_assignment(workspace, true, pixels - config.gaps.inner);
+        else {
+            gaps.inner = pixels - config.gaps.inner;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
     } else if (!strcmp(scope, "outer")) {
+        if (workspace == NULL) {
+            config.gaps.top = pixels;
+            config.gaps.right = pixels;
+            config.gaps.bottom = pixels;
+            config.gaps.left = pixels;
+        } else {
+            gaps.top = pixels - config.gaps.top;
+            gaps.right = pixels - config.gaps.right;
+            gaps.bottom = pixels - config.gaps.bottom;
+            gaps.left = pixels - config.gaps.left;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "vertical")) {
+        if (workspace == NULL) {
+            config.gaps.top = pixels;
+            config.gaps.bottom = pixels;
+        } else {
+            gaps.top = pixels - config.gaps.top;
+            gaps.bottom = pixels - config.gaps.bottom;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "horizontal")) {
+        if (workspace == NULL) {
+            config.gaps.right = pixels;
+            config.gaps.left = pixels;
+        } else {
+            gaps.right = pixels - config.gaps.right;
+            gaps.left = pixels - config.gaps.left;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "top")) {
         if (workspace == NULL)
-            config.gaps.outer = pixels;
-        else
-            create_gaps_assignment(workspace, false, pixels - config.gaps.outer);
+            config.gaps.top = pixels;
+        else {
+            gaps.top = pixels - config.gaps.top;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "right")) {
+        if (workspace == NULL)
+            config.gaps.right = pixels;
+        else {
+            gaps.right = pixels - config.gaps.right;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "bottom")) {
+        if (workspace == NULL)
+            config.gaps.bottom = pixels;
+        else {
+            gaps.bottom = pixels - config.gaps.bottom;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
+    } else if (!strcmp(scope, "left")) {
+        if (workspace == NULL)
+            config.gaps.left = pixels;
+        else {
+            gaps.left = pixels - config.gaps.left;
+            create_gaps_assignment(workspace, scope, gaps);
+        }
     } else {
         ELOG("Invalid command, cannot process scope %s", scope);
     }
@@ -209,13 +306,16 @@ CFGFUN(gaps, const char *workspace, const char *scope, const long value) {
 
 CFGFUN(smart_borders, const char *enable) {
     if (!strcmp(enable, "no_gaps"))
-        config.smart_borders = NO_GAPS;
+        config.smart_borders = SMART_BORDERS_NO_GAPS;
     else
-        config.smart_borders = eval_boolstr(enable) ? ON : OFF;
+        config.smart_borders = eval_boolstr(enable) ? SMART_BORDERS_ON : SMART_BORDERS_OFF;
 }
 
 CFGFUN(smart_gaps, const char *enable) {
-    config.smart_gaps = eval_boolstr(enable);
+    if (!strcmp(enable, "inverse_outer"))
+        config.smart_gaps = SMART_GAPS_INVERSE_OUTER;
+    else
+        config.smart_gaps = eval_boolstr(enable) ? SMART_GAPS_ON : SMART_GAPS_OFF;
 }
 
 CFGFUN(floating_minimum_size, const long width, const long height) {
@@ -390,33 +490,43 @@ CFGFUN(show_marks, const char *value) {
     config.show_marks = eval_boolstr(value);
 }
 
-CFGFUN(workspace, const char *workspace, const char *outputs) {
-    DLOG("Assigning workspace \"%s\" to outputs \"%s\"\n", workspace, outputs);
-    /* Check for earlier assignments of the same workspace so that we
-     * don’t have assignments of a single workspace to different
-     * outputs */
-    struct Workspace_Assignment *assignment;
-    TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
-        if (strcasecmp(assignment->name, workspace) == 0) {
-            // TODO XXX: Should we move the return inside this condition?
-            if (assignment->output != NULL) {
-                ELOG("You have a duplicate workspace assignment for workspace \"%s\"\n", workspace);
-            }
+static char *current_workspace = NULL;
 
+CFGFUN(workspace, const char *workspace, const char *output) {
+    struct Workspace_Assignment *assignment;
+
+    /* When a new workspace line is encountered, for the first output word,
+     * $workspace from the config.spec is non-NULL. Afterwards, the parser calls
+     * clear_stack() because of the call line. Thus, we have to preserve the
+     * workspace string. */
+    if (workspace) {
+        FREE(current_workspace);
+
+        TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
+            if (strcasecmp(assignment->name, workspace) == 0) {
+                if (assignment->output != NULL) {
+                    ELOG("You have a duplicate workspace assignment for workspace \"%s\"\n",
+                         workspace);
+                    return;
+                }
+            }
+        }
+
+        current_workspace = sstrdup(workspace);
+    } else {
+        if (!current_workspace) {
+            DLOG("Both workspace and current_workspace are NULL, assuming we had an error before\n");
             return;
         }
+        workspace = current_workspace;
     }
 
-    char *buf = sstrdup(outputs);
-    char *output = strtok(buf, " ");
-    while (output != NULL) {
-        assignment = scalloc(1, sizeof(struct Workspace_Assignment));
-        assignment->name = sstrdup(workspace);
-        assignment->output = sstrdup(output);
-        TAILQ_INSERT_TAIL(&ws_assignments, assignment, ws_assignments);
-        output = strtok(NULL, " ");
-    }
-    free(buf);
+    DLOG("Assigning workspace \"%s\" to output \"%s\"\n", workspace, output);
+
+    assignment = scalloc(1, sizeof(struct Workspace_Assignment));
+    assignment->name = sstrdup(workspace);
+    assignment->output = sstrdup(output);
+    TAILQ_INSERT_TAIL(&ws_assignments, assignment, ws_assignments);
 }
 
 CFGFUN(ipc_socket, const char *path) {

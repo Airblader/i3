@@ -32,7 +32,15 @@ static bool parsing_marks;
 struct Match *current_swallow;
 static bool swallow_is_empty;
 static int num_marks;
-static char **marks;
+/* We need to save each container that needs to be marked if we want to support
+ * marking non-leaf containers. In their case, the end_map for their children is
+ * called before their own end_map, so marking json_node would end up marking
+ * the latest child. We can't just mark containers immediately after we parse a
+ * mark because of #2511. */
+struct pending_marks {
+    char *mark;
+    Con *con_to_be_marked;
+} * marks;
 
 /* This list is used for reordering the focus stack after parsing the 'focus'
  * array. */
@@ -145,13 +153,15 @@ static int json_end_map(void *ctx) {
                 }
             }
 
-            floating_check_size(json_node);
+            floating_check_size(json_node, false);
         }
 
         if (num_marks > 0) {
             for (int i = 0; i < num_marks; i++) {
-                con_mark(json_node, marks[i], MM_ADD);
-                free(marks[i]);
+                Con *con = marks[i].con_to_be_marked;
+                char *mark = marks[i].mark;
+                con_mark(con, mark, MM_ADD);
+                free(mark);
             }
 
             FREE(marks);
@@ -279,8 +289,9 @@ static int json_string(void *ctx, const unsigned char *val, size_t len) {
         char *mark;
         sasprintf(&mark, "%.*s", (int)len, val);
 
-        marks = srealloc(marks, (++num_marks) * sizeof(char *));
-        marks[num_marks - 1] = sstrdup(mark);
+        marks = srealloc(marks, (++num_marks) * sizeof(struct pending_marks));
+        marks[num_marks - 1].mark = sstrdup(mark);
+        marks[num_marks - 1].con_to_be_marked = json_node;
     } else {
         if (strcasecmp(last_key, "name") == 0) {
             json_node->name = scalloc(len + 1, 1);
@@ -414,6 +425,9 @@ static int json_string(void *ctx, const unsigned char *val, size_t len) {
             else if (strcasecmp(buf, "changed") == 0)
                 json_node->scratchpad_state = SCRATCHPAD_CHANGED;
             free(buf);
+        } else if (strcasecmp(last_key, "previous_workspace_name") == 0) {
+            FREE(previous_workspace_name);
+            previous_workspace_name = sstrndup((const char *)val, len);
         }
     }
     return 1;
@@ -484,8 +498,14 @@ static int json_int(void *ctx, long long val) {
     if (parsing_gaps) {
         if (strcasecmp(last_key, "inner") == 0)
             json_node->gaps.inner = val;
-        else if (strcasecmp(last_key, "outer") == 0)
-            json_node->gaps.outer = val;
+        else if (strcasecmp(last_key, "top") == 0)
+            json_node->gaps.top = val;
+        else if (strcasecmp(last_key, "right") == 0)
+            json_node->gaps.right = val;
+        else if (strcasecmp(last_key, "bottom") == 0)
+            json_node->gaps.bottom = val;
+        else if (strcasecmp(last_key, "left") == 0)
+            json_node->gaps.left = val;
     }
 
     return 1;

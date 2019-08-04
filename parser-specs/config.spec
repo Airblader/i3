@@ -66,9 +66,9 @@ state IGNORE_LINE:
   line
       -> INITIAL
 
-# gaps inner|outer <px>
+# gaps inner|outer|horizontal|vertical|top|right|bottom|left <px>
 state GAPS:
-  scope = 'inner', 'outer'
+  scope = 'inner', 'outer', 'horizontal', 'vertical', 'top', 'right', 'bottom', 'left'
       -> GAPS_WITH_SCOPE
 
 state GAPS_WITH_SCOPE:
@@ -86,6 +86,8 @@ state SMART_BORDERS:
 # smart_gaps on|off
 state SMART_GAPS:
   enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
+      -> call cfg_smart_gaps($enabled)
+  enabled = 'inverse_outer'
       -> call cfg_smart_gaps($enabled)
 
 # floating_minimum_size <width> x <height>
@@ -303,13 +305,15 @@ state WORKSPACE:
 
 state WORKSPACE_COMMAND:
   'output'
-      -> WORKSPACE_OUTPUT_STR
+      -> WORKSPACE_OUTPUT_WORD
   'gaps'
       -> GAPS
 
-state WORKSPACE_OUTPUT_STR:
-  output = string
-      -> call cfg_workspace($workspace, $output)
+state WORKSPACE_OUTPUT_WORD:
+  output = word
+      -> call cfg_workspace($workspace, $output); WORKSPACE_OUTPUT_WORD
+  end
+      -> INITIAL
 
 # ipc-socket <path>
 state IPC_SOCKET:
