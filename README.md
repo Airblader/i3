@@ -95,6 +95,11 @@ smart_borders no_gaps
 
 This extends i3's `hide_edge_borders` with a new option. When set, edge-specific borders of a container will be hidden if it's the only container on the workspace and the gaps to the screen edge is `0`.
 
+```
+# Hide edge borders only if there is one window with no gaps
+hide_edge_borders smart_no_gaps
+```
+
 ## i3bar
 
 ### Bar Height
