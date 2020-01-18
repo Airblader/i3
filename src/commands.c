@@ -1207,8 +1207,24 @@ void cmd_kill(I3_CMD, const char *kill_mode_str) {
 void cmd_exec(I3_CMD, const char *nosn, const char *command) {
     bool no_startup_id = (nosn != NULL);
 
-    DLOG("should execute %s, no_startup_id = %d\n", command, no_startup_id);
-    start_application(command, no_startup_id);
+    HANDLE_EMPTY_MATCH;
+
+    int count = 0;
+    owindow *current;
+    TAILQ_FOREACH(current, &owindows, owindows) {
+        count++;
+    }
+
+    if (count > 1) {
+        LOG("WARNING: Your criteria for the exec command match %d containers, "
+            "so the command will execute this many times.\n",
+            count);
+    }
+
+    TAILQ_FOREACH(current, &owindows, owindows) {
+        DLOG("should execute %s, no_startup_id = %d\n", command, no_startup_id);
+        start_application(command, no_startup_id);
+    }
 
     ysuccess(true);
 }
@@ -1582,7 +1598,7 @@ void cmd_layout_toggle(I3_CMD, const char *toggle_mode) {
  */
 void cmd_exit(I3_CMD) {
     LOG("Exiting due to user command.\n");
-    exit(0);
+    exit(EXIT_SUCCESS);
 
     /* unreached */
 }
