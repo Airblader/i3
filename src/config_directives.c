@@ -168,7 +168,7 @@ static void create_gaps_assignment(const char *workspace, const char *scope, gap
     DLOG("Setting gaps for workspace %s", workspace);
 
     struct Workspace_Assignment *assignment;
-    TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
+    TAILQ_FOREACH (assignment, &ws_assignments, ws_assignments) {
         if (strcasecmp(assignment->name, workspace) == 0) {
             if (!strcmp(scope, "inner")) {
                 assignment->gaps.inner = gaps.inner;

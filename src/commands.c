@@ -2235,48 +2235,48 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
     int pixels = logical_px(atoi(value));
     Con *workspace = con_get_workspace(focused);
 
-#define CMD_GAPS(type)                                                 \
-    do {                                                               \
-        int current_value = config.gaps.type;                          \
-        if (strcmp(scope, "current") == 0)                             \
-            current_value += workspace->gaps.type;                     \
-                                                                       \
-        bool reset = false;                                            \
-        if (!strcmp(mode, "plus"))                                     \
-            current_value += pixels;                                   \
-        else if (!strcmp(mode, "minus"))                               \
-            current_value -= pixels;                                   \
-        else if (!strcmp(mode, "set")) {                               \
-            current_value = pixels;                                    \
-            reset = true;                                              \
-        } else if (!strcmp(mode, "toggle")) {                          \
-            current_value = !current_value * pixels;                   \
-            reset = true;                                              \
-        } else {                                                       \
-            ELOG("Invalid mode %s when changing gaps", mode);          \
-            ysuccess(false);                                           \
-            return;                                                    \
-        }                                                              \
-                                                                       \
-        if (current_value < 0)                                         \
-            current_value = 0;                                         \
-                                                                       \
-        if (!strcmp(scope, "all")) {                                   \
-            Con *output, *cur_ws = NULL;                               \
-            TAILQ_FOREACH(output, &(croot->nodes_head), nodes) {       \
-                Con *content = output_get_content(output);             \
-                TAILQ_FOREACH(cur_ws, &(content->nodes_head), nodes) { \
-                    if (reset)                                         \
-                        cur_ws->gaps.type = 0;                         \
-                    else if (current_value + cur_ws->gaps.type < 0)    \
-                        cur_ws->gaps.type = -current_value;            \
-                }                                                      \
-            }                                                          \
-                                                                       \
-            config.gaps.type = current_value;                          \
-        } else {                                                       \
-            workspace->gaps.type = current_value - config.gaps.type;   \
-        }                                                              \
+#define CMD_GAPS(type)                                                  \
+    do {                                                                \
+        int current_value = config.gaps.type;                           \
+        if (strcmp(scope, "current") == 0)                              \
+            current_value += workspace->gaps.type;                      \
+                                                                        \
+        bool reset = false;                                             \
+        if (!strcmp(mode, "plus"))                                      \
+            current_value += pixels;                                    \
+        else if (!strcmp(mode, "minus"))                                \
+            current_value -= pixels;                                    \
+        else if (!strcmp(mode, "set")) {                                \
+            current_value = pixels;                                     \
+            reset = true;                                               \
+        } else if (!strcmp(mode, "toggle")) {                           \
+            current_value = !current_value * pixels;                    \
+            reset = true;                                               \
+        } else {                                                        \
+            ELOG("Invalid mode %s when changing gaps", mode);           \
+            ysuccess(false);                                            \
+            return;                                                     \
+        }                                                               \
+                                                                        \
+        if (current_value < 0)                                          \
+            current_value = 0;                                          \
+                                                                        \
+        if (!strcmp(scope, "all")) {                                    \
+            Con *output, *cur_ws = NULL;                                \
+            TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {       \
+                Con *content = output_get_content(output);              \
+                TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) { \
+                    if (reset)                                          \
+                        cur_ws->gaps.type = 0;                          \
+                    else if (current_value + cur_ws->gaps.type < 0)     \
+                        cur_ws->gaps.type = -current_value;             \
+                }                                                       \
+            }                                                           \
+                                                                        \
+            config.gaps.type = current_value;                           \
+        } else {                                                        \
+            workspace->gaps.type = current_value - config.gaps.type;    \
+        }                                                               \
     } while (0)
 
     if (!strcmp(type, "inner")) {
