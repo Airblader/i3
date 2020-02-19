@@ -139,7 +139,7 @@ Con *workspace_get(const char *num, bool *created) {
         long parsed_num = ws_name_to_number(num);
 
         struct Workspace_Assignment *assignment;
-        TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
+        TAILQ_FOREACH (assignment, &ws_assignments, ws_assignments) {
             if (strcmp(assignment->name, num) == 0) {
                 gaps = assignment->gaps;
                 break;
@@ -302,7 +302,7 @@ Con *create_workspace_on_output(Output *output, Con *content) {
     }
 
     struct Workspace_Assignment *assignment;
-    TAILQ_FOREACH(assignment, &ws_assignments, ws_assignments) {
+    TAILQ_FOREACH (assignment, &ws_assignments, ws_assignments) {
         if (strcmp(assignment->name, ws->name) == 0) {
             ws->gaps = assignment->gaps;
             break;
