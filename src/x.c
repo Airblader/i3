@@ -517,7 +517,8 @@ void x_shape_window(Con *con) {
         return;
     }
 
-    if (con->fullscreen_mode) {
+    if (con->fullscreen_mode
+        || config.smart_gaps == SMART_GAPS_ON && con_num_visible_children(con->parent) <= 1) {
         xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_BOUNDING, con->frame.id, 0, 0, XCB_NONE);
         xcb_shape_mask(conn, XCB_SHAPE_SO_SET, XCB_SHAPE_SK_CLIP, con->frame.id, 0, 0, XCB_NONE);
         return;
