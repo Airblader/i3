@@ -32,6 +32,8 @@
 
 /* Global variables for child_*() */
 i3bar_child child;
+#define DLOG_CHILD DLOG("%s: pid=%ld stopped=%d stop_signal=%d cont_signal=%d click_events=%d click_events_init=%d\n", \
+                        __func__, (long)child.pid, child.stopped, child.stop_signal, child.cont_signal, child.click_events, child.click_events_init)
 
 /* stdin- and SIGCHLD-watchers */
 ev_io *stdin_io;
@@ -194,6 +196,11 @@ static int stdin_map_key(void *context, const unsigned char *key, size_t len) {
 
 static int stdin_boolean(void *context, int val) {
     parser_ctx *ctx = context;
+
+    if (!ctx->last_map_key) {
+        return 0;
+    }
+
     if (strcasecmp(ctx->last_map_key, "urgent") == 0) {
         ctx->block.urgent = val;
         return 1;
@@ -208,6 +215,11 @@ static int stdin_boolean(void *context, int val) {
 
 static int stdin_string(void *context, const unsigned char *val, size_t len) {
     parser_ctx *ctx = context;
+
+    if (!ctx->last_map_key) {
+        return 0;
+    }
+
     if (strcasecmp(ctx->last_map_key, "full_text") == 0) {
         ctx->block.full_text = i3string_from_markup_with_length((const char *)val, len);
         return 1;
@@ -260,6 +272,11 @@ static int stdin_string(void *context, const unsigned char *val, size_t len) {
 
 static int stdin_integer(void *context, long long val) {
     parser_ctx *ctx = context;
+
+    if (!ctx->last_map_key) {
+        return 0;
+    }
+
     if (strcasecmp(ctx->last_map_key, "min_width") == 0) {
         ctx->block.min_width = (uint32_t)val;
         return 1;
@@ -604,9 +621,12 @@ void start_child(char *command) {
     ev_child_start(main_loop, child_sig);
 
     atexit(kill_child_at_exit);
+    DLOG_CHILD;
 }
 
 static void child_click_events_initialize(void) {
+    DLOG_CHILD;
+
     if (!child.click_events_init) {
         yajl_gen_array_open(gen);
         child_write_output();
@@ -685,6 +705,8 @@ void send_block_clicked(int button, const char *name, const char *instance, int 
  *
  */
 void kill_child_at_exit(void) {
+    DLOG_CHILD;
+
     if (child.pid > 0) {
         if (child.cont_signal > 0 && child.stopped)
             killpg(child.pid, child.cont_signal);
@@ -698,6 +720,8 @@ void kill_child_at_exit(void) {
  *
  */
 void kill_child(void) {
+    DLOG_CHILD;
+
     if (child.pid > 0) {
         if (child.cont_signal > 0 && child.stopped)
             killpg(child.pid, child.cont_signal);
@@ -713,6 +737,8 @@ void kill_child(void) {
  *
  */
 void stop_child(void) {
+    DLOG_CHILD;
+
     if (child.stop_signal > 0 && !child.stopped) {
         child.stopped = true;
         killpg(child.pid, child.stop_signal);
@@ -724,6 +750,8 @@ void stop_child(void) {
  *
  */
 void cont_child(void) {
+    DLOG_CHILD;
+
     if (child.cont_signal > 0 && child.stopped) {
         child.stopped = false;
         killpg(child.pid, child.cont_signal);
