@@ -514,9 +514,15 @@ bool floating_maybe_reassign_ws(Con *con) {
     Con *content = output_get_content(output->con);
     Con *ws = TAILQ_FIRST(&(content->focus_head));
     DLOG("Moving con %p / %s to workspace %p / %s\n", con, con->name, ws, ws->name);
+    Con *needs_focus = con_descend_focused(con);
+    if (!con_inside_focused(needs_focus)) {
+        needs_focus = NULL;
+    }
     con_move_to_workspace(con, ws, false, true, false);
-    workspace_show(ws);
-    con_activate(con_descend_focused(con));
+    if (needs_focus) {
+        workspace_show(ws);
+        con_activate(needs_focus);
+    }
     return true;
 }
 
@@ -745,16 +751,13 @@ bool floating_reposition(Con *con, Rect newrect) {
 
     con->rect = newrect;
 
-    bool reassigned = floating_maybe_reassign_ws(con);
+    floating_maybe_reassign_ws(con);
 
     /* If this is a scratchpad window, don't auto center it from now on. */
     if (con->scratchpad_state == SCRATCHPAD_FRESH)
         con->scratchpad_state = SCRATCHPAD_CHANGED;
 
-    /* Workspace change will already result in a tree_render. */
-    if (!reassigned) {
-        tree_render();
-    }
+    tree_render();
     return true;
 }
 
