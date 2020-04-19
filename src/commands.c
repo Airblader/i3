@@ -2244,6 +2244,26 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
     int pixels = logical_px(atoi(value));
     Con *workspace = con_get_workspace(focused);
 
+#define CMD_SET_GAPS_VALUE(type, value, reset)                          \
+    do {                                                                \
+        if (!strcmp(scope, "all")) {                                    \
+            Con *output, *cur_ws = NULL;                                \
+            TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {       \
+                Con *content = output_get_content(output);              \
+                TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) { \
+                    if (reset)                                          \
+                        cur_ws->gaps.type = 0;                          \
+                    else if (value + cur_ws->gaps.type < 0)             \
+                        cur_ws->gaps.type = -value;                     \
+                }                                                       \
+            }                                                           \
+                                                                        \
+            config.gaps.type = value;                                   \
+        } else {                                                        \
+            workspace->gaps.type = value - config.gaps.type;            \
+        }                                                               \
+    } while(0)
+
 #define CMD_GAPS(type)                                                  \
     do {                                                                \
         int current_value = config.gaps.type;                           \
@@ -2267,29 +2287,41 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
             return;                                                     \
         }                                                               \
                                                                         \
-        if (current_value < 0)                                          \
-            current_value = 0;                                          \
-                                                                        \
-        if (!strcmp(scope, "all")) {                                    \
-            Con *output, *cur_ws = NULL;                                \
-            TAILQ_FOREACH (output, &(croot->nodes_head), nodes) {       \
-                Con *content = output_get_content(output);              \
-                TAILQ_FOREACH (cur_ws, &(content->nodes_head), nodes) { \
-                    if (reset)                                          \
-                        cur_ws->gaps.type = 0;                          \
-                    else if (current_value + cur_ws->gaps.type < 0)     \
-                        cur_ws->gaps.type = -current_value;             \
-                }                                                       \
-            }                                                           \
-                                                                        \
-            config.gaps.type = current_value;                           \
-        } else {                                                        \
-            workspace->gaps.type = current_value - config.gaps.type;    \
+        /* see issue 262 */                                             \
+        int min_value = 0;                                              \
+        if (strcmp(#type, "inner") != 0) {                              \
+            min_value = strcmp(scope, "all") ?                          \
+                -config.gaps.inner-workspace->gaps.inner :              \
+                -config.gaps.inner;                                     \
         }                                                               \
+                                                                        \
+        if (current_value < min_value)                                  \
+            current_value = min_value;                                  \
+                                                                        \
+        CMD_SET_GAPS_VALUE(type, current_value, reset);                 \
     } while (0)
+
+#define CMD_UPDATE_GAPS(type)                                           \
+    do {                                                                \
+        if (!strcmp(scope, "all")) {                                    \
+            if(config.gaps.type + config.gaps.inner < 0)                \
+                CMD_SET_GAPS_VALUE(type,-config.gaps.inner, true);      \
+        } else {                                                        \
+            if(config.gaps.type + workspace->gaps.type +                \
+                config.gaps.inner + workspace->gaps.inner < 0) {        \
+                CMD_SET_GAPS_VALUE(type,                                \
+                    -config.gaps.inner-workspace->gaps.inner, true);    \
+            }                                                           \
+        }                                                               \
+    } while(0)
 
     if (!strcmp(type, "inner")) {
         CMD_GAPS(inner);
+        // update inconsistent values
+        CMD_UPDATE_GAPS(top);
+        CMD_UPDATE_GAPS(bottom);
+        CMD_UPDATE_GAPS(right);
+        CMD_UPDATE_GAPS(left);
     } else if (!strcmp(type, "outer")) {
         CMD_GAPS(top);
         CMD_GAPS(bottom);
