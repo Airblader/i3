@@ -2299,19 +2299,16 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
         CMD_SET_GAPS_VALUE(type, current_value, reset);                                                         \
     } while (0)
 
-#define CMD_UPDATE_GAPS(type)                                                         \
-    do {                                                                              \
-        if (!strcmp(scope, "all")) {                                                  \
-            if (config.gaps.type + config.gaps.inner < 0)                             \
-                CMD_SET_GAPS_VALUE(type, -config.gaps.inner, true);                   \
-        } else {                                                                      \
-            if (config.gaps.type + workspace->gaps.type +                             \
-                    config.gaps.inner + workspace->gaps.inner <                       \
-                0) {                                                                  \
-                CMD_SET_GAPS_VALUE(type,                                              \
-                                   -config.gaps.inner - workspace->gaps.inner, true); \
-            }                                                                         \
-        }                                                                             \
+#define CMD_UPDATE_GAPS(type)                                                                              \
+    do {                                                                                                   \
+        if (!strcmp(scope, "all")) {                                                                       \
+            if (config.gaps.type + config.gaps.inner < 0)                                                  \
+                CMD_SET_GAPS_VALUE(type, -config.gaps.inner, true);                                        \
+        } else {                                                                                           \
+            if (config.gaps.type + workspace->gaps.type + config.gaps.inner + workspace->gaps.inner < 0) { \
+                CMD_SET_GAPS_VALUE(type, -config.gaps.inner - workspace->gaps.inner, true);                \
+            }                                                                                              \
+        }                                                                                                  \
     } while (0)
 
     if (!strcmp(type, "inner")) {
