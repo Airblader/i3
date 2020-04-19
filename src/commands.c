@@ -2262,58 +2262,57 @@ void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, con
         } else {                                                        \
             workspace->gaps.type = value - config.gaps.type;            \
         }                                                               \
-    } while(0)
-
-#define CMD_GAPS(type)                                                  \
-    do {                                                                \
-        int current_value = config.gaps.type;                           \
-        if (strcmp(scope, "current") == 0)                              \
-            current_value += workspace->gaps.type;                      \
-                                                                        \
-        bool reset = false;                                             \
-        if (!strcmp(mode, "plus"))                                      \
-            current_value += pixels;                                    \
-        else if (!strcmp(mode, "minus"))                                \
-            current_value -= pixels;                                    \
-        else if (!strcmp(mode, "set")) {                                \
-            current_value = pixels;                                     \
-            reset = true;                                               \
-        } else if (!strcmp(mode, "toggle")) {                           \
-            current_value = !current_value * pixels;                    \
-            reset = true;                                               \
-        } else {                                                        \
-            ELOG("Invalid mode %s when changing gaps", mode);           \
-            ysuccess(false);                                            \
-            return;                                                     \
-        }                                                               \
-                                                                        \
-        /* see issue 262 */                                             \
-        int min_value = 0;                                              \
-        if (strcmp(#type, "inner") != 0) {                              \
-            min_value = strcmp(scope, "all") ?                          \
-                -config.gaps.inner-workspace->gaps.inner :              \
-                -config.gaps.inner;                                     \
-        }                                                               \
-                                                                        \
-        if (current_value < min_value)                                  \
-            current_value = min_value;                                  \
-                                                                        \
-        CMD_SET_GAPS_VALUE(type, current_value, reset);                 \
     } while (0)
 
-#define CMD_UPDATE_GAPS(type)                                           \
-    do {                                                                \
-        if (!strcmp(scope, "all")) {                                    \
-            if(config.gaps.type + config.gaps.inner < 0)                \
-                CMD_SET_GAPS_VALUE(type,-config.gaps.inner, true);      \
-        } else {                                                        \
-            if(config.gaps.type + workspace->gaps.type +                \
-                config.gaps.inner + workspace->gaps.inner < 0) {        \
-                CMD_SET_GAPS_VALUE(type,                                \
-                    -config.gaps.inner-workspace->gaps.inner, true);    \
-            }                                                           \
-        }                                                               \
-    } while(0)
+#define CMD_GAPS(type)                                                                                          \
+    do {                                                                                                        \
+        int current_value = config.gaps.type;                                                                   \
+        if (strcmp(scope, "current") == 0)                                                                      \
+            current_value += workspace->gaps.type;                                                              \
+                                                                                                                \
+        bool reset = false;                                                                                     \
+        if (!strcmp(mode, "plus"))                                                                              \
+            current_value += pixels;                                                                            \
+        else if (!strcmp(mode, "minus"))                                                                        \
+            current_value -= pixels;                                                                            \
+        else if (!strcmp(mode, "set")) {                                                                        \
+            current_value = pixels;                                                                             \
+            reset = true;                                                                                       \
+        } else if (!strcmp(mode, "toggle")) {                                                                   \
+            current_value = !current_value * pixels;                                                            \
+            reset = true;                                                                                       \
+        } else {                                                                                                \
+            ELOG("Invalid mode %s when changing gaps", mode);                                                   \
+            ysuccess(false);                                                                                    \
+            return;                                                                                             \
+        }                                                                                                       \
+                                                                                                                \
+        /* see issue 262 */                                                                                     \
+        int min_value = 0;                                                                                      \
+        if (strcmp(#type, "inner") != 0) {                                                                      \
+            min_value = strcmp(scope, "all") ? -config.gaps.inner - workspace->gaps.inner : -config.gaps.inner; \
+        }                                                                                                       \
+                                                                                                                \
+        if (current_value < min_value)                                                                          \
+            current_value = min_value;                                                                          \
+                                                                                                                \
+        CMD_SET_GAPS_VALUE(type, current_value, reset);                                                         \
+    } while (0)
+
+#define CMD_UPDATE_GAPS(type)                                                         \
+    do {                                                                              \
+        if (!strcmp(scope, "all")) {                                                  \
+            if (config.gaps.type + config.gaps.inner < 0)                             \
+                CMD_SET_GAPS_VALUE(type, -config.gaps.inner, true);                   \
+        } else {                                                                      \
+            if (config.gaps.type + workspace->gaps.type +                             \
+                    config.gaps.inner + workspace->gaps.inner <                       \
+                0) {                                                                  \
+                CMD_SET_GAPS_VALUE(type,                                              \
+                                   -config.gaps.inner - workspace->gaps.inner, true); \
+            }                                                                         \
+        }                                                                             \
+    } while (0)
 
     if (!strcmp(type, "inner")) {
         CMD_GAPS(inner);
