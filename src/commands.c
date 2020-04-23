@@ -1299,7 +1299,16 @@ void cmd_focus_sibling(I3_CMD, const char *direction_str) {
         }
         Con *next = get_tree_next_sibling(current->con, direction);
         if (next) {
-            con_activate(next);
+            if (next->type == CT_WORKSPACE) {
+                /* On the workspace level, we need to make sure that the
+                 * workspace change happens properly. However, workspace_show
+                 * descends focus so we also have to put focus on the workspace
+                 * itself to maintain consistency. See #3997. */
+                workspace_show(next);
+                con_focus(next);
+            } else {
+                con_activate(next);
+            }
         }
     }
 
@@ -1517,7 +1526,7 @@ void cmd_move_direction(I3_CMD, const char *direction_str, long move_px) {
                     break;
             }
 
-            floating_reposition(current->con->parent, newrect);
+            cmd_output->needs_tree_render = floating_reposition(current->con->parent, newrect);
         } else {
             tree_move(current->con, direction);
             cmd_output->needs_tree_render = true;

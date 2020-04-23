@@ -26,7 +26,6 @@ i3-wm (4.16.1-1) unstable; urgency=medium
 
   * New upstream release.
 
->>>>>>> vanilla/next
  -- Michael Stapelberg <stapelberg@debian.org>  Sun, 27 Jan 2019 16:45:11 +0100
 
 i3-wm (4.16-1) unstable; urgency=medium
