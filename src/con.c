@@ -10,7 +10,6 @@
  *
  */
 #include "all.h"
-
 #include "yajl_utils.h"
 
 static void con_on_remove_child(Con *con);
@@ -92,8 +91,8 @@ void con_free(Con *con) {
         FREE(mark->name);
         FREE(mark);
     }
-    free(con);
     DLOG("con %p freed\n", con);
+    free(con);
 }
 
 static void _con_attach(Con *con, Con *parent, Con *previous, bool ignore_focus) {

@@ -10,9 +10,9 @@
  */
 #include "all.h"
 
-#include <time.h>
-#include <float.h>
 #include <sys/time.h>
+#include <time.h>
+
 #include <xcb/randr.h>
 #define SN_API_NOT_YET_FROZEN 1
 #include <libsn/sn-monitor.h>
@@ -841,12 +841,13 @@ static void handle_client_message(xcb_client_message_event_t *event) {
              * let's float it and make it sticky. */
             DLOG("The window was requested to be visible on all workspaces, making it sticky and floating.\n");
 
-            floating_enable(con, false);
-            con->floating = FLOATING_AUTO_ON;
+            if (floating_enable(con, false)) {
+                con->floating = FLOATING_AUTO_ON;
 
-            con->sticky = true;
-            ewmh_update_sticky(con->window->id, true);
-            output_push_sticky_windows(focused);
+                con->sticky = true;
+                ewmh_update_sticky(con->window->id, true);
+                output_push_sticky_windows(focused);
+            }
         } else {
             Con *ws = ewmh_get_workspace_by_index(index);
             if (ws == NULL) {
