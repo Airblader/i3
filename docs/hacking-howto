@@ -23,16 +23,12 @@ outdated information.
 
 == Building i3
 
-You can build i3 like you build any other software package which uses autotools.
+You can build i3 like you build any other software package which uses meson.
 Here’s a memory refresher:
 
-    $ autoreconf -fi
     $ mkdir -p build && cd build
-    $ ../configure
-    $ make -j8
-
-The autoreconf -fi step is unnecessary if you are building from a release
-tarball, but shouldn’t hurt either.
+    $ meson ..
+    $ ninja
 
 === Build system features
 
@@ -254,7 +250,7 @@ src/window.c::
 Handlers to update X11 window properties like +WM_CLASS+, +_NET_WM_NAME+,
 +CLIENT_LEADER+, etc.
 
-include/atoms.xmacro::
+include/*.xmacro.*::
 A file containing all X11 atoms which i3 uses. This file will be included
 various times (for defining, requesting and receiving the atoms), each time
 with a different definition of xmacro().
