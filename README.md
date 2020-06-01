@@ -13,7 +13,7 @@ i3-gaps is a fork of [i3wm](https://www.i3wm.org), a tiling window manager for X
 
 ## How do I install i3-gaps?
 
-Please refer to the [wiki](https://github.com/Airblader/i3/wiki).
+Please refer to the [wiki](https://github.com/Airblader/i3/wiki/installation).
 
 ## Where can I get help?
 
