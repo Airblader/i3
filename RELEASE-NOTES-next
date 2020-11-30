@@ -11,11 +11,11 @@ strongly encouraged to upgrade.
  │ Changes in i3 v4.20        │
  └────────────────────────────┘
 
-  • placeholder
+  • i3-nagbar: position on focused monitor by default
+  • i3-nagbar: add option to position on primary monitor
 
  ┌────────────────────────────┐
  │ Bugfixes                   │
  └────────────────────────────┘
 
-  • placeholder
-
+  • when initializing new outputs, avoid duplicating workspace numbers
