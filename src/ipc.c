@@ -27,22 +27,6 @@ char *current_socketpath = NULL;
 
 TAILQ_HEAD(ipc_client_head, ipc_client) all_clients = TAILQ_HEAD_INITIALIZER(all_clients);
 
-/*
- * Puts the given socket file descriptor into non-blocking mode or dies if
- * setting O_NONBLOCK failed. Non-blocking sockets are a good idea for our
- * IPC model because we should by no means block the window manager.
- *
- */
-static void set_nonblock(int sockfd) {
-    int flags = fcntl(sockfd, F_GETFL, 0);
-    if (flags & O_NONBLOCK) {
-        return;
-    }
-    flags |= O_NONBLOCK;
-    if (fcntl(sockfd, F_SETFL, flags) < 0)
-        err(-1, "Could not set O_NONBLOCK");
-}
-
 static void ipc_client_timeout(EV_P_ ev_timer *w, int revents);
 static void ipc_socket_writeable_cb(EV_P_ struct ev_io *w, int revents);
 
@@ -1550,57 +1534,6 @@ ipc_client *ipc_new_client_on_fd(EV_P_ int fd) {
     DLOG("IPC: new client connected on fd %d\n", fd);
     TAILQ_INSERT_TAIL(&all_clients, client, clients);
     return client;
-}
-
-/*
- * Creates the UNIX domain socket at the given path, sets it to non-blocking
- * mode, bind()s and listen()s on it.
- *
- */
-int ipc_create_socket(const char *filename) {
-    int sockfd;
-
-    FREE(current_socketpath);
-
-    char *resolved = resolve_tilde(filename);
-    DLOG("Creating IPC-socket at %s\n", resolved);
-    char *copy = sstrdup(resolved);
-    const char *dir = dirname(copy);
-    if (!path_exists(dir))
-        mkdirp(dir, DEFAULT_DIR_MODE);
-    free(copy);
-
-    /* Unlink the unix domain socket before */
-    unlink(resolved);
-
-    if ((sockfd = socket(AF_LOCAL, SOCK_STREAM, 0)) < 0) {
-        perror("socket()");
-        free(resolved);
-        return -1;
-    }
-
-    (void)fcntl(sockfd, F_SETFD, FD_CLOEXEC);
-
-    struct sockaddr_un addr;
-    memset(&addr, 0, sizeof(struct sockaddr_un));
-    addr.sun_family = AF_LOCAL;
-    strncpy(addr.sun_path, resolved, sizeof(addr.sun_path) - 1);
-    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_un)) < 0) {
-        perror("bind()");
-        free(resolved);
-        return -1;
-    }
-
-    set_nonblock(sockfd);
-
-    if (listen(sockfd, 5) < 0) {
-        perror("listen()");
-        free(resolved);
-        return -1;
-    }
-
-    current_socketpath = resolved;
-    return sockfd;
 }
 
 /*
