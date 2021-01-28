@@ -581,6 +581,7 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
         DUMP_PROPERTY("class", class_class);
         DUMP_PROPERTY("instance", class_instance);
         DUMP_PROPERTY("window_role", role);
+        DUMP_PROPERTY("machine", machine);
 
         if (con->window->name != NULL) {
             ystr("title");
@@ -670,6 +671,7 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
         DUMP_REGEX(instance);
         DUMP_REGEX(window_role);
         DUMP_REGEX(title);
+        DUMP_REGEX(machine);
 
 #undef DUMP_REGEX
         y(map_close);
