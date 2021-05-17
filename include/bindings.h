@@ -20,6 +20,12 @@ extern pid_t command_error_nagbar_pid;
 extern const char *DEFAULT_BINDING_MODE;
 
 /**
+ * Returns true if a is a key binding for the same key as b.
+ *
+ */
+bool binding_same_key(Binding *a, Binding *b);
+
+/**
  * Adds a binding from config parameters given as strings and returns a
  * pointer to the binding structure. Returns NULL if the input code could not
  * be parsed.
