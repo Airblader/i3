@@ -19,7 +19,7 @@ static void con_on_remove_child(Con *con);
  *
  */
 void con_force_split_parents_redraw(Con *con) {
-    Con *parent = con;
+    Con *parent = co;
 
     while (parent != NULL && parent->type != CT_WORKSPACE && parent->type != CT_DOCKAREA) {
         if (!con_is_leaf(parent)) {
