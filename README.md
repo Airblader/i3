@@ -19,7 +19,7 @@ Please refer to the [wiki](https://github.com/Airblader/i3/wiki/installation).
 
 For bug reports or feature requests regarding i3-gaps specifically, open an issue on [GitHub](https://www.github.com/Airblader/i3). If your issue is with core i3 functionality, please report it [upstream](https://www.github.com/i3/i3).
 
-For support & all other kinds of questions, you can ask your question on the official [subreddit /r/i3wm](https://www.reddit.com/r/i3wm).
+For support & all other kinds of questions, you can ask your question on [GitHub Discussions](https://github.com/i3/i3/discussions).
 
 # Features
 
