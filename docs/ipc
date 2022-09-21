@@ -423,9 +423,9 @@ window_properties (map)::
 	following list: *title*, *instance*, *class*, *window_role*, *machine*
 	and *transient_for*.
 window_type (string)::
-	The window type (_NET_WM_WINDOW_TYPE). Possible values are undefined, normal,
-	dialog, utility, toolbar, splash, menu, dropdown_menu, popup_menu, tooltip and
-	notification.
+	The window type (_NET_WM_WINDOW_TYPE). Possible values are `undefined`,
+	unknown, normal, dialog, utility, toolbar, splash, menu, dropdown_menu,
+	popup_menu, tooltip and notification.
 urgent (bool)::
 	Whether this container (window, split container, floating container or
 	workspace) has the urgency hint set, directly or indirectly. All parent
@@ -440,6 +440,9 @@ focus (array of integer)::
 	order. Traversing the tree by following the first entry in this array
 	will result in eventually reaching the one node with +focused+ set to
 	true.
+sticky (bool)::
+	Whether this window is "sticky". If it is also floating, this window will
+	be present on all workspaces on the same output.
 fullscreen_mode (integer)::
 	Whether this container is in fullscreen state or not.
     Possible values are

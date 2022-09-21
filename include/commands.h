@@ -339,7 +339,7 @@ void cmd_debuglog(I3_CMD, const char *argument);
 void cmd_gaps(I3_CMD, const char *type, const char *scope, const char *mode, const char *value);
 
 /**
- * Implementation of 'title_window_icon <yes|no>' and 'title_window_icon padding <px>'
+ * Implementation of 'title_window_icon <yes|no|toggle>' and 'title_window_icon <padding|toggle> <px>'
  *
  */
 void cmd_title_window_icon(I3_CMD, const char *enable, int padding);
