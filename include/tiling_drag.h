@@ -10,7 +10,17 @@
 #pragma once
 
 /**
+ * Tiling drag initiation modes.
+ */
+typedef enum {
+    TILING_DRAG_OFF = 0,
+    TILING_DRAG_MODIFIER = 1,
+    TILING_DRAG_TITLEBAR = 2,
+    TILING_DRAG_MODIFIER_OR_TITLEBAR = 3
+} tiling_drag_t;
+
+/**
  * Initiates a mouse drag operation on a tiled window.
  *
  */
-void tiling_drag(Con *con, xcb_button_press_event_t *event);
+void tiling_drag(Con *con, xcb_button_press_event_t *event, bool use_threshold);
