@@ -347,8 +347,9 @@ bool floating_enable(Con *con, bool automatic) {
     con->floating = FLOATING_USER_ON;
 
     /* 4: set the border style as specified with new_float */
-    if (automatic)
-        con->border_style = config.default_floating_border;
+    if (automatic) {
+        con->border_style = con->max_user_border_style = config.default_floating_border;
+    }
 
     /* Add pixels for the decoration. */
     Rect border_style_rect = con_border_style_rect(con);
@@ -697,6 +698,10 @@ DRAGGING_CB(resize_window_callback) {
 void floating_resize_window(Con *con, const bool proportional,
                             const xcb_button_press_event_t *event) {
     DLOG("floating_resize_window\n");
+
+    /* Push changes before resizing, so that the window gets raised now and not
+     * after the user releases the mouse button */
+    tree_render();
 
     /* corner saves the nearest corner to the original click. It contains
      * a bitmask of the nearest borders (BORDER_LEFT, BORDER_RIGHT, …) */
